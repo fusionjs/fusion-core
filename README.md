@@ -279,7 +279,7 @@ export default () => (ctx, next) => {
 }
 ```
 
-If `userData` above was `<script>alert(1)</script>`, the string would be automatically turned into `<div>&lt;script&gt;alert(1)&lt;/script&gt;</div>`. Note that only `userData` is escaped, but the HTML in your code stays intact.
+If `userData` above was `<script>alert(1)</script>`, the string would be automatically turned into `<div>\u003Cscript\u003Ealert(1)\u003C/script\u003E</div>`. Note that only `userData` is escaped, but the HTML in your code stays intact.
 
 If your HTML is complex and needs to be broken into smaller strings, you can also nest sanitized HTML strings like this:
 
