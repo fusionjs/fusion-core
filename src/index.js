@@ -3,6 +3,10 @@ import clientApp from './client';
 
 import {Plugin, SingletonPlugin, compose} from './plugin/index.js';
 
+testonly
+linter error
+again.
+
 import {
   html,
   dangerouslySetHTML,
