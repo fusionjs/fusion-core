@@ -5,7 +5,7 @@ Instead, they should use html`<div>{stuff}</div>` so interpolated data gets auto
 We trust the markup outside of interpolation because it's code written by a developer with commit permissions,
 which can be audited via code reviews
 */
-let html, dangerouslySetHTML, consumeSanitizedHTML, escape, unescape;
+let html, dangerouslySetHTML, consumeSanitizedHTML, escape;
 if (__NODE__) {
   const forbiddenChars = {
     '<': '\\u003C',
@@ -38,14 +38,13 @@ if (__NODE__) {
     }
     return h[key];
   };
-} else {
-  const replaceEscaped = c => String.fromCodePoint(parseInt(c.slice(2), 16));
-  unescape = str => {
-    return str.replace(
-      /\\u003C|\\u003E|\\u0022|\\u002F|\\u2028|\\u2029/g,
-      replaceEscaped
-    );
-  };
 }
+const replaceEscaped = c => String.fromCodePoint(parseInt(c.slice(2), 16));
+const unescape = str => {
+  return str.replace(
+    /\\u003C|\\u003E|\\u0022|\\u002F|\\u2028|\\u2029/g,
+    replaceEscaped
+  );
+};
 
 export {html, dangerouslySetHTML, consumeSanitizedHTML, escape, unescape};
