@@ -16,7 +16,6 @@ if (__NODE__) {
     '\u2029': '\\u2029',
   };
   const replaceForbidden = c => forbiddenChars[c];
-  const replaceEscaped = c => String.fromCodePoint(parseInt(c.slice(2), 16));
 
   const key = Symbol('sanitized html');
   html = ([head, ...rest], ...values) => {
@@ -33,17 +32,19 @@ if (__NODE__) {
     if (str && str[key]) return consumeSanitizedHTML(str);
     return String(str).replace(/[<>"/\u2028\u2029]/g, replaceForbidden);
   };
-  unescape = str => {
-    return str.replace(
-      /\\u003C|\\u003E|\\u0022|\\u002F|\\u2028|\\u2029/g,
-      replaceEscaped
-    );
-  };
   consumeSanitizedHTML = h => {
     if (typeof h === 'string') {
       throw new Error(`Unsanitized html. Use html\`${h}\``);
     }
     return h[key];
+  };
+} else {
+  const replaceEscaped = c => String.fromCodePoint(parseInt(c.slice(2), 16));
+  unescape = str => {
+    return str.replace(
+      /\\u003C|\\u003E|\\u0022|\\u002F|\\u2028|\\u2029/g,
+      replaceEscaped
+    );
   };
 }
 
