@@ -9,7 +9,7 @@ export default class Plugin {
     if (!this.hasOwnProperty('__instances__')) {
       this.__instances__ = new WeakMap();
     }
-    const key = ctx ? ctx : __global_key__;
+    const key = ctx === null || ctx === undefined ? __global_key__ : ctx;
     return (
       this.__instances__.get(key) ||
       this.__instances__
