@@ -45,5 +45,7 @@ test('`of` accepts valid keys', t => {
   t.doesNotThrow(() => p.of({}), 'p.of({}) does not throw');
   t.doesNotThrow(() => p.of([]), 'p.of([]) does not throw');
   t.throws(() => p.of(1), 'p.of(1) throws: key is not gc-able');
+  t.throws(() => p.of(false), 'p.of(false) throws: key is not gc-able');
+  t.throws(() => p.of(''), 'p.of("") throws: key is not gc-able');
   t.end();
 });
