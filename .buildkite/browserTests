@@ -3,4 +3,4 @@ export DISPLAY=:99.0
 /etc/init.d/xvfb start
 
 ./node_modules/.bin/nyc --reporter=json ./node_modules/.bin/unitest --browser=dist-tests/browser.js
-./node_modules/.bin/codecov
+./node_modules/.bin/codecov -f coverage/coverage-final.json
