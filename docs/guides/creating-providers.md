@@ -29,7 +29,7 @@ GreetingProvider.childContextTypes = {
 
 export default () => (ctx, next) => {
   if (ctx.element) {
-    ctx.element = <MyProvider>{ctx.element}</MyProvider>;
+    ctx.element = <GreetingProvider>{ctx.element}</GreetingProvider>;
   }
 }
 ```

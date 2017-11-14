@@ -29,7 +29,7 @@ There's one issue left with the code above: FusionJS code runs isomorphically by
 
 ```js
 export default ({}) => {
-  if (_NODE__) {
+  if (__NODE__) {
     return (ctx, next) => {
       if (ctx.method === 'GET' && ctx.path === '/api/ping') {
         ctx.body = {ok: 1};

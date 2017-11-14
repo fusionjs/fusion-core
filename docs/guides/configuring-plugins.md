@@ -40,15 +40,17 @@ Instead, we recommended keeping the plugin registration calls in `src/main.js` f
 
 ```js
 // src/main.js
-import App from 'fusion-react';
-import JWTSession from 'fusion-plugin-jwt';
-import sessionConfig from './config/session';
+// ...
+import FooPlugin from './plugins/foo-plugin';
+import fooConfig from './config/foo-plugin';
 
 export default () => {
   const app = new App();
-  const Session = app.plugin(JWTSession, sessionConfig);
+  const Dep1 = app.plugin(Dep1Plugin);
+  const Dep2 = app.plugin(Dep2Plugin);
+  const Foo = app.plugin(FooPlugin, {Dep1, Dep2, config: fooConfig});
+  return app;
 }
-
-// src/config/session.js
-export default {secret: __NODE__ ? 'secret goes here'};
 ```
+
+Note that we recommend pulling out configuration into a separate file, but leaving plugin dependencies (`Dep1, Dep2`) in `src/main.js`.
