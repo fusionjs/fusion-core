@@ -1416,9 +1416,9 @@ create-hmac@^1.1.0, create-hmac@^1.1.2, create-hmac@^1.1.4:
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
 
-create-universal-package@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/create-universal-package/-/create-universal-package-2.1.0.tgz#b8caa4df5562b1dbcf3ad6e345291016443320e4"
+create-universal-package@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/create-universal-package/-/create-universal-package-2.1.1.tgz#170877cb6725d8494efb757005eb5aca9ee5edde"
   dependencies:
     "@babel/core" "^7.0.0-beta.31"
     "@babel/preset-stage-3" "^7.0.0-beta.31"
