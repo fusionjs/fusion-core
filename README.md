@@ -5,6 +5,7 @@
 ### Guides
 
 - [Getting started](./docs/guides/getting-started.md)
+- [Framework comparison](./docs/guides/framework-comparison.md)
 
 #### Core concepts
 
