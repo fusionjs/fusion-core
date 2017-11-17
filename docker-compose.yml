@@ -9,6 +9,7 @@ services:
       - /fusion-core/dist-tests/
     environment:
       - CODECOV_TOKEN
+      - CI=true
       - BUILDKITE
       - BUILDKITE_BRANCH
       - BUILDKITE_BUILD_NUMBER
