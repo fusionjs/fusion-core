@@ -86,7 +86,7 @@ However, apps can gain more functionality via plugins. In the next section, we'l
 
 ### Styling
 
-Let's install this package:
+Let's install these packages:
 
 ```sh
 yarn add fusion-plugin-styletron-react styletron
