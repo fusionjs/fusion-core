@@ -2,7 +2,7 @@
 
 FusionJS is a web application framework developed by Uber. Because Uber operates on a large scale in countries with slow mobile networks, performance is a big driving factor for FusionJS.
 
-It has a modular architecture in order to promote small bundle sizes, and it is designed in such a way that performance milestones in FusionJS' development pipeline can be rolled out to consumers of the framework via version bumps, as opposed to requiring big migrations or offloading that work to app developers altogether.
+It has a modular architecture in order to promote small bundle sizes, and it is designed in such a way that performance milestones in FusionJS' development pipeline can be rolled out to consumers of the framework via version bumps, as opposed to requiring big migrations or entirely offloading that work to app developers.
 
 Here are the features you'll find in FusionJS:
 

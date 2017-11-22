@@ -10,13 +10,13 @@ Here is how FusionJS compares to some popular frameworks and libraries:
 
 [React](https://reactjs.org/) is a popular and mature library developed by Facebook for implementing component-based UIs. FusionJS can be used seamlessly with React: JSX, ES2017, hot module reloading, server-side rendering, etc all work out of the box. In addition, the FusionJS core is view-layer agnostic and we are planning on adding plugins for Preact in the future.
 
-Through plugins, FusionJS provides various extra features on top of vanilla React: it provides an easy way to do code splitting, it supports async server-side rendering, it allows plugins to automatically installs providers when needed, etc.
+Through plugins, FusionJS provides various extra features on top of vanilla React: it provides an easy way to do code splitting, it supports async server-side rendering, it allows plugins to automatically install providers when needed, etc.
 
 #### create-react-app
 
-[create-react-app](https://github.com/facebookincubator/create-react-app) is a CLI that scaffolds a React project, as well as configure Webpack, Babel, Eslint, Jest, etc. It does not support some things out of the box (most notably, [server rendering and hot reloading of components](https://github.com/facebookincubator/create-react-app#limitations)), but it provides the ability to "eject", so you can use it as a boilerplate generator and customize the build workflow from there.
+[create-react-app](https://github.com/facebookincubator/create-react-app) is a CLI that scaffolds a React project, as well as configure Webpack, Babel, Eslint, Jest, etc. There are some things it doesn't support out of the box (most notably, [server rendering and hot reloading of components](https://github.com/facebookincubator/create-react-app#limitations)), but it provides the ability to "eject", so you can use it as a boilerplate generator and customize the build workflow from there.
 
-FusionJS is similar to create-react-app in the sense that it also provides a Webpack/Babel setup, but in addition to that, it also provides higher level tools like server-side rendering, more powerful code splitting and fully integrated hot reloading. FusionJS also provides a modern HTTP server API (through [Koa](http://koajs.com/)) and an universal code environment.
+FusionJS is similar to create-react-app in the sense that it provides a Webpack/Babel setup, but in addition to that, it provides higher level tools like server-side rendering, more powerful code splitting and fully integrated hot reloading. FusionJS also provides a modern HTTP server API (through [Koa](http://koajs.com/)) and an universal code environment.
 
 Because FusionJS provides the compilation pipeline, as well as both the server and browser environments, it has the potential to automatically apply several optimizations that would otherwise need to be done manually for every application.
 
@@ -38,4 +38,4 @@ Both Next.js and FusionJS can be used with a variety of 3rd party libraries, but
 
 [Electrode](http://www.electrode.io/) is a framework developed by Walmart Labs designed for building server-rendered React applications. It's very similar in scope to FusionJS, and offers many of the same features (e.g. server rendering, hot reloading, etc).
 
-Electrode has been around for longer and has more mature tooling surrounding bundle analysis and deployment. FusionJS is a much younger project and we plan on focusing more on automating performance optimization strategies and solidifying features related to application health monitoring.
+Electrode has been around longer and has more mature tooling surrounding bundle analysis and deployment. FusionJS is a much younger project and we plan on focusing more on automating performance optimization strategies and solidifying features related to application health monitoring.
