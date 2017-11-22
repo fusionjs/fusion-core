@@ -39,5 +39,3 @@ Both Next.js and FusionJS can be used with a variety of 3rd party libraries, but
 [Electrode](http://www.electrode.io/) is a framework developed by Walmart Labs designed for building server-rendered React applications. It's very similar in scope to FusionJS, and offers many of the same features (e.g. server rendering, hot reloading, etc).
 
 Electrode has been around for longer and has more mature tooling surrounding bundle analysis and deployment. FusionJS is a much younger project and we plan on focusing more on automating performance optimization strategies and solidifying features related to application health monitoring.
-
-
