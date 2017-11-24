@@ -67,7 +67,7 @@ export default function() {
 
         if (ctx.element) {
           const renderStart = now();
-          ctx.rendered = await render(ctx.element);
+          ctx.rendered = await render(ctx.element, ctx);
           timing.render.resolve(now() - renderStart);
         }
 
