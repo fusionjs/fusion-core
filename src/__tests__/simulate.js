@@ -1,7 +1,6 @@
 import test from 'tape-cup';
 import ClientAppFactory from '../client';
 import ServerAppFactory from '../server';
-import {setImmediate} from 'timers';
 
 const App = __BROWSER__ ? ClientAppFactory() : ServerAppFactory();
 const env = __BROWSER__ ? 'browser' : 'server';
@@ -23,7 +22,7 @@ function delay() {
   });
 }
 
-test.only(`${env} - simulate with async render`, async t => {
+test(`${env} - simulate with async render`, async t => {
   const flags = {render: false};
   const element = 'hi';
   const render = el => {
