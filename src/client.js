@@ -12,8 +12,18 @@ export default function() {
         return next();
       }
       function renderer(ctx, next) {
-        ctx.rendered = render(ctx.element);
-        return next();
+        const rendered = render(ctx.element);
+        if (rendered instanceof Promise) {
+          render(ctx.element)
+            .then(rendered => {
+              ctx.rendered = rendered;
+              return next();
+            })
+            .catch(next);
+        } else {
+          ctx.rendered = rendered;
+          return next();
+        }
       }
       this.plugins = [timing, ssr, renderer];
     }
@@ -34,7 +44,7 @@ export default function() {
           element: null,
           body: null,
         };
-        return middleware(ctx, () => Promise.resolve());
+        return middleware(ctx).then(() => ctx);
       };
     }
     simulate(ctx) {
