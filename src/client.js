@@ -28,7 +28,6 @@ export default function() {
       this.plugins = [timing, ssr, renderer];
     }
     onerror(e) {
-      // TODO: Should we call window.onerror instead?
       throw e;
     }
     plugin(plugin, dependencies) {
