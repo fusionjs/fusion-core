@@ -43,11 +43,13 @@ export default function() {
           element: null,
           body: null,
         };
-        return middleware(ctx).then(() => ctx);
+        return middleware(ctx, () => Promise.resolve()).then(() => ctx);
       };
     }
     simulate(ctx) {
-      return compose(this.plugins)(ctx).then(() => ctx);
+      return compose(this.plugins)(ctx, () => Promise.resolve()).then(
+        () => ctx
+      );
     }
   };
 }
