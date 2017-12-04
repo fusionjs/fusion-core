@@ -89,11 +89,6 @@ export default function() {
       this._app.use(compose(this.plugins));
       return this._app.callback();
     }
-    simulate(ctx) {
-      return compose(this.plugins)(ctx, () => Promise.resolve()).then(
-        () => ctx
-      );
-    }
   };
 }
 
