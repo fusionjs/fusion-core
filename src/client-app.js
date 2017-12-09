@@ -1,10 +1,14 @@
 /* eslint-env browser */
 import {compose} from './plugin/index.js';
 import timing from './timing';
+import BaseApp from './base-app';
 
 export default function() {
-  return class ClientApp {
+  return class ClientApp extends BaseApp {
     constructor(element, render) {
+      super();
+      this.registered = new Map();
+      this.resolved = new Map();
       function ssr(ctx, next) {
         ctx.prefix = window.__ROUTE_PREFIX__ || ''; // serialized by ./server
         ctx.element = element;
@@ -28,12 +32,8 @@ export default function() {
     onerror(e) {
       throw e;
     }
-    plugin(plugin, dependencies) {
-      const service = plugin(dependencies);
-      this.plugins.splice(-1, 0, service);
-      return service;
-    }
     callback() {
+      this.resolve();
       const middleware = compose(this.plugins);
       return () => {
         const ctx = {

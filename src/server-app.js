@@ -3,13 +3,18 @@ import path from 'path';
 import {compose} from './plugin/index.js';
 import {escape, consumeSanitizedHTML} from './sanitization';
 import Timing, {now} from './timing';
+import BaseApp from './base-app';
 
 export default function() {
   const Koa = require('koa');
 
-  return class ServerApp {
+  return class ServerApp extends BaseApp {
     constructor(element, render) {
+      super();
       this._app = new Koa();
+      // map of types to plugins
+      this.registered = new Map();
+      this.resolved = new Map();
       const ssrPlugin = async (ctx, next) => {
         if (!isSSR(ctx)) return next();
 
@@ -80,12 +85,8 @@ export default function() {
     onerror(err) {
       return this._app.onerror(err);
     }
-    plugin(plugin, dependencies) {
-      const service = plugin(dependencies);
-      this.plugins.splice(-1, 0, service);
-      return service;
-    }
     callback() {
+      this.resolve();
       this._app.use(compose(this.plugins));
       return this._app.callback();
     }

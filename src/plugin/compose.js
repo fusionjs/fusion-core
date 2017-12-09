@@ -1,3 +1,5 @@
+import {BasePlugin} from '../base-plugin';
+import {default as DeprecatedPlugin} from './plugin/plugin';
 // inline version of koa-compose to get around Rollup/CUP commonjs-related issue
 function composeMiddleware(middleware) {
   if (!Array.isArray(middleware)) {
@@ -34,7 +36,13 @@ function composeMiddleware(middleware) {
 export default function(plugins) {
   const middleware = plugins
     .map(p => {
-      return p && typeof p.middleware === 'function' ? p.middleware.bind(p) : p;
+      if (p instanceof BasePlugin || p instanceof DeprecatedPlugin) {
+        if (typeof p.middleware === 'function') {
+          return p.middleware.bind(p);
+        }
+        return false;
+      }
+      return p;
     })
     .filter(Boolean);
   return composeMiddleware(middleware);

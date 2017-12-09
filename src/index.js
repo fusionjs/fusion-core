@@ -1,5 +1,5 @@
-import serverApp from './server';
-import clientApp from './client';
+import serverApp from './server-app';
+import clientApp from './client-app';
 
 import {Plugin, SingletonPlugin, compose} from './plugin/index.js';
 
@@ -12,6 +12,7 @@ import {
 } from './sanitization';
 
 export default (__BROWSER__ ? clientApp() : serverApp());
+export {BasePlugin} from './base-plugin';
 // sanitization API
 export {html, dangerouslySetHTML, consumeSanitizedHTML, escape, unescape};
 
