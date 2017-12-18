@@ -1,3 +1,6 @@
+import {withMiddleware} from './with-middleware';
+import {withDependencies} from './with-dependencies';
+
 export default class CoreApp {
   constructor() {
     this.registered = new Map();
@@ -9,6 +12,17 @@ export default class CoreApp {
     }
     this.plugins.push(type);
     this.registered.set(type, Plugin);
+  }
+  middleware(middleware, deps) {
+    if (!deps) {
+      this.register(withMiddleware(middleware));
+    } else {
+      this.register(
+        withDependencies(deps)(d => {
+          withMiddleware(middleware(d));
+        })
+      );
+    }
   }
   resolve() {
     this.register(this.renderer);

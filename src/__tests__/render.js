@@ -189,3 +189,43 @@ test('app.register - middleware execution respects dependency order', async t =>
   t.equal(order, 8, 'calls middleware in correct order');
   t.end();
 });
+
+test('app.middleware with dependencies', async t => {
+  const TokenA = 'TokenA';
+  const element = 'hi';
+  const renderFn = el => {
+    return el;
+  };
+  const app = new App(element, renderFn);
+  let called = false;
+  app.register(() => 'Something', TokenA);
+  app.middleware(
+    deps => {
+      t.equal(typeof deps.TokenA, 'function');
+      return (ctx, next) => {
+        called = true;
+        return next();
+      };
+    },
+    {TokenA}
+  );
+  await run(app);
+  t.ok(called, 'calls middleware');
+  t.end();
+});
+
+test('app.middleware with no dependencies', async t => {
+  const element = 'hi';
+  const renderFn = el => {
+    return el;
+  };
+  const app = new App(element, renderFn);
+  let called = false;
+  app.middleware((ctx, next) => {
+    called = true;
+    return next();
+  });
+  await run(app);
+  t.ok(called, 'calls middleware');
+  t.end();
+});
