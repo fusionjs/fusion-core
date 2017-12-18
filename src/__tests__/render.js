@@ -1,4 +1,4 @@
-import test, {run} from '../test-helper';
+import test, {run} from './test-helper';
 import ClientAppFactory from '../client-app';
 import ServerAppFactory from '../server-app';
 import {withMiddleware} from '../with-middleware';

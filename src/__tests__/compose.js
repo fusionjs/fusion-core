@@ -1,4 +1,4 @@
-import test from '../test-helper';
+import test from './test-helper';
 import {compose} from '../compose';
 import {withMiddleware} from '../with-middleware';
 

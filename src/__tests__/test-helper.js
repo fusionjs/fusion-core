@@ -1,5 +1,5 @@
 import tape from 'tape-cup';
-import {compose} from './compose';
+import {compose} from '../compose';
 
 const env = __BROWSER__ ? 'BROWSER' : 'NODE';
 
