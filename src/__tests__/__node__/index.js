@@ -2,7 +2,7 @@ import test from 'tape-cup';
 import App, {html} from '../../index';
 import {compose} from '../../compose.js';
 
-test('ssr with accept header', async t => {
+test.skip('ssr with accept header', async t => {
   const flags = {render: false, next: false};
   const element = 'hi';
   const render = () => {
@@ -41,7 +41,7 @@ test('ssr with accept header', async t => {
 
   t.end();
 });
-test('ssr without valid accept header', async t => {
+test.skip('ssr without valid accept header', async t => {
   const flags = {render: false, next: false};
   const element = 'hi';
   const render = () => {
@@ -74,7 +74,7 @@ test('ssr without valid accept header', async t => {
 
   t.end();
 });
-test('HTML escaping works', async t => {
+test.skip('HTML escaping works', async t => {
   const element = 'hi';
   const render = el => el;
   const template = () => (ctx, next) => {
@@ -107,7 +107,7 @@ test('HTML escaping works', async t => {
 
   t.end();
 });
-test('head and body must be sanitized', async t => {
+test.skip('head and body must be sanitized', async t => {
   const element = 'hi';
   const render = el => el;
   const template = () => (ctx, next) => {
@@ -137,7 +137,7 @@ test('head and body must be sanitized', async t => {
 
   t.end();
 });
-test('head throws if not sanitized', async t => {
+test.skip('head throws if not sanitized', async t => {
   const element = 'hi';
   const render = el => el;
   const template = () => (ctx, next) => {
@@ -161,7 +161,7 @@ test('head throws if not sanitized', async t => {
     t.end();
   });
 });
-test('body throws if not sanitized', async t => {
+test.skip('body throws if not sanitized', async t => {
   const element = 'hi';
   const render = el => el;
   const template = () => (ctx, next) => {
@@ -185,7 +185,7 @@ test('body throws if not sanitized', async t => {
     t.end();
   });
 });
-test('renderer with element', async t => {
+test.skip('renderer with element', async t => {
   const flags = {render: false, next: false};
   const element = 'hi';
   const render = el => {
@@ -218,7 +218,7 @@ test('renderer with element', async t => {
   t.end();
 });
 
-test('renderer without element', async t => {
+test.skip('renderer without element', async t => {
   const flags = {render: false, next: false};
   const element = 'hi';
   const render = el => {
@@ -250,7 +250,7 @@ test('renderer without element', async t => {
   t.end();
 });
 
-test('throws rendering errors', async t => {
+test.skip('throws rendering errors', async t => {
   const element = 'hi';
   const render = () => {
     return new Promise(() => {

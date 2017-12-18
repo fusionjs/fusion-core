@@ -1,23 +1,21 @@
 export default class CoreApp {
   constructor() {
     this.registered = new Map();
-  }
-  plugin(plugin, dependencies) {
-    const service = plugin(dependencies);
-    this.plugins.splice(-1, 0, service);
-    return service;
+    this.plugins = [];
   }
   register(Plugin, type) {
     if (type === undefined) {
       type = Plugin;
     }
-    this.plugins.splice(-1, 0, type);
+    this.plugins.push(type);
     this.registered.set(type, Plugin);
   }
   resolve() {
+    this.register(this.renderer);
     const resolved = new Map();
     const resolving = new Set();
     const registered = this.registered;
+    const resolvedPlugins = [];
     // TODO: maybe could turn this into a map
     this.plugins.forEach(function resolveToken(token) {
       // if we have already resolved the type, return it
@@ -36,24 +34,24 @@ export default class CoreApp {
       }
       // get the registered type and resolve it
       resolving.add(token);
-      const p = registered.get(token);
-      const registeredDeps = p && p.__deps__ ? p.__deps__ : {};
-      const resolvedDeps = {};
-      for (const key in registeredDeps) {
-        const registeredToken = registeredDeps[key];
-        resolvedDeps[key] = resolveToken(registeredToken);
+      let p = registered.get(token);
+      if (typeof p === 'function' && p.__deps__) {
+        const registeredDeps = p.__deps__;
+        const resolvedDeps = {};
+        for (const key in registeredDeps) {
+          const registeredToken = registeredDeps[key];
+          resolvedDeps[key] = resolveToken(registeredToken);
+        }
+        // TODO: should we always call the function or only when the plugin
+        // is used with `withDependencies`?
+        p = p(resolvedDeps);
+        resolved.set(token, p);
       }
-      const resolvedPlugin = p(resolvedDeps);
-      resolved.set(token, resolvedPlugin);
       resolving.delete(token);
-      return resolvedPlugin;
-    });
-    // TODO: potentially unnecessary
-    this.plugins = this.plugins.map(p => {
-      if (resolved.has(p)) {
-        return resolved.get(p);
-      }
+      resolvedPlugins.push(p);
       return p;
     });
+    // TODO: potentially unnecessary
+    this.plugins = resolvedPlugins;
   }
 }

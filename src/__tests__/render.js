@@ -1,10 +1,10 @@
-import test from 'tape-cup';
+import test from '../test-helper';
 import ClientAppFactory from '../client-app';
 import ServerAppFactory from '../server-app';
 import {compose} from '../compose';
+import {withMiddleware} from '../with-middleware';
 
 const App = __BROWSER__ ? ClientAppFactory() : ServerAppFactory();
-const env = __BROWSER__ ? 'browser' : 'server';
 
 function getContext() {
   return __BROWSER__
@@ -19,6 +19,7 @@ function getContext() {
 
 function run(app) {
   const ctx = getContext();
+  app.resolve();
   return compose(app.plugins)(ctx, () => Promise.resolve()).then(() => ctx);
 }
 
@@ -28,7 +29,7 @@ function delay() {
   });
 }
 
-test(`${env} - async render`, async t => {
+test('async render', async t => {
   let numRenders = 0;
   const element = 'hi';
   const renderFn = el => {
@@ -46,7 +47,7 @@ test(`${env} - async render`, async t => {
   t.end();
 });
 
-test(`${env} - sync render`, async t => {
+test('sync render', async t => {
   let numRenders = 0;
   const element = 'hi';
   const renderFn = el => {
@@ -62,28 +63,26 @@ test(`${env} - sync render`, async t => {
   t.end();
 });
 
-test(`${env} - app.plugin`, async t => {
+test('app.register - async render with async middleware', async t => {
   let numRenders = 0;
   const element = 'hi';
   const renderFn = el => {
-    numRenders++;
     t.equals(el, element, 'render receives correct args');
-    return el;
+    return delay().then(() => {
+      numRenders++;
+      return el;
+    });
   };
   const app = new App(element, renderFn);
-  app.plugin(
-    deps => {
-      return async (ctx, next) => {
-        t.deepLooseEqual(deps, {a: true});
-        t.equal(ctx.element, element);
-        t.equal(numRenders, 0);
-        t.notok(ctx.rendered);
-        await next();
-        t.equal(numRenders, 1);
-        t.equal(ctx.rendered, element);
-      };
-    },
-    {a: true}
+  app.register(
+    withMiddleware(async (ctx, next) => {
+      t.equal(ctx.element, element);
+      t.equal(numRenders, 0);
+      t.notok(ctx.rendered);
+      await next();
+      t.equal(numRenders, 1);
+      t.equal(ctx.rendered, element);
+    })
   );
   const ctx = await run(app);
   t.equal(ctx.rendered, element);

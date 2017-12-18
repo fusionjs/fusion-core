@@ -1,6 +1,6 @@
 /* eslint-env browser */
 import {compose} from './compose.js';
-import timing from './timing';
+import timing, {TimingToken} from './timing';
 import BaseApp from './base-app';
 import {withMiddleware} from './with-middleware';
 
@@ -28,8 +28,9 @@ export default function() {
           return next();
         }
       }
-      // this.plugins = [timing, ssr, renderer].map(withMiddleware);
-      this.plugins = [];
+      this.register(timing, TimingToken);
+      this.register(withMiddleware(ssr));
+      this.renderer = withMiddleware(renderer);
     }
     onerror(e) {
       throw e;

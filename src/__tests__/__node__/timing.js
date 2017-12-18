@@ -1,7 +1,7 @@
 import tape from 'tape-cup';
 import Timing from '../../timing';
 
-tape('timing plugin', t => {
+tape.skip('timing plugin', t => {
   const ctx = {};
   const timing = Timing.of(ctx);
   checkTimingProp('end');

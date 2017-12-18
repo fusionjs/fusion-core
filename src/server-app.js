@@ -2,14 +2,17 @@
 import path from 'path';
 import {compose} from './compose.js';
 import {escape, consumeSanitizedHTML} from './sanitization';
-// import Timing, {now} from './timing';
+import Timing, {now, TimingToken} from './timing';
 import BaseApp from './base-app';
 import {withMiddleware} from './with-middleware';
+import {withDependencies} from './with-dependencies';
 
 export default function() {
   const Koa = require('koa');
 
   return class ServerApp extends BaseApp {
+    // TODO: Potentially we can have the app depend on `element` and `render` functions, rather
+    // than have them passed into the constructor. Doing DI all the way down could make testing easier
     constructor(element, render) {
       super();
       this._app = new Koa();
@@ -67,24 +70,13 @@ export default function() {
           '</html>',
         ].join('');
       };
-      const rendererPlugin = async (ctx, next) => {
-        // const timing = Timing.of(ctx);
-        // timing.downstream.resolve(now() - timing.start);
-
-        if (ctx.element) {
-          // const renderStart = now();
-          ctx.rendered = await render(ctx.element);
-          // timing.render.resolve(now() - renderStart);
-        }
-
-        // const upstreamStart = now();
-        await next();
-        // timing.upstream.resolve(now() - upstreamStart);
-      };
-      this.plugins = [];
-      // this.plugins = [(ctx, next) => next(), ssrPlugin, rendererPlugin].map(
-      //   withMiddleware
-      // );
+      // this.plugins = [
+      //   withMiddleware(ssrPlugin),
+      //   withMiddleware(rendererPlugin),
+      // ];
+      this.register(Timing, TimingToken);
+      this.register(withMiddleware(ssrPlugin));
+      this.renderer = getRendererPlugin(render);
     }
     onerror(err) {
       return this._app.onerror(err);
@@ -190,4 +182,23 @@ function getChunkPreloaderScript({nonce = '', preloadChunks}) {
 
 function trim(str) {
   return str.replace(/^\s+/gm, '');
+}
+
+function getRendererPlugin(render) {
+  return withDependencies({timing: TimingToken})(({timing}) => {
+    return withMiddleware(async function renderer(ctx, next) {
+      const timer = timing.from(ctx);
+      timer.downstream.resolve(now() - timing.start);
+
+      if (ctx.element) {
+        const renderStart = now();
+        ctx.rendered = await render(ctx.element);
+        timer.render.resolve(now() - renderStart);
+      }
+
+      const upstreamStart = now();
+      await next();
+      timer.upstream.resolve(now() - upstreamStart);
+    });
+  });
 }
