@@ -1,10 +1,10 @@
 /* eslint-env node */
 import path from 'path';
-import {compose} from './plugin/index.js';
+import {compose} from './compose.js';
 import {escape, consumeSanitizedHTML} from './sanitization';
 // import Timing, {now} from './timing';
 import BaseApp from './base-app';
-import {withMiddleware} from './plugin/with-middleware';
+import {withMiddleware} from './with-middleware';
 
 export default function() {
   const Koa = require('koa');

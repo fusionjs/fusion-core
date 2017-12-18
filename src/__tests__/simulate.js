@@ -1,7 +1,7 @@
 import test from 'tape-cup';
 import ClientAppFactory from '../client-app';
 import ServerAppFactory from '../server-app';
-import compose from '../plugin/compose';
+import {compose} from '../compose';
 
 const App = __BROWSER__ ? ClientAppFactory() : ServerAppFactory();
 const env = __BROWSER__ ? 'browser' : 'server';

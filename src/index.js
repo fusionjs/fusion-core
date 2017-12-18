@@ -1,9 +1,10 @@
 import serverApp from './server-app';
 import clientApp from './client-app';
 
-import {Plugin, SingletonPlugin, compose} from './plugin/index.js';
+export {compose} from './compose.js';
 
-import {
+// sanitization API
+export {
   html,
   dangerouslySetHTML,
   consumeSanitizedHTML,
@@ -12,11 +13,6 @@ import {
 } from './sanitization';
 
 export default (__BROWSER__ ? clientApp() : serverApp());
-export {BasePlugin} from './base-plugin';
-// sanitization API
-export {html, dangerouslySetHTML, consumeSanitizedHTML, escape, unescape};
-
-export {Plugin, SingletonPlugin, compose};
 
 // Virtual modules
 export {

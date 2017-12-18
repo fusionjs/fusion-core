@@ -1,8 +1,8 @@
 /* eslint-env browser */
-import {compose} from './plugin/index.js';
+import {compose} from './compose.js';
 import timing from './timing';
 import BaseApp from './base-app';
-import {withMiddleware} from './plugin/with-middleware';
+import {withMiddleware} from './with-middleware';
 
 export default function() {
   return class ClientApp extends BaseApp {
