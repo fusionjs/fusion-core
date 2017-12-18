@@ -1,27 +1,34 @@
 import test from 'tape-cup';
 import App, {html} from '../../index';
 import {compose} from '../../compose.js';
+import {withMiddleware} from '../../with-middleware';
 
-test.skip('ssr with accept header', async t => {
-  const flags = {render: false, next: false};
+function run(app, ctx = {}) {
+  ctx = Object.assign(
+    {
+      headers: {accept: 'text/html'},
+      path: '/',
+      element: null,
+      type: null,
+      body: null,
+    },
+    ctx
+  );
+  app.resolve();
+  return compose(app.plugins)(ctx, () => Promise.resolve()).then(() => ctx);
+}
+
+test.only('ssr with accept header', async t => {
+  const flags = {render: false};
   const element = 'hi';
   const render = () => {
     flags.render = true;
+    return 'lol';
   };
   const app = new App(element, render);
 
-  const ssr = app.plugins[1];
-
-  const ctx = {
-    headers: {accept: 'text/html'},
-    path: '/',
-    element: null,
-    type: null,
-    body: null,
-  };
-  try {
-    await ssr(ctx, async () => {
-      flags.next = true;
+  app.register(
+    withMiddleware(async (ctx, next) => {
       t.equals(ctx.element, element, 'sets ctx.element');
       t.equals(ctx.type, 'text/html', 'sets ctx.type');
       t.equals(typeof ctx.body, 'object', 'sets ctx.body');
@@ -29,16 +36,40 @@ test.skip('ssr with accept header', async t => {
       t.equals(typeof ctx.body.htmlAttrs, 'object', 'ctx.body.htmlAttrs');
       t.ok(ctx.body.head instanceof Array, 'ctx.body.head');
       t.ok(ctx.body.body instanceof Array, 'ctx.body.body');
-      t.equals(typeof ctx.rendered, 'string', 'ctx.rendered');
-    });
+      await next();
+      t.equals(
+        typeof ctx.body,
+        'object',
+        'ctx.body keeps structure on upstream'
+      );
+      t.equals(
+        typeof ctx.body.title,
+        'string',
+        'ctx.body.title keeps structure on upstream'
+      );
+      t.equals(
+        typeof ctx.body.htmlAttrs,
+        'object',
+        'ctx.body.htmlAttrs keeps structure on upstream'
+      );
+      t.ok(
+        ctx.body.head instanceof Array,
+        'ctx.body.head keeps structure on upstream'
+      );
+      t.ok(
+        ctx.body.body instanceof Array,
+        'ctx.body.body keeps structure on upstream'
+      );
+    })
+  );
+  try {
+    const ctx = await run(app);
+    t.equals(typeof ctx.rendered, 'string', 'ctx.rendered');
+    t.equals(typeof ctx.body, 'string', 'renders ctx.body to string');
+    t.ok(!ctx.body.includes(element), 'does not renders element into ctx.body');
   } catch (e) {
     t.ifError(e, 'should not error');
   }
-  t.ok(flags.next, 'calls next');
-  t.ok(!flags.render, 'does not call render');
-  t.equals(typeof ctx.body, 'string', 'renders ctx.body to string');
-  t.ok(!ctx.body.includes(element), 'does not renders element into ctx.body');
-
   t.end();
 });
 test.skip('ssr without valid accept header', async t => {
