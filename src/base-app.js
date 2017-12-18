@@ -45,8 +45,8 @@ export default class CoreApp {
         // TODO: should we always call the function or only when the plugin
         // is used with `withDependencies`?
         p = p(resolvedDeps);
-        resolved.set(token, p);
       }
+      resolved.set(token, p);
       resolving.delete(token);
       resolvedPlugins.push(p);
       return p;

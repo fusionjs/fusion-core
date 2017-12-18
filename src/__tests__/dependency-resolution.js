@@ -137,3 +137,70 @@ tape('dependency registration with middleware', t => {
   app.resolve();
   t.end();
 });
+
+tape('dependency registration with missing dependency', t => {
+  const app = new App('el', el => el);
+  const PluginA = deps => {
+    return withMiddleware((ctx, next) => next(), {
+      deps,
+      name: 'PluginA',
+    });
+  };
+  const PluginC = withDependencies({a: TokenA, b: TokenB})(deps => {
+    return withMiddleware((ctx, next) => next(), {
+      deps,
+      name: 'PluginC',
+    });
+  });
+  app.register(PluginA, TokenA);
+  app.register(PluginC, TokenC);
+  t.throws(() => app.resolve(), 'Catches missing dependencies');
+  t.end();
+});
+
+tape('dependency registration with missing deep tree dependency', t => {
+  const app = new App('el', el => el);
+  const PluginA = deps => {
+    return withMiddleware((ctx, next) => next(), {
+      deps,
+      name: 'PluginA',
+    });
+  };
+  const PluginB = withDependencies({a: TokenA, d: 'RANDOM-TOKEN'})(deps => {
+    return withMiddleware((ctx, next) => next(), {
+      deps,
+      name: 'PluginB',
+    });
+  });
+  const PluginC = withDependencies({a: TokenA, b: TokenB})(deps => {
+    return withMiddleware((ctx, next) => next(), {
+      deps,
+      name: 'PluginC',
+    });
+  });
+  app.register(PluginC, TokenC);
+  app.register(PluginA, TokenA);
+  app.register(PluginB, TokenB);
+  t.throws(() => app.resolve(), 'Catches missing dependencies');
+  t.end();
+});
+
+tape('dependency registration with circular dependency', t => {
+  const app = new App('el', el => el);
+  const PluginB = withDependencies({c: TokenC})(deps => {
+    return withMiddleware((ctx, next) => next(), {
+      deps,
+      name: 'PluginC',
+    });
+  });
+  const PluginC = withDependencies({b: TokenB})(deps => {
+    return withMiddleware((ctx, next) => next(), {
+      deps,
+      name: 'PluginC',
+    });
+  });
+  app.register(PluginB, TokenB);
+  app.register(PluginC, TokenC);
+  t.throws(() => app.resolve(), 'Catches circular dependencies');
+  t.end();
+});
