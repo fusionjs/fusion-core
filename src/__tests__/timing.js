@@ -1,25 +1,8 @@
 import test from 'tape-cup';
 import ClientAppFactory from '../client-app';
 import ServerAppFactory from '../server-app';
-import {compose} from '../compose';
+import {run} from '../test-helper';
 const App = __BROWSER__ ? ClientAppFactory() : ServerAppFactory();
-
-function getContext() {
-  return __BROWSER__
-    ? {}
-    : {
-        path: '/',
-        headers: {
-          accept: 'text/html',
-        },
-      };
-}
-
-function run(app) {
-  const ctx = getContext();
-  app.resolve();
-  return compose(app.plugins)(ctx, () => Promise.resolve()).then(() => ctx);
-}
 
 test('timing plugin', async t => {
   const element = 'hi';

@@ -1,30 +1,10 @@
-import test from '../test-helper';
+import test, {run} from '../test-helper';
 import ClientAppFactory from '../client-app';
 import ServerAppFactory from '../server-app';
-import {compose} from '../compose';
 import {withMiddleware} from '../with-middleware';
 import {withDependencies} from '../with-dependencies';
 
 const App = __BROWSER__ ? ClientAppFactory() : ServerAppFactory();
-
-function getContext() {
-  return __BROWSER__
-    ? {}
-    : {
-        path: '/',
-        headers: {
-          accept: 'text/html',
-        },
-      };
-}
-
-function run(app) {
-  const ctx = getContext();
-  // eslint-disable-next-line
-  debugger;
-  app.resolve();
-  return compose(app.plugins)(ctx, () => Promise.resolve()).then(() => ctx);
-}
 
 function delay() {
   return new Promise(resolve => {
@@ -141,7 +121,7 @@ test('app.register - middleware execution respects registration order', async t 
   t.end();
 });
 
-test.only('app.register - middleware execution respects dependency order', async t => {
+test('app.register - middleware execution respects dependency order', async t => {
   const TokenA = 'TokenA';
   const TokenB = 'TokenB';
   let numRenders = 0;

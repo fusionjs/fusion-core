@@ -1,22 +1,7 @@
 import test from 'tape-cup';
 import App, {html} from '../../index';
-import {compose} from '../../compose.js';
 import {withMiddleware} from '../../with-middleware';
-
-function run(app, ctx = {}) {
-  ctx = Object.assign(
-    {
-      headers: {accept: 'text/html'},
-      path: '/',
-      element: null,
-      type: null,
-      body: null,
-    },
-    ctx
-  );
-  app.resolve();
-  return compose(app.plugins)(ctx, () => Promise.resolve()).then(() => ctx);
-}
+import {run} from '../../test-helper';
 
 test('ssr with accept header', async t => {
   const flags = {render: false};
@@ -86,11 +71,11 @@ test('ssr without valid accept header', async t => {
   };
   try {
     const ctx = await run(app, initialCtx);
-    t.equals(ctx.element, null, 'does not set ctx.element');
-    t.equals(ctx.type, null, 'does not set ctx.type');
-    t.equals(ctx.body, null, 'does not set ctx.body');
+    t.notok(ctx.element, 'does not set ctx.element');
+    t.notok(ctx.type, 'does not set ctx.type');
+    t.notok(ctx.body, 'does not set ctx.body');
     t.ok(!flags.render, 'does not call render');
-    t.equals(ctx.body, null, 'does not render ctx.body to string');
+    t.notok(ctx.body, 'does not render ctx.body to string');
   } catch (e) {
     t.ifError(e, 'does not error');
   }
