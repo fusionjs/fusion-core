@@ -2,8 +2,9 @@
 import path from 'path';
 import {compose} from './plugin/index.js';
 import {escape, consumeSanitizedHTML} from './sanitization';
-import Timing, {now} from './timing';
+// import Timing, {now} from './timing';
 import BaseApp from './base-app';
+import {withMiddleware} from './plugin/with-middleware';
 
 export default function() {
   const Koa = require('koa');
@@ -67,20 +68,23 @@ export default function() {
         ].join('');
       };
       const rendererPlugin = async (ctx, next) => {
-        const timing = Timing.of(ctx);
-        timing.downstream.resolve(now() - timing.start);
+        // const timing = Timing.of(ctx);
+        // timing.downstream.resolve(now() - timing.start);
 
         if (ctx.element) {
-          const renderStart = now();
+          // const renderStart = now();
           ctx.rendered = await render(ctx.element);
-          timing.render.resolve(now() - renderStart);
+          // timing.render.resolve(now() - renderStart);
         }
 
-        const upstreamStart = now();
+        // const upstreamStart = now();
         await next();
-        timing.upstream.resolve(now() - upstreamStart);
+        // timing.upstream.resolve(now() - upstreamStart);
       };
-      this.plugins = [Timing, ssrPlugin, rendererPlugin];
+      this.plugins = [];
+      // this.plugins = [(ctx, next) => next(), ssrPlugin, rendererPlugin].map(
+      //   withMiddleware
+      // );
     }
     onerror(err) {
       return this._app.onerror(err);

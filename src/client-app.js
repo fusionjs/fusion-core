@@ -2,6 +2,7 @@
 import {compose} from './plugin/index.js';
 import timing from './timing';
 import BaseApp from './base-app';
+import {withMiddleware} from './plugin/with-middleware';
 
 export default function() {
   return class ClientApp extends BaseApp {
@@ -27,7 +28,8 @@ export default function() {
           return next();
         }
       }
-      this.plugins = [timing, ssr, renderer];
+      // this.plugins = [timing, ssr, renderer].map(withMiddleware);
+      this.plugins = [];
     }
     onerror(e) {
       throw e;
