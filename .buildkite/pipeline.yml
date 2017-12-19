@@ -20,8 +20,13 @@ steps:
     plugins:
       'docker-compose#v1.7.0':
         run: fusion-core
-  - name: ':node: :white_check_mark:'
+  - name: ':node: :white_check_mark: /w coverage'
     command: .buildkite/nodeTests
+    plugins:
+      'docker-compose#v1.7.0':
+        run: fusion-core
+  - name: ':node: :white_check_mark: no coverage'
+    command: .buildkite/testsNoCoverage
     plugins:
       'docker-compose#v1.7.0':
         run: fusion-core
