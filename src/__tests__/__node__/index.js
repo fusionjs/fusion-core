@@ -2,6 +2,12 @@ import test from 'tape-cup';
 import App, {html} from '../../index';
 import {compose} from '../../plugin/index.js';
 
+test('something', t => {
+  t.ok(false);
+  t.equals(true, false);
+  t.end();
+});
+
 test('ssr with accept header', async t => {
   const flags = {render: false, next: false};
   const element = 'hi';
