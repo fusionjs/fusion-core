@@ -17,3 +17,12 @@ export type Middleware = (
   ctx: Context,
   next: () => Promise<void>
 ) => Promise<void>;
+
+declare class App {
+  // TODO: More specific types
+  registered: Map<any, any>;
+  plugins: Array<any>;
+  renderer: any;
+  register<A, B>(Plugin: PluginType<A, B>, type: B): void;
+  middleware<Deps>(middleware: (Deps) => Middleware, deps: Deps): void;
+}

@@ -20,17 +20,12 @@ export default class CoreApp {
     this.plugins.push(type);
     this.registered.set(type, Plugin);
   }
-  middleware<Deps>(middleware: Deps => Middleware, deps?: Deps) {
-    if (!deps) {
-      // $FlowIgnore
-      this.register(withMiddleware(middleware));
-    } else {
-      this.register(
-        withDependencies(deps)(d => {
-          return withMiddleware(middleware(d));
-        })
-      );
-    }
+  middleware<Deps>(middleware: Deps => Middleware, deps: Deps) {
+    this.register(
+      withDependencies(deps)(d => {
+        return withMiddleware(middleware(d));
+      })
+    );
   }
   resolve() {
     this.register(this.renderer);

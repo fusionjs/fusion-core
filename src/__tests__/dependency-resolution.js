@@ -6,34 +6,59 @@ import {withDependencies} from '../with-dependencies';
 import {withMiddleware} from '../with-middleware';
 
 const App = __BROWSER__ ? ClientAppFactory() : ServerAppFactory();
-const TokenA: {deps: void, name: string} = ('TokenA': any);
-const TokenB: {deps: {a: typeof TokenA}, name: string} = ('TokenB': any);
-const TokenC: {
-  deps: {a: typeof TokenA, b: typeof TokenB},
-  name: string,
-} = ('TokenC': any);
+type AType = {
+  a: string,
+};
+type BType = {
+  b: string,
+};
+type CType = {
+  c: string,
+};
+const TokenA: AType = ('TokenA': any);
+const TokenB: BType = ('TokenB': any);
+const TokenC: CType = ('TokenC': any);
+import type {PluginType} from '../../lib/index.js.flow';
 
 tape('dependency registration', t => {
   const app = new App('el', el => el);
   t.ok(app, 'creates an app');
+  const counters = {
+    a: 0,
+    b: 0,
+    c: 0,
+    d: 0,
+  };
 
-  const PluginA = deps => {
+  const PluginA: PluginType<void, AType> = () => {
+    counters.a++;
+    t.equal(counters.a, 1, 'only instantiates once');
     return {
-      deps,
-      name: 'PluginA',
+      a: 'PluginA',
     };
   };
-  const PluginB = withDependencies({a: TokenA})(deps => {
-    return {
-      deps,
-      name: 'PluginB',
-    };
-  });
+  const PluginB: PluginType<{a: AType}, BType> = withDependencies({a: TokenA})(
+    deps => {
+      counters.b++;
+      t.equal(deps.a.a, 'PluginA');
+      t.equal(counters.b, 1, 'only instantiates once');
+      return {
+        b: 'PluginB',
+      };
+    }
+  );
 
-  const PluginC = withDependencies({a: TokenA, b: TokenB})(deps => {
+  type PluginCType = PluginType<{a: AType, b: BType}, CType>;
+  const PluginC: PluginCType = withDependencies({
+    a: TokenA,
+    b: TokenB,
+  })(deps => {
+    counters.c++;
+    t.equal(deps.a.a, 'PluginA');
+    t.equal(deps.b.b, 'PluginB');
+    t.equal(counters.c, 1, 'only instantiates once');
     return {
-      deps,
-      name: 'PluginC',
+      c: 'PluginC',
     };
   });
 
@@ -42,62 +67,55 @@ tape('dependency registration', t => {
   app.register(PluginC, TokenC);
   app.register(
     withDependencies({a: TokenA, b: TokenB, c: TokenC})(deps => {
-      t.deepLooseEqual(
-        deps.a,
-        deps.b.deps.a,
-        'only instantiates dependencies once'
-      );
-      t.deepLooseEqual(
-        deps.a,
-        deps.c.deps.a,
-        'only instantiates dependencies once'
-      );
-      t.deepLooseEqual(
-        deps.b,
-        deps.c.deps.b,
-        'only instantiates dependencies once'
-      );
-      t.deepLooseEqual(
-        deps.b.name,
-        'PluginB',
-        'passes dependencies through correctly'
-      );
-      t.deepLooseEqual(
-        deps.a.name,
-        'PluginA',
-        'passes dependencies through correctly'
-      );
-      t.deepLooseEqual(
-        deps.c.name,
-        'PluginC',
-        'passes dependencies through correctly'
-      );
-      return {};
+      counters.d++;
+      t.equal(deps.a.a, 'PluginA');
+      t.equal(deps.b.b, 'PluginB');
+      t.equal(deps.c.c, 'PluginC');
     })
   );
+  t.equal(counters.a, 0, 'does not instantiate until resolve is called');
+  t.equal(counters.b, 0, 'does not instantiate until resolve is called');
+  t.equal(counters.c, 0, 'does not instantiate until resolve is called');
+  t.equal(counters.d, 0, 'does not instantiate until resolve is called');
   app.resolve();
+  t.equal(counters.a, 1, 'only instantiates once');
+  t.equal(counters.b, 1, 'only instantiates once');
+  t.equal(counters.c, 1, 'only instantiates once');
+  t.equal(counters.d, 1, 'only instantiates once');
   t.end();
 });
 
 tape('dependency registration with middleware', t => {
+  const counters = {
+    a: 0,
+    b: 0,
+    c: 0,
+    d: 0,
+  };
   const app = new App('el', el => el);
   t.ok(app, 'creates an app');
-  const PluginA = deps => {
+  const PluginA = () => {
+    counters.a++;
+    t.equal(counters.a, 1, 'only instantiates once');
     return withMiddleware((ctx, next) => next(), {
-      deps,
-      name: 'PluginA',
+      a: 'PluginA',
     });
   };
   const PluginB = withDependencies({a: TokenA})(deps => {
+    counters.b++;
+    t.equal(deps.a.a, 'PluginA');
+    t.equal(counters.b, 1, 'only instantiates once');
     return {
-      deps,
-      name: 'PluginB',
+      b: 'PluginB',
     };
   });
   const PluginC = withDependencies({a: TokenA, b: TokenB})(deps => {
+    counters.c++;
+    t.equal(deps.a.a, 'PluginA');
+    t.equal(deps.b.b, 'PluginB');
+    t.equal(counters.c, 1, 'only instantiates once');
     return withMiddleware((ctx, next) => next(), {
-      deps,
-      name: 'PluginC',
+      c: 'PluginC',
     });
   });
   app.register(PluginA, TokenA);
@@ -105,55 +123,35 @@ tape('dependency registration with middleware', t => {
   app.register(PluginC, TokenC);
   app.register(
     withDependencies({a: TokenA, b: TokenB, c: TokenC})(deps => {
-      t.deepLooseEqual(
-        deps.a,
-        deps.b.deps.a,
-        'only instantiates dependencies once'
-      );
-      t.deepLooseEqual(
-        deps.a,
-        deps.c.deps.a,
-        'only instantiates dependencies once'
-      );
-      t.deepLooseEqual(
-        deps.b,
-        deps.c.deps.b,
-        'only instantiates dependencies once'
-      );
-      t.deepLooseEqual(
-        deps.b.name,
-        'PluginB',
-        'passes dependencies through correctly'
-      );
-      t.deepLooseEqual(
-        deps.a.name,
-        'PluginA',
-        'passes dependencies through correctly'
-      );
-      t.deepLooseEqual(
-        deps.c.name,
-        'PluginC',
-        'passes dependencies through correctly'
-      );
+      counters.d++;
+      t.equal(deps.a.a, 'PluginA');
+      t.equal(deps.b.b, 'PluginB');
+      t.equal(deps.c.c, 'PluginC');
       return withMiddleware((ctx, next) => next());
     })
   );
+  t.equal(counters.a, 0, 'does not instantiate until resolve is called');
+  t.equal(counters.b, 0, 'does not instantiate until resolve is called');
+  t.equal(counters.c, 0, 'does not instantiate until resolve is called');
+  t.equal(counters.d, 0, 'does not instantiate until resolve is called');
   app.resolve();
+  t.equal(counters.a, 1, 'only instantiates once');
+  t.equal(counters.b, 1, 'only instantiates once');
+  t.equal(counters.c, 1, 'only instantiates once');
+  t.equal(counters.d, 1, 'only instantiates once');
   t.end();
 });
 
 tape('dependency registration with missing dependency', t => {
   const app = new App('el', el => el);
-  const PluginA = deps => {
+  const PluginA = () => {
     return withMiddleware((ctx, next) => next(), {
-      deps,
-      name: 'PluginA',
+      a: 'PluginA',
     });
   };
-  const PluginC = withDependencies({a: TokenA, b: TokenB})(deps => {
+  const PluginC = withDependencies({a: TokenA, b: TokenB})(() => {
     return withMiddleware((ctx, next) => next(), {
-      deps,
-      name: 'PluginC',
+      c: 'PluginC',
     });
   });
   app.register(PluginA, TokenA);
@@ -164,22 +162,19 @@ tape('dependency registration with missing dependency', t => {
 
 tape('dependency registration with missing deep tree dependency', t => {
   const app = new App('el', el => el);
-  const PluginA = deps => {
+  const PluginA = () => {
     return withMiddleware((ctx, next) => next(), {
-      deps,
-      name: 'PluginA',
+      a: 'PluginA',
     });
   };
-  const PluginB = withDependencies({a: TokenA, d: 'RANDOM-TOKEN'})(deps => {
+  const PluginB = withDependencies({a: TokenA, d: 'RANDOM-TOKEN'})(() => {
     return withMiddleware((ctx, next) => next(), {
-      deps,
-      name: 'PluginB',
+      b: 'PluginB',
     });
   });
-  const PluginC = withDependencies({a: TokenA, b: TokenB})(deps => {
+  const PluginC = withDependencies({a: TokenA, b: TokenB})(() => {
     return withMiddleware((ctx, next) => next(), {
-      deps,
-      name: 'PluginC',
+      c: 'PluginC',
     });
   });
   app.register(PluginC, TokenC);
@@ -191,16 +186,14 @@ tape('dependency registration with missing deep tree dependency', t => {
 
 tape('dependency registration with circular dependency', t => {
   const app = new App('el', el => el);
-  const PluginB = withDependencies({c: TokenC})(deps => {
+  const PluginB = withDependencies({c: TokenC})(() => {
     return withMiddleware((ctx, next) => next(), {
-      deps,
-      name: 'PluginC',
+      b: 'PluginB',
     });
   });
-  const PluginC = withDependencies({b: TokenB})(deps => {
+  const PluginC = withDependencies({b: TokenB})(() => {
     return withMiddleware((ctx, next) => next(), {
-      deps,
-      name: 'PluginC',
+      c: 'PluginC',
     });
   });
   app.register(PluginB, TokenB);
