@@ -30,9 +30,9 @@ test('context composition', async t => {
 
   const app = new App(element, render);
   app.register(withMiddleware(wrap));
-  app.resolve();
-  const middleware = compose(app.plugins);
   try {
+    app.resolve();
+    const middleware = compose(app.plugins);
     await middleware(context, () => Promise.resolve());
     t.equals(typeof context.rendered, 'string', 'renders');
     t.ok(context.rendered.includes('<h1>HELLO</h1>'), 'has expected html');

@@ -5,12 +5,11 @@ import timing, {TimingToken} from './timing';
 import BaseApp from './base-app';
 import {withMiddleware} from './with-middleware';
 
-export default function() {
+export default function(): Class<FusionApp> {
   return class ClientApp extends BaseApp {
     // TODO: More specific types
     constructor(element: any, render: (el: any) => Promise<any>) {
       super();
-      this.registered = new Map();
       function ssr(ctx, next) {
         ctx.prefix = window.__ROUTE_PREFIX__ || ''; // serialized by ./server
         ctx.element = element;
@@ -29,7 +28,7 @@ export default function() {
           return next();
         }
       }
-      this.register(timing, TimingToken);
+      this.register(TimingToken, timing);
       this.register(withMiddleware(ssr));
       this.renderer = withMiddleware(renderer);
     }

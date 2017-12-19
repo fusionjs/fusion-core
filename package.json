@@ -5,7 +5,8 @@
   "license": "MIT",
   "repository": "fusionjs/fusion-core",
   "files": [
-    "dist"
+    "dist",
+    "flow-typed"
   ],
   "main": "./dist/node.cjs.js",
   "module": "./dist/node.es.js",

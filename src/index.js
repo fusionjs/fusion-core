@@ -3,6 +3,8 @@ import serverApp from './server-app';
 import clientApp from './client-app';
 
 export {compose} from './compose.js';
+export {withMiddleware} from './with-middleware';
+export {withDependencies} from './with-dependencies';
 
 // sanitization API
 export {

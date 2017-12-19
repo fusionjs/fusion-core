@@ -6,6 +6,14 @@ import {withMiddleware} from '../with-middleware';
 import {withDependencies} from '../with-dependencies';
 
 const App = __BROWSER__ ? ClientAppFactory() : ServerAppFactory();
+type AType = {
+  a: string,
+};
+type BType = () => {
+  b: string,
+};
+const TokenA: AType = (() => 'TokenA': any);
+const TokenB: BType = (() => 'TokenB': any);
 
 function delay() {
   return new Promise(resolve => {
@@ -123,8 +131,6 @@ test('app.register - middleware execution respects registration order', async t 
 });
 
 test('app.register - middleware execution respects dependency order', async t => {
-  const TokenA = 'TokenA';
-  const TokenB = 'TokenB';
   let numRenders = 0;
   const element = 'hi';
   const renderFn = el => {
@@ -148,18 +154,21 @@ test('app.register - middleware execution respects dependency order', async t =>
     })
   );
   app.register(
-    withDependencies({TokenB})(() =>
-      withMiddleware(async function second(ctx, next) {
-        t.equal(order, 2, 'calls downstream in correct order');
-        t.equal(numRenders, 0);
-        order++;
-        await next();
-        t.equal(order, 5, 'calls upstream in correct order');
-        t.equal(numRenders, 1);
-        order++;
-      })
-    ),
-    TokenA
+    TokenA,
+    withDependencies({TokenB})(deps => {
+      return withMiddleware(
+        async function second(ctx, next) {
+          t.equal(order, 2, 'calls downstream in correct order');
+          t.equal(numRenders, 0);
+          order++;
+          await next();
+          t.equal(order, 5, 'calls upstream in correct order');
+          t.equal(numRenders, 1);
+          order++;
+        },
+        {a: 'something'}
+      );
+    })
   );
   app.register(
     withMiddleware(async function third(ctx, next) {
@@ -173,16 +182,19 @@ test('app.register - middleware execution respects dependency order', async t =>
     })
   );
   app.register(
-    withMiddleware(async function fourth(ctx, next) {
-      t.equal(order, 1, 'calls downstream in correct order');
-      t.equal(numRenders, 0);
-      order++;
-      await next();
-      t.equal(order, 6, 'calls upstream in correct order');
-      t.equal(numRenders, 1);
-      order++;
-    }),
-    TokenB
+    TokenB,
+    withMiddleware(
+      async function fourth(ctx, next) {
+        t.equal(order, 1, 'calls downstream in correct order');
+        t.equal(numRenders, 0);
+        order++;
+        await next();
+        t.equal(order, 6, 'calls upstream in correct order');
+        t.equal(numRenders, 1);
+        order++;
+      },
+      () => ({b: 'something-b'})
+    )
   );
   const ctx = await run(app);
   t.equal(ctx.rendered, element);
@@ -199,17 +211,14 @@ test('app.middleware with dependencies', async t => {
   };
   const app = new App(element, renderFn);
   let called = false;
-  app.register(() => 'Something', TokenA);
-  app.middleware(
-    deps => {
-      t.equal(deps.TokenA, 'Something');
-      return (ctx, next) => {
-        called = true;
-        return next();
-      };
-    },
-    {TokenA}
-  );
+  app.register(TokenA, () => 'Something');
+  app.middleware({TokenA}, deps => {
+    t.equal(deps.TokenA, 'Something');
+    return (ctx, next) => {
+      called = true;
+      return next();
+    };
+  });
   await run(app);
   t.ok(called, 'calls middleware');
   t.end();
@@ -223,7 +232,7 @@ test('app.middleware with no dependencies', async t => {
   const app = new App(element, renderFn);
   let called = false;
   // TODO: Investigate how we can make this work with flow and support not wrapping in extra function
-  app.middleware(() => (ctx, next) => {
+  app.middleware((ctx, next) => {
     called = true;
     return next();
   });

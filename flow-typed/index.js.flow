@@ -1,0 +1,56 @@
+/* @flow */
+import type {Context as KoaContext} from 'koa';
+declare var __NODE__: Boolean;
+declare var __BROWSER__: Boolean;
+
+declare type SSRContext = {
+  element: any,
+  template: {
+    htmlAttrs: Object,
+    title: string,
+    head: Array<string>,
+    body: Array<string>,
+  },
+} & KoaContext;
+declare type ContextType = SSRContext | KoaContext;
+declare type PluginType<Dependencies, Plugin> = (Dependencies) => Plugin;
+declare type MiddlewareType = (
+  ctx: ContextType,
+  next: () => Promise<void>
+) => Promise<*>;
+
+declare class FusionApp {
+  // TODO: More specific types
+  constructor<Element>(element: Element, render: (Element) => any): FusionApp;
+  registered: Map<any, any>;
+  plugins: Array<any>;
+  renderer: any;
+  register<A, B>(type: B, Plugin: PluginType<A, B>): void;
+  register<A, B>(Plugin: PluginType<A, B>): void;
+  middleware<Deps>(deps: Deps, middleware: (Deps) => MiddlewareType): void;
+  middleware(middleware: MiddlewareType): void;
+  callback(): () => Promise<void>;
+  resolve(): void;
+}
+
+declare type PluginLoader<Dependencies, Plugin> = (
+  init: PluginType<Dependencies, Plugin>
+) => PluginType<Dependencies, Plugin>;
+
+declare module 'fusion-core' {
+  declare export default FusionApp
+  declare export function withMiddlewareType<Service>(
+    middleware: MiddlewareType,
+    service: Service
+  ): Service;
+
+  declare export function withMiddlewareType<Service>(
+    middleware: MiddlewareType
+  ): {
+    __middleware__: MiddlewareType,
+  };
+  declare export function withDependencies<Dependencies, Plugin>(
+    deps: Dependencies
+  ): PluginLoader<Dependencies, Plugin>;
+  declare export type Context = ContextType;
+}

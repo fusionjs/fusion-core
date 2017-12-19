@@ -8,7 +8,7 @@ import BaseApp from './base-app';
 import {withMiddleware} from './with-middleware';
 import {withDependencies} from './with-dependencies';
 
-export default function() {
+export default function(): Class<FusionApp> {
   const Koa = require('koa');
 
   return class ServerApp extends BaseApp {
@@ -20,8 +20,6 @@ export default function() {
     constructor(element: any, render: (el: any) => Promise<string>) {
       super();
       this._app = new Koa();
-      // map of types to plugins
-      this.registered = new Map();
       const ssrPlugin = async (ctx, next) => {
         if (!isSSR(ctx)) return next();
 
@@ -73,12 +71,13 @@ export default function() {
           '</html>',
         ].join('');
       };
-      this.register(Timing, TimingToken);
+      this.register(TimingToken, Timing);
       this.register(withMiddleware(ssrPlugin));
       this.renderer = getRendererPlugin(render);
     }
     callback() {
       this.resolve();
+      // $FlowIgnore
       this._app.use(compose(this.plugins));
       return this._app.callback();
     }

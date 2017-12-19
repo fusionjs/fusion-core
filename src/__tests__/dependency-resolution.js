@@ -18,7 +18,6 @@ type CType = {
 const TokenA: AType = ('TokenA': any);
 const TokenB: BType = ('TokenB': any);
 const TokenC: CType = ('TokenC': any);
-import type {PluginType} from '../../lib/index.js.flow';
 
 tape('dependency registration', t => {
   const app = new App('el', el => el);
@@ -62,9 +61,9 @@ tape('dependency registration', t => {
     };
   });
 
-  app.register(PluginA, TokenA);
-  app.register(PluginB, TokenB);
-  app.register(PluginC, TokenC);
+  app.register(TokenA, PluginA);
+  app.register(TokenB, PluginB);
+  app.register(TokenC, PluginC);
   app.register(
     withDependencies({a: TokenA, b: TokenB, c: TokenC})(deps => {
       counters.d++;
@@ -118,9 +117,9 @@ tape('dependency registration with middleware', t => {
       c: 'PluginC',
     });
   });
-  app.register(PluginA, TokenA);
-  app.register(PluginB, TokenB);
-  app.register(PluginC, TokenC);
+  app.register(TokenA, PluginA);
+  app.register(TokenB, PluginB);
+  app.register(TokenC, PluginC);
   app.register(
     withDependencies({a: TokenA, b: TokenB, c: TokenC})(deps => {
       counters.d++;
@@ -154,8 +153,8 @@ tape('dependency registration with missing dependency', t => {
       c: 'PluginC',
     });
   });
-  app.register(PluginA, TokenA);
-  app.register(PluginC, TokenC);
+  app.register(TokenA, PluginA);
+  app.register(TokenC, PluginC);
   t.throws(() => app.resolve(), 'Catches missing dependencies');
   t.end();
 });
@@ -177,9 +176,9 @@ tape('dependency registration with missing deep tree dependency', t => {
       c: 'PluginC',
     });
   });
-  app.register(PluginC, TokenC);
-  app.register(PluginA, TokenA);
-  app.register(PluginB, TokenB);
+  app.register(TokenC, PluginC);
+  app.register(TokenA, PluginA);
+  app.register(TokenB, PluginB);
   t.throws(() => app.resolve(), 'Catches missing dependencies');
   t.end();
 });
@@ -196,8 +195,8 @@ tape('dependency registration with circular dependency', t => {
       c: 'PluginC',
     });
   });
-  app.register(PluginB, TokenB);
-  app.register(PluginC, TokenC);
+  app.register(TokenB, PluginB);
+  app.register(TokenC, PluginC);
   t.throws(() => app.resolve(), 'Catches circular dependencies');
   t.end();
 });
