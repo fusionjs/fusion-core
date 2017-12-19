@@ -72,17 +72,17 @@ Typically a plugin works the same way as a Koa middleware.
 
 #### Instance members
 
-##### app.plugin
+##### app.register
 
 ```js
-const plugin = app.plugin(factory, dependencies);
+app.register(Plugin, Token);
 ```
 
-- `factory: (dependencies: Object) => Plugin` - Required. The function that is exported by a plugin package
-- `dependencies: Object` - Optional. A map of dependencies and configuration for the plugin
-- `plugin` - a plugin
+- `Plugin: (dependencies: Object) => any` - Required. The function that is exported by a plugin package
+- `Token: Object` - Optional. A token to register the plugin under. 
 
-Call this method to register a plugin into a FusionJS application. Returns a plugin, which can be passed as a dependency to other plugins.
+Call this method to register a plugin into a FusionJS application. An optional token can be passed as a second
+argument to allow integrating the plugin into the FusionJS dependency injection system. See [TODO: Insert link here about DI]
 
 ---
 
@@ -197,7 +197,7 @@ export default () => {
     return async (ctx, next) => {
       const data = read('package.json');
       const {version} = JSON.parse(data);
-      ctx.body.head.push(html`<meta id="app-version" content="${version}">`);
+      ctx.template.head.push(html`<meta id="app-version" content="${version}">`);
       return next();
     }
   }
@@ -336,10 +336,10 @@ In the server, `ctx` also exposes the same properties as a [Koa context](http://
     - `properties: Object` - is merged to the error object
   - `respond: boolean` - set to true to bypass Koa's built-in response handling. You should not use this flag.
 
-Additionally, when server-side rendering a page, FusionJS sets `ctx.body` to an object with the following properties:
+Additionally, when server-side rendering a page, FusionJS sets `ctx.template` to an object with the following properties:
 
 - `ctx: Object`
-  - `body: Object`
+  - `template: Object`
     - `htmlAttrs: Object` - attributes for the `<html>` tag. For example `{lang: 'en-US'}` turns into `<html lang="en-US">`. Default: empty object
     - `title: string` - The content for the `<title>` tag. Default: empty string
     - `head: Array` - A list of [sanitized HTML strings](#html-sanitization). Default: empty array
@@ -360,7 +360,7 @@ export default () => (ctx, next) => {
   if (ctx.element) {
     const userData = await getUserData();
     // userData can't be trusted, and is automatically escaped
-    ctx.body.body.push(html`<div>${userData}</div>`)
+    ctx.template.body.push(html`<div>${userData}</div>`)
   }
   return next();
 }
@@ -378,7 +378,7 @@ const body = html`<div>${notUserData}</div>`
 Note that you cannot mix sanitized HTML with unsanitized strings:
 
 ```js
-ctx.body.body.push(html`<h1>Safe</h1>` + 'not safe') // will throw an error when rendered
+ctx.template.body.push(html`<h1>Safe</h1>` + 'not safe') // will throw an error when rendered
 ```
 
 Also note that only template strings can have template tags (i.e. <code>html&#x60;&lt;div&gt;&lt;/div&gt;&#x60;</code>). The following are NOT valid Javascript: `html"<div></div>"` and `html'<div></div>'`.
@@ -392,7 +392,7 @@ If you have already taken steps to sanitize your input against XSS and don't wis
 Here's how to serialize JSON data in the server:
 
 ```js
-ctx.body.body.push(html`<script id="__MY_DATA__" type="text/plain">${JSON.stringify(data)}</script>`);
+ctx.template.body.push(html`<script id="__MY_DATA__" type="text/plain">${JSON.stringify(data)}</script>`);
 ```
 
 Here's how to deserialize it in the browser:

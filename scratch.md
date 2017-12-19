@@ -1,0 +1,41 @@
+# Plugin
+
+A plugin is simply a function that returns a value. For example, the following is a valid plugin.
+
+```js
+const ConsoleLoggerPlugin = () => {
+  return console;
+}
+```
+
+In order to use plugins, you need to register them with your FusionJS application. You do this by calling
+`app.register` with the plugin and a token for that plugin. The token is simply a value used to keep track of
+what plugins are registered, and to allow plugins to depend on one another. You can think of Tokens like interfaces.
+We keep a list of standard tokens in the `fusion-tokens` repository. Lets finish up this logger example:
+
+```js
+import ConsoleLoggerPlugin from 'fusion-plugin-console-logger';
+import {LoggerToken} from 'fusion-tokens';
+import App from 'fusion-core';
+
+export default function main() {
+  const app = new App(...);
+  app.register(ConsoleLoggerPlugin, LoggerToken);
+  return app;
+}
+```
+
+To use the logger we registered, we need to introduce the `withDependencies` helper from `fusion-core`. This function allows us to declare the dependencies we need. Lets write a new plugin that depends on a logger.
+
+```js
+import {withDependencies} from 'fusion-core';
+import {LoggerToken} from 'fusion-tokens';
+
+const APIPlugin = withDependencies({
+  logger: LoggerToken,
+})(deps => {
+ const {logger} = deps;
+  // Note: implementation of APIClient left out for brevity
+  return new APIClient(logger);
+});
+```
