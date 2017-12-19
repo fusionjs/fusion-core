@@ -201,7 +201,7 @@ test('app.middleware with dependencies', async t => {
   app.register(() => 'Something', TokenA);
   app.middleware(
     deps => {
-      t.equal(typeof deps.TokenA, 'function');
+      t.equal(deps.TokenA, 'Something');
       return (ctx, next) => {
         called = true;
         return next();

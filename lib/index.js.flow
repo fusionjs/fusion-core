@@ -1,0 +1,19 @@
+/* @flow */
+import type {Context as KoaContext} from 'koa';
+
+type SSRContext = {
+  element: any,
+  template: {
+    htmlAttrs: Object,
+    title: string,
+    head: Array<string>,
+    body: Array<string>,
+  },
+} & KoaContext;
+
+export type Context = SSRContext | KoaContext;
+export type PluginType<Dependencies, Plugin> = Dependencies => Plugin;
+export type Middleware = (
+  ctx: Context,
+  next: () => Promise<void>
+) => Promise<void>;

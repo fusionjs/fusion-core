@@ -1,25 +1,33 @@
+/* @flow */
 import {withMiddleware} from './with-middleware';
 import {withDependencies} from './with-dependencies';
+import type {PluginType, Middleware} from '../lib/index.js.flow';
 
 export default class CoreApp {
+  // TODO: More specific types
+  registered: Map<any, any>;
+  plugins: Array<any>;
+  renderer: any;
   constructor() {
     this.registered = new Map();
     this.plugins = [];
   }
-  register(Plugin, type) {
+  register<P>(Plugin: PluginType<*, P>, type: P) {
     if (type === undefined) {
+      // $FlowIgnore
       type = Plugin;
     }
     this.plugins.push(type);
     this.registered.set(type, Plugin);
   }
-  middleware(middleware, deps) {
+  middleware<Deps>(middleware: Deps => Middleware, deps?: Deps) {
     if (!deps) {
+      // $FlowIgnore
       this.register(withMiddleware(middleware));
     } else {
       this.register(
         withDependencies(deps)(d => {
-          withMiddleware(middleware(d));
+          return withMiddleware(middleware(d));
         })
       );
     }
@@ -49,8 +57,8 @@ export default class CoreApp {
       // get the registered type and resolve it
       resolving.add(token);
       let p = registered.get(token);
-      if (typeof p === 'function' && p.__deps__) {
-        const registeredDeps = p.__deps__;
+      if (typeof p === 'function') {
+        const registeredDeps = p.__deps__ || {};
         const resolvedDeps = {};
         for (const key in registeredDeps) {
           const registeredToken = registeredDeps[key];

@@ -5,6 +5,8 @@
 ./src/
 
 [libs]
+./flow-globals.js
+./flow-typed
 
 [lints]
 

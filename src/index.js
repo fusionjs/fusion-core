@@ -1,3 +1,4 @@
+/* @flow */
 import serverApp from './server-app';
 import clientApp from './client-app';
 
@@ -12,6 +13,7 @@ export {
   unescape,
 } from './sanitization';
 
+// $FlowIgnore
 export default (__BROWSER__ ? clientApp() : serverApp());
 
 // Virtual modules

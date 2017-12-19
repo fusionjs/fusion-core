@@ -1,5 +1,7 @@
+/* @flow */
 // inline version of koa-compose to get around Rollup/CUP commonjs-related issue
-function composeMiddleware(middleware) {
+import type {Middleware} from '../lib/index.js.flow';
+function composeMiddleware(middleware): Middleware {
   if (!Array.isArray(middleware)) {
     throw new TypeError('Middleware stack must be an array!');
   }
@@ -21,6 +23,7 @@ function composeMiddleware(middleware) {
       if (i === middleware.length) fn = next;
       if (!fn) return Promise.resolve();
       try {
+        // $FlowIgnore
         return fn(context, function next() {
           return dispatch(i + 1);
         });
@@ -31,9 +34,10 @@ function composeMiddleware(middleware) {
   };
 }
 
-export function compose(plugins) {
+export function compose(plugins: Array<mixed>) {
   const middleware = plugins
     .map(p => {
+      // $FlowIgnore
       if (Object(p) === p && typeof p.__middleware__ === 'function') {
         return p.__middleware__;
       }

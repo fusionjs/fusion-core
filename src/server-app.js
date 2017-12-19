@@ -1,3 +1,4 @@
+/* @flow */
 /* eslint-env node */
 import path from 'path';
 import {compose} from './compose.js';
@@ -11,14 +12,16 @@ export default function() {
   const Koa = require('koa');
 
   return class ServerApp extends BaseApp {
+    // TODO: More specific types
+    _app: Koa;
     // TODO: Potentially we can have the app depend on `element` and `render` functions, rather
     // than have them passed into the constructor. Doing DI all the way down could make testing easier
-    constructor(element, render) {
+    // TODO: More specific types
+    constructor(element: any, render: (el: any) => Promise<string>) {
       super();
       this._app = new Koa();
       // map of types to plugins
       this.registered = new Map();
-      this.resolved = new Map();
       const ssrPlugin = async (ctx, next) => {
         if (!isSSR(ctx)) return next();
 
@@ -30,7 +33,7 @@ export default function() {
         };
         ctx.element = element;
         ctx.rendered = '';
-        ctx.body = template;
+        ctx.template = template;
         ctx.type = 'text/html';
         if (!ctx.chunkUrlMap) ctx.chunkUrlMap = new Map();
         if (!ctx.syncChunks) ctx.syncChunks = [];
@@ -38,12 +41,12 @@ export default function() {
 
         await next();
 
-        if (ctx.body !== template) return; // this can happen if you hit an endpoint from the url bar
-
-        const {htmlAttrs, title, head, body} = ctx.body;
-        const safeAttrs = Object.keys(htmlAttrs).map(attrKey => {
-          return ` ${escape(attrKey)}="${escape(htmlAttrs[attrKey])}"`;
-        });
+        const {htmlAttrs, title, head, body} = ctx.template;
+        const safeAttrs = Object.keys(htmlAttrs)
+          .map(attrKey => {
+            return ` ${escape(attrKey)}="${escape(htmlAttrs[attrKey])}"`;
+          })
+          .join('');
         const safeTitle = escape(title);
         const safeHead = head.map(consumeSanitizedHTML).join('');
         const safeBody = body.map(consumeSanitizedHTML).join('');
@@ -70,16 +73,9 @@ export default function() {
           '</html>',
         ].join('');
       };
-      // this.plugins = [
-      //   withMiddleware(ssrPlugin),
-      //   withMiddleware(rendererPlugin),
-      // ];
       this.register(Timing, TimingToken);
       this.register(withMiddleware(ssrPlugin));
       this.renderer = getRendererPlugin(render);
-    }
-    onerror(err) {
-      return this._app.onerror(err);
     }
     callback() {
       this.resolve();
@@ -188,7 +184,7 @@ function getRendererPlugin(render) {
   return withDependencies({timing: TimingToken})(({timing}) => {
     return withMiddleware(async function renderer(ctx, next) {
       const timer = timing.from(ctx);
-      timer.downstream.resolve(now() - timing.start);
+      timer.downstream.resolve(now() - timer.start);
 
       if (ctx.element) {
         const renderStart = now();

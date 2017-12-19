@@ -1,3 +1,4 @@
+/* @flow */
 /* eslint-env browser */
 import {compose} from './compose.js';
 import timing, {TimingToken} from './timing';
@@ -6,10 +7,10 @@ import {withMiddleware} from './with-middleware';
 
 export default function() {
   return class ClientApp extends BaseApp {
-    constructor(element, render) {
+    // TODO: More specific types
+    constructor(element: any, render: (el: any) => Promise<any>) {
       super();
       this.registered = new Map();
-      this.resolved = new Map();
       function ssr(ctx, next) {
         ctx.prefix = window.__ROUTE_PREFIX__ || ''; // serialized by ./server
         ctx.element = element;
@@ -32,18 +33,17 @@ export default function() {
       this.register(withMiddleware(ssr));
       this.renderer = withMiddleware(renderer);
     }
-    onerror(e) {
-      throw e;
-    }
     callback() {
       this.resolve();
       const middleware = compose(this.plugins);
       return () => {
+        // TODO: Create noop context object to match server api
         const ctx = {
           url: window.location.path + window.location.search,
           element: null,
           body: null,
         };
+        // $FlowIgnore
         return middleware(ctx, () => Promise.resolve()).then(() => ctx);
       };
     }

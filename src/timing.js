@@ -1,21 +1,37 @@
+/* @flow */
 // TODO: Use real token with type signature
 import {withMiddleware} from './with-middleware';
-export const TimingToken = 'TimingToken';
+
+type Deferred<T> = {
+  promise: Promise<T>,
+  resolve: (result: T) => void,
+  reject: (error: Error) => void,
+};
 
 class Timing {
+  start: number;
+  render: Deferred<number>;
+  end: Deferred<number>;
+  downstream: Deferred<number>;
+  upstream: Deferred<number>;
   constructor() {
+    this.start = now();
     this.render = deferred();
     this.end = deferred();
     this.downstream = deferred();
     this.upstream = deferred();
   }
 }
-
-const timing = {
-  from(ctx) {
+type TimingPlugin = {
+  from(ctx: Object): Timing,
+};
+const timing: TimingPlugin = {
+  from(ctx): Timing {
     return ctx.memoize(() => new Timing());
   },
 };
+
+export const TimingToken: TimingPlugin = (() => {}: any);
 
 function middleware(ctx, next) {
   const memoCache = new Map();
@@ -27,9 +43,9 @@ function middleware(ctx, next) {
     memoCache.set(fn, result);
     return result;
   };
-  const {render, end, downstream, upstream} = timing.from(ctx);
+  const {start, render, end, downstream, upstream} = timing.from(ctx);
   ctx.timing = {
-    start: now(),
+    start,
     render: render.promise,
     end: end.promise,
     downstream: downstream.promise,
@@ -40,23 +56,26 @@ function middleware(ctx, next) {
     end.resolve(endTime);
   });
 }
-export default withMiddleware(middleware, timing);
 
-export function now() {
+export default () => withMiddleware(middleware, timing);
+
+export function now(): number {
   if (__NODE__) {
     const [seconds, ns] = process.hrtime();
     return Math.round(seconds * 1000 + ns / 1e6);
-  } else if (__BROWSER__) {
+  } else {
+    // eslint-disable-next-line cup/no-undef
     if (window.performance && window.performance.now) {
+      // eslint-disable-next-line cup/no-undef
       return Math.round(window.performance.now());
     }
     return Date.now();
   }
 }
 
-function deferred() {
-  let resolve = null;
-  let reject = null;
+function deferred<T>(): Deferred<T> {
+  let resolve = () => {};
+  let reject = () => {};
   const promise = new Promise((res, rej) => {
     resolve = res;
     reject = rej;

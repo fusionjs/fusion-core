@@ -16,34 +16,38 @@ test('ssr with accept header', async t => {
     withMiddleware(async (ctx, next) => {
       t.equals(ctx.element, element, 'sets ctx.element');
       t.equals(ctx.type, 'text/html', 'sets ctx.type');
-      t.equals(typeof ctx.body, 'object', 'sets ctx.body');
-      t.equals(typeof ctx.body.title, 'string', 'sets ctx.body.title');
-      t.equals(typeof ctx.body.htmlAttrs, 'object', 'ctx.body.htmlAttrs');
-      t.ok(ctx.body.head instanceof Array, 'ctx.body.head');
-      t.ok(ctx.body.body instanceof Array, 'ctx.body.body');
+      t.equals(typeof ctx.template, 'object', 'sets ctx.template');
+      t.equals(typeof ctx.template.title, 'string', 'sets ctx.template.title');
+      t.equals(
+        typeof ctx.template.htmlAttrs,
+        'object',
+        'ctx.template.htmlAttrs'
+      );
+      t.ok(ctx.template.head instanceof Array, 'ctx.template.head');
+      t.ok(ctx.template.body instanceof Array, 'ctx.template.body');
       await next();
       t.equals(
-        typeof ctx.body,
+        typeof ctx.template,
         'object',
-        'ctx.body keeps structure on upstream'
+        'ctx.templatekeeps structure on upstream'
       );
       t.equals(
-        typeof ctx.body.title,
+        typeof ctx.template.title,
         'string',
-        'ctx.body.title keeps structure on upstream'
+        'ctx.template.title keeps structure on upstream'
       );
       t.equals(
-        typeof ctx.body.htmlAttrs,
+        typeof ctx.template.htmlAttrs,
         'object',
-        'ctx.body.htmlAttrs keeps structure on upstream'
+        'ctx.template.htmlAttrs keeps structure on upstream'
       );
       t.ok(
-        ctx.body.head instanceof Array,
-        'ctx.body.head keeps structure on upstream'
+        ctx.template.head instanceof Array,
+        'ctx.template.head keeps structure on upstream'
       );
       t.ok(
-        ctx.body.body instanceof Array,
-        'ctx.body.body keeps structure on upstream'
+        ctx.template.body instanceof Array,
+        'ctx.template.body keeps structure on upstream'
       );
     })
   );
@@ -86,8 +90,8 @@ test('HTML escaping works', async t => {
   const element = 'hi';
   const render = el => el;
   const template = (ctx, next) => {
-    ctx.body.htmlAttrs = {lang: '">'};
-    ctx.body.title = '</title>';
+    ctx.template.htmlAttrs = {lang: '">'};
+    ctx.template.title = '</title>';
     return next();
   };
   const app = new App(element, render);
@@ -110,8 +114,8 @@ test('head and body must be sanitized', async t => {
   const element = 'hi';
   const render = el => el;
   const template = (ctx, next) => {
-    ctx.body.head.push(html`<meta charset="${'">'}" />`);
-    ctx.body.body.push(html`<div>${'">'}</div>`);
+    ctx.template.head.push(html`<meta charset="${'">'}" />`);
+    ctx.template.body.push(html`<div>${'">'}</div>`);
     return next();
   };
   const app = new App(element, render);
@@ -130,7 +134,7 @@ test('throws if head is not sanitized', async t => {
   const element = 'hi';
   const render = el => el;
   const template = (ctx, next) => {
-    ctx.body.head.push(`<meta charset="${'">'}" />`);
+    ctx.template.head.push(`<meta charset="${'">'}" />`);
     return next();
   };
   const app = new App(element, render);
@@ -148,7 +152,7 @@ test('throws if body is not sanitized', async t => {
   const element = 'hi';
   const render = el => el;
   const template = (ctx, next) => {
-    ctx.body.body.push(`<meta charset="${'">'}" />`);
+    ctx.template.body.push(`<meta charset="${'">'}" />`);
     return next();
   };
   const app = new App(element, render);

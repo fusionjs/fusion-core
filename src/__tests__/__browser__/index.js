@@ -3,18 +3,6 @@ import AppFactory from '../../client-app';
 
 const App = AppFactory();
 
-test('app onerror', t => {
-  const e = new Error('Some error');
-  const app = new App('hello', () => {});
-  try {
-    app.onerror(e);
-  } catch (error) {
-    t.equal(error, e);
-  } finally {
-    t.end();
-  }
-});
-
 test('app callback', async t => {
   let numRenders = 0;
   const element = 'hi';
