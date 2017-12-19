@@ -1,3 +1,4 @@
+/* @flow */
 import tape from 'tape-cup';
 import ClientAppFactory from '../client-app';
 import ServerAppFactory from '../server-app';
@@ -5,10 +6,12 @@ import {withDependencies} from '../with-dependencies';
 import {withMiddleware} from '../with-middleware';
 
 const App = __BROWSER__ ? ClientAppFactory() : ServerAppFactory();
-
-const TokenA = 'TokenA';
-const TokenB = 'TokenB';
-const TokenC = 'TokenC';
+const TokenA: {deps: void, name: string} = ('TokenA': any);
+const TokenB: {deps: {a: typeof TokenA}, name: string} = ('TokenB': any);
+const TokenC: {
+  deps: {a: typeof TokenA, b: typeof TokenB},
+  name: string,
+} = ('TokenC': any);
 
 tape('dependency registration', t => {
   const app = new App('el', el => el);
@@ -26,6 +29,7 @@ tape('dependency registration', t => {
       name: 'PluginB',
     };
   });
+
   const PluginC = withDependencies({a: TokenA, b: TokenB})(deps => {
     return {
       deps,

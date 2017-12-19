@@ -12,7 +12,7 @@ export default class CoreApp {
     this.registered = new Map();
     this.plugins = [];
   }
-  register<P>(Plugin: PluginType<*, P>, type: P) {
+  register<A, B>(Plugin: PluginType<A, B>, type: B) {
     if (type === undefined) {
       // $FlowIgnore
       type = Plugin;

@@ -1,3 +1,4 @@
+/* @flow */
 import test, {run} from './test-helper';
 import ClientAppFactory from '../client-app';
 import ServerAppFactory from '../server-app';
@@ -221,7 +222,8 @@ test('app.middleware with no dependencies', async t => {
   };
   const app = new App(element, renderFn);
   let called = false;
-  app.middleware((ctx, next) => {
+  // TODO: Investigate how we can make this work with flow and support not wrapping in extra function
+  app.middleware(() => (ctx, next) => {
     called = true;
     return next();
   });
