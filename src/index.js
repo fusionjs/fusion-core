@@ -1,6 +1,8 @@
 /* @flow */
 import serverApp from './server-app';
 import clientApp from './client-app';
+// $FlowFixMe
+export default (__BROWSER__ ? clientApp() : serverApp());
 
 export {compose} from './compose.js';
 export {withMiddleware} from './with-middleware';
@@ -15,9 +17,6 @@ export {
   escape,
   unescape,
 } from './sanitization';
-
-// $FlowFixMe
-export default (__BROWSER__ ? clientApp() : serverApp());
 
 // Virtual modules
 export {

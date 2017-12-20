@@ -84,6 +84,34 @@ tape('dependency registration', t => {
   t.end();
 });
 
+tape('dependency registration with no token', t => {
+  const app = new App('el', el => el);
+  const PluginA: FusionPlugin<void, AType> = () => {
+    return {
+      a: 'PluginA',
+    };
+  };
+  const PluginB: FusionPlugin<{a: AType}, BType> = withDependencies({
+    a: TokenA,
+  })(deps => {
+    t.equal(deps.a.a, 'PluginA');
+    return {
+      b: 'PluginB',
+    };
+  });
+
+  app.register(TokenA, PluginA);
+  app.register(TokenB, PluginB);
+  app.register(
+    withDependencies({a: TokenA, b: TokenB})(deps => {
+      t.equal(deps.a.a, 'PluginA');
+      t.equal(deps.b.b, 'PluginB');
+    })
+  );
+  app.resolve();
+  t.end();
+});
+
 tape('dependency registration with middleware', t => {
   const counters = {
     a: 0,

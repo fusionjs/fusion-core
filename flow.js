@@ -43,10 +43,6 @@ declare class FusionApp {
   resolve(): void;
 }
 
-declare type PluginLoader<Dependencies, Service> = (
-  init: FusionPlugin<Dependencies, Service>
-) => FusionPlugin<Dependencies, Service>;
-
 declare function withMiddleware(middleware: Middleware): MiddlewarePlugin;
 
 // eslint-disable-next-line no-redeclare
@@ -54,7 +50,3 @@ declare function withMiddleware<Service>(
   middleware: Middleware,
   service: Service
 ): Service;
-
-declare export function withDependencies<Dependencies, Service>(
-  deps: Dependencies
-): PluginLoader<Dependencies, Service>;

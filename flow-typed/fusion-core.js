@@ -26,6 +26,8 @@ declare module 'fusion-core' {
   declare export type MiddlewarePlugin = {
     __middleware__: Middleware,
   };
+  declare type MemoizeFn<A> = (ctx: Context) => A;
+  declare export function memoize<A>(fn: MemoizeFn<A>): MemoizeFn<A>;
 
   declare class FusionApp {
     // TODO: More specific types
