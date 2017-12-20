@@ -3,6 +3,8 @@ import type {Context as KoaContext} from 'koa';
 declare var __NODE__: Boolean;
 declare var __BROWSER__: Boolean;
 
+type ExtendedKoaContext = KoaContext & {memoized: Map<Object, mixed>};
+
 declare type SSRContext = {
   element: any,
   template: {
@@ -11,16 +13,16 @@ declare type SSRContext = {
     head: Array<string>,
     body: Array<string>,
   },
-} & KoaContext;
-declare type ContextType = SSRContext | KoaContext;
+} & ExtendedKoaContext;
+declare type Context = SSRContext | ExtendedKoaContext;
 declare type FusionPlugin<Dependencies, Service> = (Dependencies) => Service;
-declare type MiddlewareType = (
-  ctx: ContextType,
+declare type Middleware = (
+  ctx: Context,
   next: () => Promise<void>
 ) => Promise<*>;
 
 declare type MiddlewarePlugin = {
-  __middleware__: MiddlewareType,
+  __middleware__: Middleware,
 };
 
 declare class FusionApp {
@@ -35,8 +37,8 @@ declare class FusionApp {
   configure<A: string>(token: A, val: string): void;
   configure<A: number>(token: A, val: number): void;
   configure<A: Object>(token: A, val: $Exact<A>): void;
-  middleware<Deps>(deps: Deps, middleware: (Deps) => MiddlewareType): void;
-  middleware(middleware: MiddlewareType): void;
+  middleware<Deps>(deps: Deps, middleware: (Deps) => Middleware): void;
+  middleware(middleware: Middleware): void;
   callback(): () => Promise<void>;
   resolve(): void;
 }
@@ -45,11 +47,11 @@ declare type PluginLoader<Dependencies, Service> = (
   init: FusionPlugin<Dependencies, Service>
 ) => FusionPlugin<Dependencies, Service>;
 
-declare function withMiddleware(middleware: MiddlewareType): MiddlewarePlugin;
+declare function withMiddleware(middleware: Middleware): MiddlewarePlugin;
 
 // eslint-disable-next-line no-redeclare
 declare function withMiddleware<Service>(
-  middleware: MiddlewareType,
+  middleware: Middleware,
   service: Service
 ): Service;
 

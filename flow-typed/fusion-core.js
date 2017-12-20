@@ -13,18 +13,18 @@ declare module 'fusion-core' {
       body: Array<string>,
     },
   } & KoaContext;
-  declare export type ContextType = SSRContext | KoaContext;
+  declare export type Context = SSRContext | KoaContext;
   declare export type FusionPlugin<
     Dependencies,
     Service
   > = Dependencies => Service;
-  declare export type MiddlewareType = (
-    ctx: ContextType,
+  declare export type Middleware = (
+    ctx: Context,
     next: () => Promise<void>
   ) => Promise<*>;
 
   declare export type MiddlewarePlugin = {
-    __middleware__: MiddlewareType,
+    __middleware__: Middleware,
   };
 
   declare class FusionApp {
@@ -39,8 +39,8 @@ declare module 'fusion-core' {
     configure<A: string>(token: A, val: string): void;
     configure<A: number>(token: A, val: number): void;
     configure<A: Object>(token: A, val: $Exact<A>): void;
-    middleware<Deps>(deps: Deps, middleware: (Deps) => MiddlewareType): void;
-    middleware(middleware: MiddlewareType): void;
+    middleware<Deps>(deps: Deps, middleware: (Deps) => Middleware): void;
+    middleware(middleware: Middleware): void;
     callback(): () => Promise<void>;
     resolve(): void;
   }
@@ -52,11 +52,11 @@ declare module 'fusion-core' {
   ) => FusionPlugin<Dependencies, Service>;
 
   declare export function withMiddleware(
-    middleware: MiddlewareType
+    middleware: Middleware
   ): MiddlewarePlugin;
 
   declare export function withMiddleware<Service>(
-    middleware: MiddlewareType,
+    middleware: Middleware,
     service: Service
   ): Service;
 

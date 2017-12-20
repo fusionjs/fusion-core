@@ -5,6 +5,7 @@ import clientApp from './client-app';
 export {compose} from './compose.js';
 export {withMiddleware} from './with-middleware';
 export {withDependencies} from './with-dependencies';
+export {memoize} from './memoize';
 
 // sanitization API
 export {

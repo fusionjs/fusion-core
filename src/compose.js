@@ -1,6 +1,6 @@
 /* @flow */
 // inline version of koa-compose to get around Rollup/CUP commonjs-related issue
-function composeMiddleware(middleware): MiddlewareType {
+function composeMiddleware(middleware): Middleware {
   if (!Array.isArray(middleware)) {
     throw new TypeError('Middleware stack must be an array!');
   }

@@ -1,7 +1,9 @@
+// @flow
 import test from 'tape-cup';
 import ClientAppFactory from '../client-app';
 import ServerAppFactory from '../server-app';
 import {run} from './test-helper';
+import {TimingToken} from '../timing';
 const App = __BROWSER__ ? ClientAppFactory() : ServerAppFactory();
 
 test('timing plugin', async t => {
@@ -10,6 +12,10 @@ test('timing plugin', async t => {
     return el;
   };
   const app = new App(element, renderFn);
+  app.middleware({timing: TimingToken}, deps => (ctx, next) => {
+    t.equal(deps.timing.from(ctx), deps.timing.from(ctx), 'timing is memoized');
+    return next();
+  });
   const ctx = await run(app);
   t.equal(typeof ctx.timing.start, 'number', 'sets up ctx.timing.start');
   t.ok(

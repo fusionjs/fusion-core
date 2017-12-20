@@ -1,6 +1,7 @@
 /* @flow */
 // TODO: Use real token with type signature
 import {withMiddleware} from './with-middleware';
+import {memoize} from './memoize';
 
 type Deferred<T> = {
   promise: Promise<T>,
@@ -25,24 +26,15 @@ class Timing {
 type TimingPlugin = {
   from(ctx: Object): Timing,
 };
+
 const timing: TimingPlugin = {
-  from(ctx): Timing {
-    return ctx.memoize(() => new Timing());
-  },
+  from: memoize(() => new Timing()),
 };
 
 export const TimingToken: TimingPlugin = (() => {}: any);
 
 function middleware(ctx, next) {
-  const memoCache = new Map();
-  ctx.memoize = fn => {
-    if (memoCache.has(fn)) {
-      return memoCache.get(fn);
-    }
-    const result = fn();
-    memoCache.set(fn, result);
-    return result;
-  };
+  ctx.memoized = new Map();
   const {start, render, end, downstream, upstream} = timing.from(ctx);
   ctx.timing = {
     start,
