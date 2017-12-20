@@ -48,7 +48,8 @@ class FusionApp {
       }
       // the type was never registered, throw error
       if (!registered.has(token)) {
-        throw new Error(`Missing registration for type: ${token.toString()}`);
+        // Attempt to get default value
+        registered.set(token, token());
       }
       // get the registered type and resolve it
       resolving.add(token);

@@ -5,6 +5,12 @@ import ServerAppFactory from '../server-app';
 import {withDependencies} from '../with-dependencies';
 import {withMiddleware} from '../with-middleware';
 
+function createToken(name) {
+  return () => {
+    throw new Error(`Missing dependency: ${name}`);
+  };
+}
+
 const App = __BROWSER__ ? ClientAppFactory() : ServerAppFactory();
 type AType = {
   a: string,
@@ -15,9 +21,9 @@ type BType = {
 type CType = {
   c: string,
 };
-const TokenA: AType = ('TokenA': any);
-const TokenB: BType = ('TokenB': any);
-const TokenC: CType = ('TokenC': any);
+const TokenA: AType = createToken('TokenA');
+const TokenB: BType = createToken('TokenB');
+const TokenC: CType = createToken('TokenC');
 
 tape('dependency registration', t => {
   const app = new App('el', el => el);
@@ -261,8 +267,8 @@ tape('dependency configuration', t => {
 });
 
 tape('dependency configuration with missing deps', t => {
-  const StringToken: string = (() => {}: any);
-  const OtherStringToken: string = (() => {}: any);
+  const StringToken: string = createToken('string-token');
+  const OtherStringToken: string = createToken('other-string-token');
 
   const app = new App('el', el => el);
   app.register(
