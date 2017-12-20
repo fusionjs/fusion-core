@@ -29,25 +29,25 @@ tape('dependency registration', t => {
     d: 0,
   };
 
-  const PluginA: PluginType<void, AType> = () => {
+  const PluginA: FusionPlugin<void, AType> = () => {
     counters.a++;
     t.equal(counters.a, 1, 'only instantiates once');
     return {
       a: 'PluginA',
     };
   };
-  const PluginB: PluginType<{a: AType}, BType> = withDependencies({a: TokenA})(
-    deps => {
-      counters.b++;
-      t.equal(deps.a.a, 'PluginA');
-      t.equal(counters.b, 1, 'only instantiates once');
-      return {
-        b: 'PluginB',
-      };
-    }
-  );
+  const PluginB: FusionPlugin<{a: AType}, BType> = withDependencies({
+    a: TokenA,
+  })(deps => {
+    counters.b++;
+    t.equal(deps.a.a, 'PluginA');
+    t.equal(counters.b, 1, 'only instantiates once');
+    return {
+      b: 'PluginB',
+    };
+  });
 
-  type PluginCType = PluginType<{a: AType, b: BType}, CType>;
+  type PluginCType = FusionPlugin<{a: AType, b: BType}, CType>;
   const PluginC: PluginCType = withDependencies({
     a: TokenA,
     b: TokenB,

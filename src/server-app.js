@@ -77,7 +77,7 @@ export default function(): Class<FusionApp> {
     }
     callback() {
       this.resolve();
-      // $FlowIgnore
+      // $FlowFixMe
       this._app.use(compose(this.plugins));
       return this._app.callback();
     }

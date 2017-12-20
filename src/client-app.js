@@ -42,7 +42,7 @@ export default function(): Class<FusionApp> {
           element: null,
           body: null,
         };
-        // $FlowIgnore
+        // $FlowFixMe
         return middleware(ctx, () => Promise.resolve()).then(() => ctx);
       };
     }

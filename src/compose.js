@@ -22,7 +22,7 @@ function composeMiddleware(middleware): MiddlewareType {
       if (i === middleware.length) fn = next;
       if (!fn) return Promise.resolve();
       try {
-        // $FlowIgnore
+        // $FlowFixMe
         return fn(context, function next() {
           return dispatch(i + 1);
         });
@@ -36,7 +36,7 @@ function composeMiddleware(middleware): MiddlewareType {
 export function compose(plugins: Array<mixed>) {
   const middleware = plugins
     .map(p => {
-      // $FlowIgnore
+      // $FlowFixMe
       if (Object(p) === p && typeof p.__middleware__ === 'function') {
         return p.__middleware__;
       }

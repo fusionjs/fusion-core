@@ -156,6 +156,7 @@ test('app.register - middleware execution respects dependency order', async t =>
   app.register(
     TokenA,
     withDependencies({TokenB})(deps => {
+      t.equal(deps.TokenB().b, 'something-b');
       return withMiddleware(
         async function second(ctx, next) {
           t.equal(order, 2, 'calls downstream in correct order');

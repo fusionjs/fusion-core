@@ -1,9 +1,10 @@
 /* @flow */
-
-export function withDependencies<Dependencies, Plugin>(
+export function withDependencies<Dependencies, Service>(
   deps: Dependencies
-): PluginLoader<Dependencies, Plugin> {
-  return function withService(serviceLoader: PluginType<Dependencies, Plugin>) {
+): PluginLoader<Dependencies, Service> {
+  return function withService(
+    serviceLoader: FusionPlugin<Dependencies, Service>
+  ) {
     serviceLoader.__deps__ = deps;
     return serviceLoader;
   };

@@ -15,7 +15,7 @@ export {
   unescape,
 } from './sanitization';
 
-// $FlowIgnore
+// $FlowFixMe
 export default (__BROWSER__ ? clientApp() : serverApp());
 
 // Virtual modules
