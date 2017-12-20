@@ -32,6 +32,9 @@ declare class FusionApp {
   // register(middleware: MiddlewarePlugin): void;
   register<A, B>(Plugin: FusionPlugin<A, B>): void;
   register<A, B>(token: B, Plugin: FusionPlugin<A, B>): void;
+  configure<A: string>(token: A, val: string): void;
+  configure<A: number>(token: A, val: number): void;
+  configure<A: Object>(token: A, val: $Exact<A>): void;
   middleware<Deps>(deps: Deps, middleware: (Deps) => MiddlewareType): void;
   middleware(middleware: MiddlewareType): void;
   callback(): () => Promise<void>;

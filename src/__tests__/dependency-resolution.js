@@ -200,3 +200,53 @@ tape('dependency registration with circular dependency', t => {
   t.throws(() => app.resolve(), 'Catches circular dependencies');
   t.end();
 });
+
+tape('dependency configuration', t => {
+  const StringToken: string = (() => {}: any);
+  const OtherStringToken: string = (() => {}: any);
+  const NumberToken: number = (() => {}: any);
+  const ObjectToken: {|
+    a: string,
+  |} = (() => {}: any);
+
+  const app = new App('el', el => el);
+  app.register(
+    withDependencies({
+      a: StringToken,
+      b: OtherStringToken,
+      c: NumberToken,
+      d: ObjectToken,
+    })(deps => {
+      t.equal(deps.a, 'string-a');
+      t.equal(deps.b, 'string-b');
+      t.equal(deps.c, 5);
+      t.deepLooseEqual(deps.d, {a: 'some-d'});
+      t.end();
+      return {};
+    })
+  );
+  app.configure(StringToken, 'string-a');
+  app.configure(OtherStringToken, 'string-b');
+  app.configure(NumberToken, 5);
+  app.configure(ObjectToken, {a: 'some-d'});
+  app.resolve();
+});
+
+tape('dependency configuration with missing deps', t => {
+  const StringToken: string = (() => {}: any);
+  const OtherStringToken: string = (() => {}: any);
+
+  const app = new App('el', el => el);
+  app.register(
+    withDependencies({
+      a: StringToken,
+      b: OtherStringToken,
+    })(() => {
+      t.fail('should not get here');
+      return {};
+    })
+  );
+  app.configure(StringToken, 'string-a');
+  t.throws(() => app.resolve(), 'throws if dependencies are not configured');
+  t.end();
+});

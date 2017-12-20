@@ -6,12 +6,15 @@ class FusionApp {
     this.registered = new Map();
     this.plugins = [];
   }
-  register(type, Plugin) {
+  register(token, Plugin) {
     if (Plugin === undefined) {
-      Plugin = type;
+      Plugin = token;
     }
-    this.plugins.push(type);
-    this.registered.set(type, Plugin);
+    this.plugins.push(token);
+    this.registered.set(token, Plugin);
+  }
+  configure(token, value) {
+    this.registered.set(token, value);
   }
   middleware(deps, middleware) {
     if (middleware === undefined) {
