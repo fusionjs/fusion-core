@@ -50,3 +50,24 @@ The API plugin is declaring that it needs a logger that matches the api document
 ## Middleware
 
 Plugins can hook into the fusion lifecycle by adding middlewares using the `withMiddleware` helper from `fusion-core`.
+
+```js
+// fusion-plugin-some-api
+import {withDependencies, withMiddleware} from 'fusion-core';
+import {LoggerToken} from 'fusion-tokens';
+export const MyApiSecretToken = '';
+
+const APIPlugin = withDependencies({
+  logger: LoggerToken,
+  secret: MyApiSecretToken,
+})(deps => {
+ const {logger} = deps;
+  // Note: implementation of APIClient left out for brevity
+  const client = new APIClient(logger);
+  return withMiddleware(async (ctx, next) => {
+    // do middleware things...
+    await next(); 
+    // do middleware things...
+  }, client);
+});
+```
