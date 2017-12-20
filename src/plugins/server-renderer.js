@@ -1,5 +1,5 @@
-import {withDependencies} from './with-dependencies';
-import {withMiddleware} from './with-middleware';
+import {withDependencies} from '../with-dependencies';
+import {withMiddleware} from '../with-middleware';
 import {TimingToken, now} from './timing';
 
 export default function getRendererPlugin(render) {

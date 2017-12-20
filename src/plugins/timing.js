@@ -1,7 +1,7 @@
 /* @flow */
 // TODO: Use real token with type signature
-import {withMiddleware} from './with-middleware';
-import {memoize} from './memoize';
+import {withMiddleware} from '../with-middleware';
+import {memoize} from '../memoize';
 
 type Deferred<T> = {
   promise: Promise<T>,

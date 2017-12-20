@@ -1,36 +1,19 @@
 /* @flow */
 /* eslint-env browser */
 import {compose} from './compose.js';
-import timing, {TimingToken} from './timing';
+import timing, {TimingToken} from './plugins/timing';
 import BaseApp from './base-app';
-import {withMiddleware} from './with-middleware';
+import createClientHydrate from './plugins/client-hydrate';
+import createClientRenderer from './plugins/client-renderer';
 
 export default function(): Class<FusionApp> {
   return class ClientApp extends BaseApp {
     // TODO: More specific types
     constructor(element: any, render: (el: any) => Promise<any>) {
       super();
-      function ssr(ctx, next) {
-        ctx.prefix = window.__ROUTE_PREFIX__ || ''; // serialized by ./server
-        ctx.element = element;
-        ctx.preloadChunks = [];
-        return next();
-      }
-      function renderer(ctx, next) {
-        const rendered = render(ctx.element);
-        if (rendered instanceof Promise) {
-          return rendered.then(r => {
-            ctx.rendered = r;
-            return next();
-          });
-        } else {
-          ctx.rendered = rendered;
-          return next();
-        }
-      }
       this.register(TimingToken, timing);
-      this.register(withMiddleware(ssr));
-      this.renderer = withMiddleware(renderer);
+      this.middleware(createClientHydrate(element));
+      this.renderer = createClientRenderer(render);
     }
     callback() {
       this.resolve();

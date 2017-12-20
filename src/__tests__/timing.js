@@ -3,7 +3,7 @@ import test from 'tape-cup';
 import ClientAppFactory from '../client-app';
 import ServerAppFactory from '../server-app';
 import {run} from './test-helper';
-import {TimingToken} from '../timing';
+import {TimingToken} from '../plugins/timing';
 const App = __BROWSER__ ? ClientAppFactory() : ServerAppFactory();
 
 test('timing plugin', async t => {

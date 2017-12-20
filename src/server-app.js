@@ -1,12 +1,11 @@
 /* @flow */
 /* eslint-env node */
 import {compose} from './compose.js';
-import Timing, {TimingToken} from './timing';
+import Timing, {TimingToken} from './plugins/timing';
 import BaseApp from './base-app';
-import {withMiddleware} from './with-middleware';
-import getRendererPlugin from './renderer';
+import getRendererPlugin from './plugins/server-renderer';
 
-import createSSRPlugin from './ssr';
+import createSSRPlugin from './plugins/ssr';
 
 export default function(): Class<FusionApp> {
   const Koa = require('koa');
@@ -21,7 +20,7 @@ export default function(): Class<FusionApp> {
       super();
       this._app = new Koa();
       this.register(TimingToken, Timing);
-      this.register(withMiddleware(createSSRPlugin(element)));
+      this.middleware(createSSRPlugin(element));
       this.renderer = getRendererPlugin(render);
     }
     callback() {

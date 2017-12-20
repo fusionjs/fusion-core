@@ -1,5 +1,5 @@
 import path from 'path';
-import {escape, consumeSanitizedHTML} from './sanitization';
+import {escape, consumeSanitizedHTML} from '../sanitization';
 
 function isSSR(ctx) {
   // If the request has one of these extensions, we assume it's not something that requires server-side rendering of virtual dom
