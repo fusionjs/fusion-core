@@ -6,21 +6,21 @@ class FusionApp {
     this.registered = new Map();
     this.plugins = [];
   }
-  register(token, Plugin) {
-    if (Plugin === undefined) {
-      Plugin = token;
+  register(token, value) {
+    if (value === undefined) {
+      value = token;
     }
     this.plugins.push(token);
+    return this.configure(token, value);
+  }
+  configure(token, value) {
     const aliases = new Map();
-    this.registered.set(token, {Plugin, aliases});
+    this.registered.set(token, {value, aliases});
     function alias(sourceToken, destToken) {
       aliases.set(sourceToken, destToken);
       return {alias};
     }
     return {alias};
-  }
-  configure(token, value) {
-    this.registered.set(token, {Plugin: value, aliases: new Map()});
   }
   middleware(deps, middleware) {
     if (middleware === undefined) {
@@ -58,16 +58,17 @@ class FusionApp {
       // the type was never registered, throw error
       if (!registered.has(token)) {
         // Attempt to get default value
-        registered.set(token, {Plugin: token(), aliases: new Map()});
+        // NOTE: As of now, default values can only be configuration, not full blown plugins
+        this.configure(token, token());
       }
       // get the registered type and resolve it
       resolving.add(token);
-      let {Plugin, aliases} = registered.get(token);
+      let {value, aliases} = registered.get(token);
       if (
-        typeof Plugin === 'function' &&
-        typeof Plugin.__middleware__ !== 'function'
+        typeof value === 'function' &&
+        typeof value.__middleware__ !== 'function'
       ) {
-        const registeredDeps = Plugin.__deps__ || {};
+        const registeredDeps = value.__deps__ || {};
         const resolvedDeps = {};
         for (const key in registeredDeps) {
           const registeredToken = registeredDeps[key];
@@ -75,12 +76,12 @@ class FusionApp {
         }
         // TODO: should we always call the function or only when the plugin
         // is used with `withDependencies`?
-        Plugin = Plugin(resolvedDeps);
+        value = value(resolvedDeps);
       }
-      resolved.set(token, Plugin);
+      resolved.set(token, value);
       resolving.delete(token);
-      resolvedPlugins.push(Plugin);
-      return Plugin;
+      resolvedPlugins.push(value);
+      return value;
     }
     for (let i = 0; i < this.plugins.length; i++) {
       resolveToken(this.plugins[i]);

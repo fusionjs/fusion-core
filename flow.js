@@ -35,12 +35,11 @@ declare class FusionApp {
   registered: Map<any, any>;
   plugins: Array<any>;
   renderer: any;
-  // register(middleware: MiddlewarePlugin): void;
   register<A, B>(Plugin: FusionPlugin<A, B>): aliaser<*>;
   register<A, B>(token: B, Plugin: FusionPlugin<A, B>): aliaser<*>;
-  configure<A: string>(token: A, val: string): void;
-  configure<A: number>(token: A, val: number): void;
-  configure<A: Object>(token: A, val: $Exact<A>): void;
+  configure<A: string>(token: A, val: string): aliaser<*>;
+  configure<A: number>(token: A, val: number): aliaser<*>;
+  configure<A: Object>(token: A, val: $Exact<A>): aliaser<*>;
   middleware<Deps>(deps: Deps, middleware: (Deps) => Middleware): void;
   middleware(middleware: Middleware): void;
   callback(): () => Promise<void>;
