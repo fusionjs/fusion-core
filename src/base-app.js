@@ -11,9 +11,12 @@ class FusionApp {
       value = token;
     }
     this.plugins.push(token);
-    return this.configure(token, value);
+    return this._set(token, value);
   }
   configure(token, value) {
+    this._set(token, () => value);
+  }
+  _set(token, value) {
     const aliases = new Map();
     this.registered.set(token, {value, aliases});
     function alias(sourceToken, destToken) {
@@ -41,7 +44,7 @@ class FusionApp {
     const registered = this.registered;
     const resolvedPlugins = [];
     // TODO: maybe could turn this into a map
-    function resolveToken(token, tokenAliases) {
+    const resolveToken = (token, tokenAliases) => {
       // if we have already resolved the type, return it
       if (tokenAliases && tokenAliases.has(token)) {
         token = tokenAliases.get(token);
@@ -64,10 +67,7 @@ class FusionApp {
       // get the registered type and resolve it
       resolving.add(token);
       let {value, aliases} = registered.get(token);
-      if (
-        typeof value === 'function' &&
-        typeof value.__middleware__ !== 'function'
-      ) {
+      if (typeof value.__middleware__ !== 'function') {
         const registeredDeps = value.__deps__ || {};
         const resolvedDeps = {};
         for (const key in registeredDeps) {
@@ -82,7 +82,7 @@ class FusionApp {
       resolving.delete(token);
       resolvedPlugins.push(value);
       return value;
-    }
+    };
     for (let i = 0; i < this.plugins.length; i++) {
       resolveToken(this.plugins[i]);
     }
