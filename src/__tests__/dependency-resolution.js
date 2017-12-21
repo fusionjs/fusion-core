@@ -5,7 +5,7 @@ import ServerAppFactory from '../server-app';
 import {withDependencies} from '../with-dependencies';
 import {withMiddleware} from '../with-middleware';
 
-function createToken(name) {
+function createToken(name): any {
   return () => {
     throw new Error(`Missing dependency: ${name}`);
   };
@@ -24,6 +24,7 @@ type CType = {
 const TokenA: AType = createToken('TokenA');
 const TokenB: BType = createToken('TokenB');
 const TokenC: CType = createToken('TokenC');
+const TokenD: BType = createToken('TokenD');
 
 tape('dependency registration', t => {
   const app = new App('el', el => el);
@@ -78,6 +79,75 @@ tape('dependency registration', t => {
       t.equal(deps.c.c, 'PluginC');
     })
   );
+  t.equal(counters.a, 0, 'does not instantiate until resolve is called');
+  t.equal(counters.b, 0, 'does not instantiate until resolve is called');
+  t.equal(counters.c, 0, 'does not instantiate until resolve is called');
+  t.equal(counters.d, 0, 'does not instantiate until resolve is called');
+  app.resolve();
+  t.equal(counters.a, 1, 'only instantiates once');
+  t.equal(counters.b, 1, 'only instantiates once');
+  t.equal(counters.c, 1, 'only instantiates once');
+  t.equal(counters.d, 1, 'only instantiates once');
+  t.end();
+});
+
+tape('dependency registration with aliases', t => {
+  const app = new App('el', el => el);
+  t.ok(app, 'creates an app');
+  const counters = {
+    a: 0,
+    b: 0,
+    c: 0,
+    d: 0,
+  };
+
+  const PluginA: FusionPlugin<void, AType> = () => {
+    counters.a++;
+    t.equal(counters.a, 1, 'only instantiates once');
+    return {
+      a: 'PluginA',
+    };
+  };
+  const PluginB: FusionPlugin<{a: AType}, BType> = withDependencies({
+    a: TokenA,
+  })(deps => {
+    counters.b++;
+    t.equal(deps.a.a, 'PluginA');
+    t.equal(counters.b, 1, 'only instantiates once');
+    return {
+      b: 'PluginB',
+    };
+  });
+
+  type PluginCType = FusionPlugin<{a: AType, b: BType}, CType>;
+  const PluginC: PluginCType = withDependencies({
+    a: TokenA,
+    b: TokenB,
+  })(deps => {
+    counters.c++;
+    t.equal(deps.a.a, 'PluginA');
+    t.equal(deps.b.b, 'PluginD', 'uses correct alias');
+    t.equal(counters.c, 1, 'only instantiates once');
+    return {
+      c: 'PluginC',
+    };
+  });
+
+  const PluginD: FusionPlugin<{a: AType}, BType> = withDependencies({
+    a: TokenA,
+  })(deps => {
+    counters.d++;
+    t.equal(deps.a.a, 'PluginA');
+    t.equal(counters.d, 1, 'only instantiates once');
+    return {
+      b: 'PluginD',
+    };
+  });
+
+  app.register(TokenA, PluginA);
+  app.register(TokenB, PluginB);
+  app.register(TokenC, PluginC).alias(TokenB, TokenD);
+  app.register(TokenD, PluginD);
   t.equal(counters.a, 0, 'does not instantiate until resolve is called');
   t.equal(counters.b, 0, 'does not instantiate until resolve is called');
   t.equal(counters.c, 0, 'does not instantiate until resolve is called');

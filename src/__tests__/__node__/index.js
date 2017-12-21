@@ -29,7 +29,7 @@ test('ssr with accept header', async t => {
       t.equals(
         typeof ctx.template,
         'object',
-        'ctx.templatekeeps structure on upstream'
+        'ctx.template keeps structure on upstream'
       );
       t.equals(
         typeof ctx.template.title,

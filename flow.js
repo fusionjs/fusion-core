@@ -5,6 +5,10 @@ declare var __BROWSER__: Boolean;
 
 type ExtendedKoaContext = KoaContext & {memoized: Map<Object, mixed>};
 
+type aliaser<Token> = {
+  alias: (sourceToken: Token, destToken: Token) => aliaser<*>,
+};
+
 declare type SSRContext = {
   element: any,
   template: {
@@ -32,8 +36,8 @@ declare class FusionApp {
   plugins: Array<any>;
   renderer: any;
   // register(middleware: MiddlewarePlugin): void;
-  register<A, B>(Plugin: FusionPlugin<A, B>): void;
-  register<A, B>(token: B, Plugin: FusionPlugin<A, B>): void;
+  register<A, B>(Plugin: FusionPlugin<A, B>): aliaser<*>;
+  register<A, B>(token: B, Plugin: FusionPlugin<A, B>): aliaser<*>;
   configure<A: string>(token: A, val: string): void;
   configure<A: number>(token: A, val: number): void;
   configure<A: Object>(token: A, val: $Exact<A>): void;

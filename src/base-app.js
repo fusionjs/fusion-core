@@ -11,10 +11,16 @@ class FusionApp {
       Plugin = token;
     }
     this.plugins.push(token);
-    this.registered.set(token, Plugin);
+    const aliases = new Map();
+    this.registered.set(token, {Plugin, aliases});
+    function alias(sourceToken, destToken) {
+      aliases.set(sourceToken, destToken);
+      return {alias};
+    }
+    return {alias};
   }
   configure(token, value) {
-    this.registered.set(token, value);
+    this.registered.set(token, {Plugin: value, aliases: new Map()});
   }
   middleware(deps, middleware) {
     if (middleware === undefined) {
@@ -35,8 +41,11 @@ class FusionApp {
     const registered = this.registered;
     const resolvedPlugins = [];
     // TODO: maybe could turn this into a map
-    this.plugins.forEach(function resolveToken(token) {
+    function resolveToken(token, tokenAliases) {
       // if we have already resolved the type, return it
+      if (tokenAliases && tokenAliases.has(token)) {
+        token = tokenAliases.get(token);
+      }
       if (resolved.has(token)) {
         return resolved.get(token);
       }
@@ -49,27 +58,34 @@ class FusionApp {
       // the type was never registered, throw error
       if (!registered.has(token)) {
         // Attempt to get default value
-        registered.set(token, token());
+        registered.set(token, {Plugin: token(), aliases: new Map()});
       }
       // get the registered type and resolve it
       resolving.add(token);
-      let p = registered.get(token);
-      if (typeof p === 'function' && typeof p.__middleware__ !== 'function') {
-        const registeredDeps = p.__deps__ || {};
+      let {Plugin, aliases} = registered.get(token);
+      if (
+        typeof Plugin === 'function' &&
+        typeof Plugin.__middleware__ !== 'function'
+      ) {
+        const registeredDeps = Plugin.__deps__ || {};
         const resolvedDeps = {};
         for (const key in registeredDeps) {
           const registeredToken = registeredDeps[key];
-          resolvedDeps[key] = resolveToken(registeredToken);
+          resolvedDeps[key] = resolveToken(registeredToken, aliases);
         }
         // TODO: should we always call the function or only when the plugin
         // is used with `withDependencies`?
-        p = p(resolvedDeps);
+        Plugin = Plugin(resolvedDeps);
       }
-      resolved.set(token, p);
+      resolved.set(token, Plugin);
       resolving.delete(token);
-      resolvedPlugins.push(p);
-      return p;
-    });
+      resolvedPlugins.push(Plugin);
+      return Plugin;
+    }
+    for (let i = 0; i < this.plugins.length; i++) {
+      resolveToken(this.plugins[i]);
+    }
+
     // TODO: potentially unnecessary
     this.plugins = resolvedPlugins;
   }

@@ -6,7 +6,10 @@ function composeMiddleware(middleware): Middleware {
   }
   for (const fn of middleware) {
     if (typeof fn !== 'function') {
-      throw new TypeError('Middleware must be composed of functions!');
+      console.log(fn);
+      throw new TypeError(
+        `Expected middleware function, received: ${typeof fn}`
+      );
     }
   }
 
