@@ -131,7 +131,7 @@ function getCoreGlobals(ctx) {
 function getUrls({chunkUrlMap, webpackPublicPath}, chunks) {
   return chunks.map(id => {
     let url = chunkUrlMap.get(id).get('es5');
-    if (webpackPublicPath[webpackPublicPath.length - 1] === '/') {
+    if (webpackPublicPath.endsWith('/')) {
       url = webpackPublicPath + url;
     } else {
       url = webpackPublicPath + '/' + url;
