@@ -36,16 +36,19 @@ This package also exposes utilities for developing plugins.
 ```js
 // main.js
 import React from 'react';
-import {render} from 'react-dom';
+import ReactDOM from 'react-dom';
 import {renderToString} from 'react-dom/server';
-import App from 'fusion-core';
+import App, {ElementToken, RenderToken} from 'fusion-core';
 
 const Hello = () => <div>Hello</div>;
 
-const render = el => __NODE__ ? renderToString(el) : render(el, document.getElementById('root'));
+const render = el => __NODE__ ? renderToString(el) : ReactDOM.render(el, document.getElementById('root'));
 
 export default function() {
-  return new App(<Hello />, render);
+  const app = new App();
+  app.configure(ElementToken, <Hello />);
+  app.configure(RenderToken, render);
+  return app;
 }
 ```
 
@@ -53,14 +56,13 @@ export default function() {
 
 ### API
 
+##### app
+
 ```js
 import App from 'fusion-core';
 
-const app = new App(element, render);
+const app = new App();
 ```
-
-- `element: T` - Required. The root element of the application. Typically this should be a React/Preact element
-- `render: T => string|undefined` - A function that can render `element`
 
 Creates an application that can be registered into the Fusion server.
 
@@ -70,7 +72,8 @@ An application can receive any number of plugins, which can augment the behavior
 
 Typically a plugin works the same way as a Koa middleware.
 
-#### Instance members
+
+#### App Instance members
 
 ##### app.register
 
@@ -84,17 +87,111 @@ app.register([Token,] Plugin);
 Call this method to register a plugin into a FusionJS application. An optional token can be passed as the first
 argument to allow integrating the plugin into the FusionJS dependency injection system. 
 
----
+##### app.middleware
 
-## Plugin
+```js
+app.middleware(Dependencies, (deps) => Middleware);
+app.middleware(Middleware);
+```
 
-There are two types of plugins: middleware plugins and service plugins.
+This method is a useful shortcut for registering middleware plugins. 
 
-When writing a plugin you should always export a function that returns either a middleware or a instance of the `Plugin` class.
+##### app.configure
 
-### Middleware plugins
+```js
+app.configure(Token, Value);
+```
 
-A middleware plugin is a [Koa](http://koajs.com/) middleware, a function that takes two argument: a `ctx` object that has some FusionJS-specific properties, and a `next` callback function.
+This method is a useful shortcut for registering configuration with the fusion-app. Since plugins are always
+functions that return a value, if you want to register primitives in the DI system you would need to register
+a function that returns the primitive. The `app.configure` allows you to register primitives without needing to
+wrap them in a function. For example, the following are equivalent:
+
+```js
+app.configure(SomeToken, 'SomeValue');
+app.register(SomeToken, () => 'SomeValue');
+```
+
+##### ElementToken
+
+```js
+import SomeComponent from './components/some-component';
+import App, {ElementToken} from 'fusion-core';
+const app = new App();
+app.configure(ElementToken, <SomeComponent />);
+```
+
+The element token is used to configure the root element with the fusion app. This is typically a react/preact element.
+
+##### RenderToken
+
+```js
+import ReactDOM from 'react-dom';
+import {renderToString} from 'react-dom/server';
+const render = el => __NODE__ ? renderToString(el) : ReactDOM.render(el, document.getElementById('root'));
+import App, {RenderToken} from 'fusion-core';
+const app = new App();
+app.configure(RenderToken, render);
+```
+
+The render token is used to configure the render function with the fusion app. This is a function that knows how to
+render your application on the server/browser, and allows `fusion-core` to remain agnostic of the virtualdom library.
+
+## Plugins
+
+Often we want to encapsulate some functionality into a single coherent package that exposes a programmatic API that can be consumed by others.
+In FusionJS, this is done via a Plugin. A plugin is simply a function that returns a value. For example, the following is a valid plugin.
+
+```js
+// fusion-plugin-console-logger
+const ConsoleLoggerPlugin = () => {
+  return console;
+}
+```
+
+In order to use plugins, you need to register them with your FusionJS application. You do this by calling
+`app.register` with the plugin and a token for that plugin. The token is simply a value used to keep track of
+what plugins are registered, and to allow plugins to depend on one another. Tokens also work nicely with `flow`.
+You can think of Tokens like interfaces. We keep a list of standard tokens in the `fusion-tokens` repository. 
+Lets finish up this logger example:
+
+```js
+// src/main.js
+import ConsoleLoggerPlugin from 'fusion-plugin-console-logger';
+import {LoggerToken} from 'fusion-tokens';
+import App from 'fusion-core';
+
+export default function main() {
+  const app = new App(...);
+  app.register(LoggerToken, ConsoleLoggerPlugin);
+  return app;
+}
+```
+
+To use the logger we registered, we need to introduce the `withDependencies` helper from `fusion-core`. This function allows us to declare the dependencies we need. Lets write a new plugin that depends on a logger.
+
+```js
+// fusion-plugin-some-api
+import {withDependencies} from 'fusion-core';
+import {LoggerToken} from 'fusion-tokens';
+export const MyApiSecretToken = '';
+
+const APIPlugin = withDependencies({
+  logger: LoggerToken,
+  secret: MyApiSecretToken,
+})(deps => {
+ const {logger} = deps;
+  // Note: implementation of APIClient left out for brevity
+  return new APIClient(logger);
+});
+```
+
+The API plugin is declaring that it needs a logger that matches the api documented by the `LoggerToken`. The user then provides an implementation of that logger by registering the `fusion-plugin-console-logger` plugin with the `LoggerToken`.
+
+## Middleware
+
+A middleware function is essentially a [Koa](http://koajs.com/) middleware, a function that takes two argument: a `ctx` object that has some FusionJS-specific properties, and a `next` callback function. 
+However, it has some additional properties on `ctx` and can run both on the `server` and the `browser`.
 
 ```js
 const middleware = (ctx, next) => {
@@ -107,7 +204,7 @@ In FusionJS, the `next()` call represents the time when virtual dom rendering ha
 In a few more advanced cases, however, you might want to do things _after_ virtual dom rendering. In that case, you can call `await next()` instead:
 
 ```js
-export default () => __NODE__ && async (ctx, next) => {
+const middleware = () => async (ctx, next) => {
   // this happens before virtual dom rendering
   const start = new Date();
 
@@ -118,47 +215,28 @@ export default () => __NODE__ && async (ctx, next) => {
 }
 ```
 
-### Services
-
-Often we want to encapsulate some functionality into a single coherent package that exposes a programmatic API that can be consumed by others.
-
-In FusionJS, any class can be a service.
+Plugins can add middlewares using the `withMiddleware` helper from `fusion-core`.
+Lets try adding a middleware to our logger plugin.
 
 ```js
-import {Plugin} from 'fusion-core';
+// fusion-plugin-some-api
+import {withDependencies, withMiddleware} from 'fusion-core';
+import {LoggerToken} from 'fusion-tokens';
+export const MyApiSecretToken = '';
 
-export default () => {
-  return new Plugin({
-    Service: class SomeService {
-      /* ... */
-    },
-  });
-}
-```
-
-#### Singleton services
-
-In some cases, it's desirable to enforce that only a single instance of a service exists in an application. To do this, simply use the `SingletonPlugin` instead of the `Plugin` class:
-
-```js
-import {SingletonPlugin} from 'fusion-core';
-
-export default () => {
-  return new SingletonPlugin({
-    Service: class {
-      constructor() {
-        console.log('only gets instantiated once');
-      }
-    },
-  })
-}
-```
-
-The singleton service instance can be acquired using the `.of` method. Calling `.of(ctx)` from a middleware returns the same instance for all requests.
-
-```js
-const Thing = app.plugin(MyThing);
-const instance = Thing.of();
+const APIPlugin = withDependencies({
+  logger: LoggerToken,
+  secret: MyApiSecretToken,
+})(deps => {
+ const {logger} = deps;
+  // Note: implementation of APIClient left out for brevity
+  const client = new APIClient(logger);
+  return withMiddleware(async (ctx, next) => {
+    // do middleware things...
+    await next(); 
+    // do middleware things...
+  }, client);
+});
 ```
 
 ---
@@ -170,12 +248,13 @@ const instance = Thing.of();
 A plugin can be used to implement a RESTful HTTP endpoint. To achieve this, simply run code conditionally based on the url of the request
 
 ```js
-export default () => async (ctx, next) => {
+
+app.middleware(async (ctx, next) => {
   if (ctx.method === 'GET' && ctx.path === '/api/v1/users') {
     ctx.body = await getUsers();
   }
   return next();
-}
+});
 ```
 
 #### Serialization and hydration
@@ -188,27 +267,21 @@ The example below shows a plugin that grabs the project version from package.jso
 // plugins/version-plugin.js
 import util from 'util';
 import fs from 'fs';
-import {html} from 'fusion-core'; // html sanitization
+import {html, withMiddleware} from 'fusion-core'; // html sanitization
+const read = __NODE__ && util.promisify(fs.readFile);
 
-export default () => {
+export default withMiddleware(async (ctx, next) => {
   if (__NODE__) {
-    const read = util.promisify(fs.readFile);
-
-    return async (ctx, next) => {
-      const data = read('package.json');
-      const {version} = JSON.parse(data);
-      ctx.template.head.push(html`<meta id="app-version" content="${version}">`);
-      return next();
-    }
+    const data = read('package.json');
+    const {version} = JSON.parse(data);
+    ctx.template.head.push(html`<meta id="app-version" content="${version}">`);
+    return next();
+  } else {
+    const version = document.getElementById('app-version').content;
+    console.log(`Version: ${version}`);
+    return next();
   }
-  else {
-    return async (ctx, next) => {
-      const version = document.getElementById('app-version').content;
-      console.log(`Version: ${version}`);
-      return next();
-    }
-  }
-}
+});
 ```
 
 We can then consume the plugin like this:
@@ -225,7 +298,7 @@ const render = el => __NODE__ ? renderToString(el) : render(el, document.getElem
 
 export default function() {
   const app = new App(root, render);
-  app.plugin(VersionPlugin);
+  app.register(VersionPlugin);
   return app;
 }
 ```
@@ -233,39 +306,6 @@ export default function() {
 ---
 
 ### API
-
-#### Middleware plugins
-
-```js
-export default () => (ctx, next) => {
-  return next()
-}
-```
-
-- `ctx: {element: T}` - An object with a property called `element`. Plugins can compose element in order to add providers into a React tree, for example:\
-  `ctx.element = <SomeProvider>{ctx.element}</SomeProvider>`
-
-  The `ctx` object also exposes properties that server-specific properties in the server. See [context](#context)
-- `next: () => Promise` - Every plugin must call `await next()` (or `next().then(...)`) exactly once.
-  Code before this call happens before virtual dom rendering, and code after it runs after. In the server, flushing the response to the client happens after
-
-#### Service plugins
-
-```js
-import {Plugin} from 'fusion-core';
-
-export default () => {
-  const plugin = new Plugin({Service, middleware});
-  return plugin;
-}
-```
-
-- `Service: class` - Optional. A class that provides a programmatic API
-- `middleware: (ctx: Object, next: () => Promise) => Promise` - Optional. A Koa middleware
-- `plugin: {Service, middleware, of}`
-  - `Service: class`
-  - `middleware: (ctx: Object, next: () => Promise) => Promise`
-  - `of: (ctx: Object|null|undefined) => Service` - returns an instance of the service, memoized using `ctx` as the memoization key.
 
 #### Context
 
@@ -356,7 +396,7 @@ Fusion automatically sanitizes `htmlAttrs` and `title`. When pushing HTML string
 ```js
 import {html} from 'fusion-core';
 
-export default () => (ctx, next) => {
+const middleware = (ctx, next) => {
   if (ctx.element) {
     const userData = await getUserData();
     // userData can't be trusted, and is automatically escaped
@@ -402,5 +442,3 @@ import {unescape} from 'fusion-core';
 
 const data = JSON.parse(unescape(document.getElementById('__MY_DATA__').innerHTML));
 ```
-
-
