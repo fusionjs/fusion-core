@@ -81,7 +81,7 @@ app.register([Token,] Plugin);
 - `Token: Object` - Optional. A token to register the plugin under. 
 - `Plugin: (dependencies: Object) => any` - Required. The function that is exported by a plugin package
 
-Call this method to register a plugin into a FusionJS application. An optional token can be passed as a second
+Call this method to register a plugin into a FusionJS application. An optional token can be passed as the first
 argument to allow integrating the plugin into the FusionJS dependency injection system. 
 
 ---

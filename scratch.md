@@ -22,7 +22,7 @@ import App from 'fusion-core';
 
 export default function main() {
   const app = new App(...);
-  app.register(ConsoleLoggerPlugin, LoggerToken);
+  app.register(LoggerToken, ConsoleLoggerPlugin);
   return app;
 }
 ```
