@@ -231,11 +231,11 @@ const APIPlugin = withDependencies({
  const {logger} = deps;
   // Note: implementation of APIClient left out for brevity
   const client = new APIClient(logger);
-  return withMiddleware(async (ctx, next) => {
+  return withMiddleware(client, async (ctx, next) => {
     // do middleware things...
     await next(); 
     // do middleware things...
-  }, client);
+  });
 });
 ```
 
