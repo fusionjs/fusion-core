@@ -25,3 +25,5 @@ export {
   syncChunkIds,
   syncChunkPaths,
 } from './virtual/index.js';
+
+export {RenderToken, ElementToken} from './tokens';

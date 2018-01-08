@@ -6,19 +6,24 @@ import BaseApp from './base-app';
 import createClientHydrate from './plugins/client-hydrate';
 import createClientRenderer from './plugins/client-renderer';
 
+import {RenderToken, ElementToken} from './tokens';
+
 export default function(): Class<FusionApp> {
   return class ClientApp extends BaseApp {
-    constructor(element: any, render: (el: any) => Promise<any>) {
-      super();
+    constructor(el, render) {
+      super(el, render);
       this.register(TimingToken, timing);
-      this.middleware(createClientHydrate(element));
-      this.renderer = createClientRenderer(render);
+      this.middleware({element: ElementToken}, createClientHydrate);
+    }
+    resolve() {
+      this.middleware({render: RenderToken}, createClientRenderer);
+      return super.resolve();
     }
     callback() {
       this.resolve();
       const middleware = compose(this.plugins);
       return () => {
-        // TODO: Create noop context object to match server api
+        // TODO(#62): Create noop context object to match server api
         const ctx = {
           url: window.location.path + window.location.search,
           element: null,

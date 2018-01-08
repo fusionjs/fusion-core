@@ -1,16 +1,22 @@
 import {withMiddleware} from './with-middleware';
 import {withDependencies} from './with-dependencies';
+import {ElementToken, RenderToken} from './tokens';
 
 class FusionApp {
-  constructor() {
+  constructor(element, render) {
     this.registered = new Map();
     this.plugins = [];
+    this.configure(ElementToken, element);
+    this.configure(RenderToken, render);
   }
   register(token, value) {
     if (value === undefined) {
       value = token;
     }
-    this.plugins.push(token);
+    // the renderer is a special case, since it needs to be always run last
+    if (token !== RenderToken) {
+      this.plugins.push(token);
+    }
     return this._set(token, value);
   }
   configure(token, value) {
@@ -38,7 +44,6 @@ class FusionApp {
     }
   }
   resolve() {
-    this.register(this.renderer);
     const resolved = new Map();
     const resolving = new Set();
     const registered = this.registered;

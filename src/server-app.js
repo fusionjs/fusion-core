@@ -3,9 +3,9 @@
 import {compose} from './compose.js';
 import Timing, {TimingToken} from './plugins/timing';
 import BaseApp from './base-app';
-import getRendererPlugin from './plugins/server-renderer';
-
-import createSSRPlugin from './plugins/ssr';
+import serverRenderer from './plugins/server-renderer';
+import {RenderToken, ElementToken} from './tokens';
+import ssrPlugin from './plugins/ssr';
 
 export default function(): Class<FusionApp> {
   const Koa = require('koa');
@@ -14,12 +14,18 @@ export default function(): Class<FusionApp> {
     _app: Koa;
     // TODO: Potentially we can have the app depend on `element` and `render` functions, rather
     // than have them passed into the constructor. Doing DI all the way down could make testing easier
-    constructor(element: any, render: (el: any) => Promise<string>) {
-      super();
+    constructor(el, render) {
+      super(el, render);
       this._app = new Koa();
       this.register(TimingToken, Timing);
-      this.middleware(createSSRPlugin(element));
-      this.renderer = getRendererPlugin(render);
+      this.middleware({element: ElementToken}, ssrPlugin);
+    }
+    resolve() {
+      this.middleware(
+        {timing: TimingToken, render: RenderToken},
+        serverRenderer
+      );
+      return super.resolve();
     }
     callback() {
       this.resolve();

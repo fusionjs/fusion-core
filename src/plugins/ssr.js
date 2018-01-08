@@ -14,7 +14,7 @@ function isSSR(ctx) {
   return true;
 }
 
-export default function createSSRPlugin(element) {
+export default function createSSRPlugin({element}) {
   return async function ssrPlugin(ctx, next) {
     if (!isSSR(ctx)) return next();
 
