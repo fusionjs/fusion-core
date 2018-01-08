@@ -12,8 +12,6 @@ export default function(): Class<FusionApp> {
 
   return class ServerApp extends BaseApp {
     _app: Koa;
-    // TODO: Potentially we can have the app depend on `element` and `render` functions, rather
-    // than have them passed into the constructor. Doing DI all the way down could make testing easier
     constructor(el, render) {
       super(el, render);
       this._app = new Koa();
