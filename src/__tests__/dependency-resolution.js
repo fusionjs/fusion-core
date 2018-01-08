@@ -200,9 +200,12 @@ tape('dependency registration with middleware', t => {
   const PluginA = () => {
     counters.a++;
     t.equal(counters.a, 1, 'only instantiates once');
-    return withMiddleware((ctx, next) => next(), {
-      a: 'PluginA',
-    });
+    return withMiddleware(
+      {
+        a: 'PluginA',
+      },
+      (ctx, next) => next()
+    );
   };
   const PluginB = withDependencies({a: TokenA})(deps => {
     counters.b++;
@@ -217,9 +220,12 @@ tape('dependency registration with middleware', t => {
     t.equal(deps.a.a, 'PluginA');
     t.equal(deps.b.b, 'PluginB');
     t.equal(counters.c, 1, 'only instantiates once');
-    return withMiddleware((ctx, next) => next(), {
-      c: 'PluginC',
-    });
+    return withMiddleware(
+      {
+        c: 'PluginC',
+      },
+      (ctx, next) => next()
+    );
   });
   app.register(TokenA, PluginA);
   app.register(TokenB, PluginB);
@@ -248,14 +254,20 @@ tape('dependency registration with middleware', t => {
 tape('dependency registration with missing dependency', t => {
   const app = new App('el', el => el);
   const PluginA = () => {
-    return withMiddleware((ctx, next) => next(), {
-      a: 'PluginA',
-    });
+    return withMiddleware(
+      {
+        a: 'PluginA',
+      },
+      (ctx, next) => next()
+    );
   };
   const PluginC = withDependencies({a: TokenA, b: TokenB})(() => {
-    return withMiddleware((ctx, next) => next(), {
-      c: 'PluginC',
-    });
+    return withMiddleware(
+      {
+        c: 'PluginC',
+      },
+      (ctx, next) => next()
+    );
   });
   app.register(TokenA, PluginA);
   app.register(TokenC, PluginC);
@@ -266,19 +278,28 @@ tape('dependency registration with missing dependency', t => {
 tape('dependency registration with missing deep tree dependency', t => {
   const app = new App('el', el => el);
   const PluginA = () => {
-    return withMiddleware((ctx, next) => next(), {
-      a: 'PluginA',
-    });
+    return withMiddleware(
+      {
+        a: 'PluginA',
+      },
+      (ctx, next) => next()
+    );
   };
   const PluginB = withDependencies({a: TokenA, d: 'RANDOM-TOKEN'})(() => {
-    return withMiddleware((ctx, next) => next(), {
-      b: 'PluginB',
-    });
+    return withMiddleware(
+      {
+        b: 'PluginB',
+      },
+      (ctx, next) => next()
+    );
   });
   const PluginC = withDependencies({a: TokenA, b: TokenB})(() => {
-    return withMiddleware((ctx, next) => next(), {
-      c: 'PluginC',
-    });
+    return withMiddleware(
+      {
+        c: 'PluginC',
+      },
+      (ctx, next) => next()
+    );
   });
   app.register(TokenC, PluginC);
   app.register(TokenA, PluginA);
@@ -290,14 +311,20 @@ tape('dependency registration with missing deep tree dependency', t => {
 tape('dependency registration with circular dependency', t => {
   const app = new App('el', el => el);
   const PluginB = withDependencies({c: TokenC})(() => {
-    return withMiddleware((ctx, next) => next(), {
-      b: 'PluginB',
-    });
+    return withMiddleware(
+      {
+        b: 'PluginB',
+      },
+      (ctx, next) => next()
+    );
   });
   const PluginC = withDependencies({b: TokenB})(() => {
-    return withMiddleware((ctx, next) => next(), {
-      c: 'PluginC',
-    });
+    return withMiddleware(
+      {
+        c: 'PluginC',
+      },
+      (ctx, next) => next()
+    );
   });
   app.register(TokenB, PluginB);
   app.register(TokenC, PluginC);

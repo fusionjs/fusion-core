@@ -157,18 +157,15 @@ test('app.register - middleware execution respects dependency order', async t =>
     TokenA,
     withDependencies({TokenB})(deps => {
       t.equal(deps.TokenB().b, 'something-b');
-      return withMiddleware(
-        async function second(ctx, next) {
-          t.equal(order, 2, 'calls downstream in correct order');
-          t.equal(numRenders, 0);
-          order++;
-          await next();
-          t.equal(order, 5, 'calls upstream in correct order');
-          t.equal(numRenders, 1);
-          order++;
-        },
-        {a: 'something'}
-      );
+      return withMiddleware({a: 'something'}, async function second(ctx, next) {
+        t.equal(order, 2, 'calls downstream in correct order');
+        t.equal(numRenders, 0);
+        order++;
+        await next();
+        t.equal(order, 5, 'calls upstream in correct order');
+        t.equal(numRenders, 1);
+        order++;
+      });
     })
   );
   app.register(
@@ -184,18 +181,18 @@ test('app.register - middleware execution respects dependency order', async t =>
   );
   app.register(
     TokenB,
-    withMiddleware(
-      async function fourth(ctx, next) {
-        t.equal(order, 1, 'calls downstream in correct order');
-        t.equal(numRenders, 0);
-        order++;
-        await next();
-        t.equal(order, 6, 'calls upstream in correct order');
-        t.equal(numRenders, 1);
-        order++;
-      },
-      () => ({b: 'something-b'})
-    )
+    withMiddleware(() => ({b: 'something-b'}), async function fourth(
+      ctx,
+      next
+    ) {
+      t.equal(order, 1, 'calls downstream in correct order');
+      t.equal(numRenders, 0);
+      order++;
+      await next();
+      t.equal(order, 6, 'calls upstream in correct order');
+      t.equal(numRenders, 1);
+      order++;
+    })
   );
   const ctx = await run(app);
   t.equal(ctx.rendered, element);

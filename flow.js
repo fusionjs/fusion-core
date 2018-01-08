@@ -49,6 +49,6 @@ declare function withMiddleware(middleware: Middleware): MiddlewarePlugin;
 
 // eslint-disable-next-line no-redeclare
 declare function withMiddleware<Service>(
-  middleware: Middleware,
-  service: Service
+  service: Service,
+  middleware: Middleware
 ): Service;

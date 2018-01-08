@@ -48,7 +48,7 @@ function middleware(ctx, next) {
   });
 }
 
-export default () => withMiddleware(middleware, timing);
+export default () => withMiddleware(timing, middleware);
 
 export function now(): number {
   if (__NODE__) {
