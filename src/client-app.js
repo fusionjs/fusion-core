@@ -8,7 +8,6 @@ import createClientRenderer from './plugins/client-renderer';
 
 export default function(): Class<FusionApp> {
   return class ClientApp extends BaseApp {
-    // TODO: More specific types
     constructor(element: any, render: (el: any) => Promise<any>) {
       super();
       this.register(TimingToken, timing);

@@ -232,7 +232,6 @@ test('app.middleware with no dependencies', async t => {
   };
   const app = new App(element, renderFn);
   let called = false;
-  // TODO: Investigate how we can make this work with flow and support not wrapping in extra function
   app.middleware((ctx, next) => {
     called = true;
     return next();

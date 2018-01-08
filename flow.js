@@ -30,7 +30,6 @@ declare type MiddlewarePlugin = {
 };
 
 declare class FusionApp {
-  // TODO: More specific types
   constructor<Element>(element: Element, render: (Element) => any): FusionApp;
   registered: Map<any, any>;
   plugins: Array<any>;

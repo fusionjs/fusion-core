@@ -1,5 +1,4 @@
 /* @flow */
-// TODO: Use real token with type signature
 import {withMiddleware} from '../with-middleware';
 import {memoize} from '../memoize';
 

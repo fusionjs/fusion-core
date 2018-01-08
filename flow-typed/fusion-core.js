@@ -1,9 +1,8 @@
 /* @flow */
 import type {Context as KoaContext} from 'koa';
 
-// TODO: Type checking here isn't very good, as it allows you to
-// alias tokens that are not of the exact same type. We should keep
-// an eye on developments in flow to see if we can improve this.
+// TODO(#61): Type checking here isn't very good, as it allows you to
+// alias tokens that are not of the exact same type.
 type aliaser<Token> = {
   alias: (sourceToken: Token, destToken: Token) => aliaser<*>,
 };
@@ -35,7 +34,6 @@ declare module 'fusion-core' {
   declare type MemoizeFn<A> = (ctx: Context) => A;
   declare export function memoize<A>(fn: MemoizeFn<A>): MemoizeFn<A>;
   declare class FusionApp {
-    // TODO: More specific types
     constructor<Element>(element: Element, render: (Element) => any): FusionApp;
     registered: Map<any, any>;
     plugins: Array<any>;

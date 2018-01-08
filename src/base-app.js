@@ -43,7 +43,6 @@ class FusionApp {
     const resolving = new Set();
     const registered = this.registered;
     const resolvedPlugins = [];
-    // TODO: maybe could turn this into a map
     const resolveToken = (token, tokenAliases) => {
       // if we have already resolved the type, return it
       if (tokenAliases && tokenAliases.has(token)) {
@@ -74,8 +73,6 @@ class FusionApp {
           const registeredToken = registeredDeps[key];
           resolvedDeps[key] = resolveToken(registeredToken, aliases);
         }
-        // TODO: should we always call the function or only when the plugin
-        // is used with `withDependencies`?
         value = value(resolvedDeps);
       }
       resolved.set(token, value);
@@ -87,7 +84,6 @@ class FusionApp {
       resolveToken(this.plugins[i]);
     }
 
-    // TODO: potentially unnecessary
     this.plugins = resolvedPlugins;
   }
 }
