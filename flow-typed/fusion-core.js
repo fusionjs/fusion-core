@@ -57,8 +57,8 @@ declare module 'fusion-core' {
     middleware: Middleware
   ): MiddlewarePlugin;
   declare export function withMiddleware<Service>(
-    middleware: Middleware,
-    service: Service
+    service: Service,
+    middleware: Middleware
   ): Service;
   declare export function withDependencies<Dependencies, Service>(
     deps: Dependencies
