@@ -1,5 +1,6 @@
 /* @flow */
-import {withMiddleware} from '../with-middleware';
+import {createPlugin} from '../create-plugin';
+
 import {memoize} from '../memoize';
 
 type Deferred<T> = {
@@ -48,7 +49,10 @@ function middleware(ctx, next) {
   });
 }
 
-export default () => withMiddleware(timing, middleware);
+export default createPlugin({
+  provides: () => timing,
+  middleware: () => middleware,
+});
 
 export function now(): number {
   if (__NODE__) {

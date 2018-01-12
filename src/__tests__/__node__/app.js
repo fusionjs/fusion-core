@@ -1,7 +1,6 @@
 import test from 'tape-cup';
 import App from '../../index';
 import {compose} from '../../compose.js';
-import {withMiddleware} from '../../with-middleware';
 
 test('context composition', async t => {
   const element = 'hello';
@@ -29,7 +28,7 @@ test('context composition', async t => {
   };
 
   const app = new App(element, render);
-  app.register(withMiddleware(wrap));
+  app.middleware(wrap);
   try {
     app.resolve();
     const middleware = compose(app.plugins);
@@ -68,7 +67,7 @@ test('context composition with a cdn', async t => {
   };
 
   const app = new App(element, render);
-  app.register(withMiddleware(wrap));
+  app.middleware(wrap);
   app.resolve();
   const middleware = compose(app.plugins);
   try {
