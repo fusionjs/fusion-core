@@ -257,7 +257,7 @@ tape('dependency registration with middleware', t => {
         c: 'PluginC',
       };
     },
-    middleware: (deps, service) => (ctx, next) => next(),
+    middleware: () => (ctx, next) => next(),
   });
   app.register(TokenA, PluginA);
   app.register(TokenB, PluginB);
