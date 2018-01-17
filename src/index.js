@@ -25,3 +25,4 @@ export {
 } from './virtual/index.js';
 
 export {RenderToken, ElementToken} from './tokens';
+export {createPlugin} from './create-plugin';
