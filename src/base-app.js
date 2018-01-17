@@ -56,6 +56,12 @@ class FusionApp {
       resolving.add(token);
       let {value, aliases} = registered.get(token);
       let provides = value;
+
+      if (!value) {
+        throw new Error(
+          `Registered value cannot be ${value}: ${token.toString()}`
+        );
+      }
       if (value.__plugin__) {
         const registeredDeps = value.deps || {};
         const resolvedDeps = {};
