@@ -10,6 +10,10 @@ function createToken(name): any {
   };
 }
 
+function createOptionalToken(name: string, defaultValue: any): any {
+  return () => defaultValue;
+}
+
 const App = __BROWSER__ ? ClientAppFactory() : ServerAppFactory();
 type AType = {
   a: string,
@@ -24,6 +28,13 @@ const TokenA: AType = createToken('TokenA');
 const TokenB: BType = createToken('TokenB');
 const TokenC: CType = createToken('TokenC');
 const TokenD: BType = createToken('TokenD');
+const TokenOptionalE: BType = createOptionalToken('TokenOptionalE', {
+  b: 'default value',
+});
+const TokenOptionalWithNullDefault: * = createOptionalToken(
+  'TokenOptionalWithNullDefault',
+  null /*no default*/
+);
 
 tape('dependency registration', t => {
   const app = new App('el', el => el);
@@ -292,6 +303,50 @@ tape('dependency registration with missing dependency', t => {
   app.register(TokenA, PluginA);
   app.register(TokenC, PluginC);
   t.throws(() => app.resolve(), 'Catches missing dependencies');
+  t.end();
+});
+
+tape('dependency registration with optional dependency', t => {
+  const app = new App('el', el => el);
+
+  t.plan(3);
+  const PluginWithOptionalDependency = createPlugin({
+    deps: {optionalE: TokenOptionalE},
+    provides: deps => {
+      t.ok(deps, 'deps are provided');
+      t.ok(deps.optionalE, 'optional dependency is provided');
+      t.equal(
+        deps.optionalE.b,
+        'default value',
+        'default value is provided for optional dependency'
+      );
+
+      return {
+        c: 'PluginC',
+      };
+    },
+  });
+  app.register(TokenC, PluginWithOptionalDependency);
+
+  app.resolve();
+  t.end();
+});
+
+tape('dependency registration with null value', t => {
+  const app = new App('el', el => el);
+
+  const PluginC = createPlugin({
+    deps: {optionalNull: TokenOptionalWithNullDefault},
+    provides: () => {
+      t.fail('should never get here');
+      return {
+        c: 'PluginC',
+      };
+    },
+  });
+  app.register(TokenC, PluginC);
+
+  t.throws(() => app.resolve(), 'Catches null value dependency');
   t.end();
 });
 
