@@ -20,17 +20,15 @@ declare module 'fusion-core' {
     },
   } & KoaContext;
   declare export type Context = SSRContext | KoaContext;
-  declare export type FusionPlugin<
-    Dependencies,
-    Service
-  > = Dependencies => Service;
+  declare export type FusionPlugin<Deps, Service> = {
+    deps?: Deps,
+    provides?: Deps => Service,
+    middleware?: (Deps, Service) => Middleware,
+  };
   declare export type Middleware = (
     ctx: Context,
     next: () => Promise<void>
   ) => Promise<*>;
-  declare export type MiddlewarePlugin = {
-    __middleware__: Middleware,
-  };
   declare type MemoizeFn<A> = (ctx: Context) => A;
   declare export function memoize<A>(fn: MemoizeFn<A>): MemoizeFn<A>;
   declare class FusionApp {
@@ -38,31 +36,20 @@ declare module 'fusion-core' {
     registered: Map<any, any>;
     plugins: Array<any>;
     renderer: any;
-    // register(middleware: MiddlewarePlugin): void;
     register<A, B>(Plugin: FusionPlugin<A, B>): aliaser<*>;
     register<A, B>(token: B, Plugin: FusionPlugin<A, B>): aliaser<*>;
-    configure<A: string>(token: A, val: string): aliaser<*>;
-    configure<A: number>(token: A, val: number): aliaser<*>;
-    configure<A: Object>(token: A, val: $Exact<A>): aliaser<*>;
+    register<A: string>(token: A, val: string): aliaser<*>;
+    register<A: number>(token: A, val: number): aliaser<*>;
+    register<A: Object>(token: A, val: $Exact<A>): aliaser<*>;
     middleware<Deps>(deps: Deps, middleware: (Deps) => Middleware): void;
     middleware(middleware: Middleware): void;
     callback(): () => Promise<void>;
     resolve(): void;
   }
   declare export default typeof FusionApp
-  declare export type PluginLoader<Dependencies, Service> = (
-    init: FusionPlugin<Dependencies, Service>
-  ) => FusionPlugin<Dependencies, Service>;
-  declare export function withMiddleware(
-    middleware: Middleware
-  ): MiddlewarePlugin;
-  declare export function withMiddleware<Service>(
-    service: Service,
-    middleware: Middleware
-  ): Service;
-  declare export function withDependencies<Dependencies, Service>(
-    deps: Dependencies
-  ): PluginLoader<Dependencies, Service>;
+  declare export function createPlugin<Deps, Service>(
+    options: FusionPlugin<Deps, Service>
+  ): FusionPlugin<Deps, Service>;
   declare export function html(
     strings: Array<string>,
     ...expressions: Array<string>

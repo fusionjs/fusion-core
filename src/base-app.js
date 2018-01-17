@@ -1,28 +1,19 @@
-import {withMiddleware} from './with-middleware';
-import {withDependencies} from './with-dependencies';
+import {createPlugin} from './create-plugin';
 import {ElementToken, RenderToken} from './tokens';
 
 class FusionApp {
   constructor(element, render) {
     this.registered = new Map();
     this.plugins = [];
-    this.configure(ElementToken, element);
-    this.configure(RenderToken, render);
+    element && this.register(ElementToken, element);
+    render && this.register(RenderToken, render);
   }
   register(token, value) {
     if (value === undefined) {
       value = token;
     }
     // the renderer is a special case, since it needs to be always run last
-    if (token !== RenderToken) {
-      this.plugins.push(token);
-    }
-    return this._set(token, value);
-  }
-  configure(token, value) {
-    this._set(token, () => value);
-  }
-  _set(token, value) {
+    this.plugins.push(token);
     const aliases = new Map();
     this.registered.set(token, {value, aliases});
     function alias(sourceToken, destToken) {
@@ -33,15 +24,9 @@ class FusionApp {
   }
   middleware(deps, middleware) {
     if (middleware === undefined) {
-      middleware = deps;
-      this.register(withMiddleware(middleware));
-    } else {
-      this.register(
-        withDependencies(deps)(d => {
-          return withMiddleware(middleware(d));
-        })
-      );
+      middleware = () => deps;
     }
+    this.register(createPlugin({deps, middleware}));
   }
   resolve() {
     const resolved = new Map();
@@ -65,30 +50,32 @@ class FusionApp {
       // the type was never registered, throw error
       if (!registered.has(token)) {
         // Attempt to get default value
-        // NOTE: As of now, default values can only be configuration, not full blown plugins
-        this.configure(token, token());
+        this.register(token, token());
       }
       // get the registered type and resolve it
       resolving.add(token);
       let {value, aliases} = registered.get(token);
-      if (typeof value.__middleware__ !== 'function') {
-        const registeredDeps = value.__deps__ || {};
+      let provides = value;
+      if (value.__plugin__) {
+        const registeredDeps = value.deps || {};
         const resolvedDeps = {};
         for (const key in registeredDeps) {
           const registeredToken = registeredDeps[key];
           resolvedDeps[key] = resolveToken(registeredToken, aliases);
         }
-        value = value(resolvedDeps);
+        // `provides` should be undefined if the plugin does not have a `provides` function
+        provides = value.provides ? value.provides(resolvedDeps) : undefined;
+        if (value.middleware) {
+          resolvedPlugins.push(value.middleware(resolvedDeps, provides));
+        }
       }
-      resolved.set(token, value);
+      resolved.set(token, provides);
       resolving.delete(token);
-      resolvedPlugins.push(value);
-      return value;
+      return provides;
     };
     for (let i = 0; i < this.plugins.length; i++) {
       resolveToken(this.plugins[i]);
     }
-
     this.plugins = resolvedPlugins;
   }
 }

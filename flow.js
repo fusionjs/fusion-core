@@ -19,15 +19,15 @@ declare type SSRContext = {
   },
 } & ExtendedKoaContext;
 declare type Context = SSRContext | ExtendedKoaContext;
-declare type FusionPlugin<Dependencies, Service> = (Dependencies) => Service;
+declare type FusionPlugin<Deps, Service> = {
+  deps?: Deps,
+  provides?: Deps => Service,
+  middleware?: (Deps, Service) => Middleware,
+};
 declare type Middleware = (
   ctx: Context,
   next: () => Promise<void>
 ) => Promise<*>;
-
-declare type MiddlewarePlugin = {
-  __middleware__: Middleware,
-};
 
 declare class FusionApp {
   constructor<Element>(element: Element, render: (Element) => any): FusionApp;
@@ -36,19 +36,11 @@ declare class FusionApp {
   renderer: any;
   register<A, B>(Plugin: FusionPlugin<A, B>): aliaser<*>;
   register<A, B>(token: B, Plugin: FusionPlugin<A, B>): aliaser<*>;
-  configure<A: string>(token: A, val: string): aliaser<*>;
-  configure<A: number>(token: A, val: number): aliaser<*>;
-  configure<A: Object>(token: A, val: $Exact<A>): aliaser<*>;
+  register<A: string>(token: A, val: string): aliaser<*>;
+  register<A: number>(token: A, val: number): aliaser<*>;
+  register<A: Object>(token: A, val: $Exact<A>): aliaser<*>;
   middleware<Deps>(deps: Deps, middleware: (Deps) => Middleware): void;
   middleware(middleware: Middleware): void;
   callback(): () => Promise<void>;
   resolve(): void;
 }
-
-declare function withMiddleware(middleware: Middleware): MiddlewarePlugin;
-
-// eslint-disable-next-line no-redeclare
-declare function withMiddleware<Service>(
-  service: Service,
-  middleware: Middleware
-): Service;
