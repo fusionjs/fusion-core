@@ -50,19 +50,20 @@ class FusionApp {
       // the type was never registered, throw error
       if (!registered.has(token)) {
         // Attempt to get default value
-        this.register(token, token());
+        const defaultValue = token();
+        if (defaultValue === undefined) {
+          throw new Error(
+            `Cannot resolve to a default value of 'undefined' for token: ${token.toString()}`
+          );
+        }
+        this.register(token, defaultValue);
       }
       // get the registered type and resolve it
       resolving.add(token);
       let {value, aliases} = registered.get(token);
       let provides = value;
 
-      if (!value) {
-        throw new Error(
-          `Registered value cannot be ${value}: ${token.toString()}`
-        );
-      }
-      if (value.__plugin__) {
+      if (value !== null && typeof value === 'object' && value.__plugin__) {
         const registeredDeps = value.deps || {};
         const resolvedDeps = {};
         for (const key in registeredDeps) {

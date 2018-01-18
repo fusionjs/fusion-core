@@ -33,7 +33,11 @@ const TokenOptionalE: BType = createOptionalToken('TokenOptionalE', {
 });
 const TokenOptionalWithNullDefault: * = createOptionalToken(
   'TokenOptionalWithNullDefault',
-  null /*no default*/
+  null
+);
+const TokenOptionalWithUndefinedDefault: * = createOptionalToken(
+  'TokenOptionalWithUndefinedDefault',
+  undefined
 );
 
 tape('dependency registration', t => {
@@ -335,18 +339,31 @@ tape('dependency registration with optional dependency', t => {
 tape('dependency registration with null value', t => {
   const app = new App('el', el => el);
 
+  t.plan(1);
   const PluginC = createPlugin({
     deps: {optionalNull: TokenOptionalWithNullDefault},
-    provides: () => {
-      t.fail('should never get here');
-      return {
-        c: 'PluginC',
-      };
+    provides: deps => {
+      t.equal(deps.optionalNull, null, 'null provided as expected');
     },
   });
   app.register(TokenC, PluginC);
 
-  t.throws(() => app.resolve(), 'Catches null value dependency');
+  app.resolve();
+  t.end();
+});
+
+tape('dependency registration with undefined value', t => {
+  const app = new App('el', el => el);
+
+  t.plan(1);
+  const PluginC = createPlugin({
+    deps: {optionalUndefined: TokenOptionalWithUndefinedDefault},
+    provides: () => {
+      t.fail('should never reach here');
+    },
+  });
+  app.register(TokenC, PluginC);
+  t.throws(app.resolve, 'unable to resolve a default value of undefined');
   t.end();
 });
 
