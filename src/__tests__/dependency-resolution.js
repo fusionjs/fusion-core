@@ -363,7 +363,6 @@ tape('dependency registration with undefined value', t => {
     },
   });
   app.register(TokenC, PluginC);
-
   t.throws(app.resolve, 'unable to resolve a default value of undefined');
   t.end();
 });
