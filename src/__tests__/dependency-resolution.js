@@ -367,6 +367,22 @@ tape('dependency registration with undefined value', t => {
   t.end();
 });
 
+tape('dependency registration with null value', t => {
+  t.doesNotThrow(() => {
+    const app = new App('el', el => el);
+    // $FlowFixMe
+    app.register(null);
+    app.resolve();
+  });
+  t.doesNotThrow(() => {
+    const app = new App('el', el => el);
+    // $FlowFixMe
+    app.register('something', null);
+    app.resolve();
+  });
+  t.end();
+});
+
 tape('dependency registration with missing deep tree dependency', t => {
   const app = new App('el', el => el);
   const PluginA = createPlugin({

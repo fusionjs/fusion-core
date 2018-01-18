@@ -63,7 +63,7 @@ class FusionApp {
       let {value, aliases} = registered.get(token);
       let provides = value;
 
-      if (value !== null && typeof value === 'object' && value.__plugin__) {
+      if (value && value.__plugin__) {
         const registeredDeps = value.deps || {};
         const resolvedDeps = {};
         for (const key in registeredDeps) {
