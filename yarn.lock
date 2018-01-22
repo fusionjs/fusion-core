@@ -1796,11 +1796,11 @@ eslint-config-cup@^1.0.0-rc.4:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/eslint-config-cup/-/eslint-config-cup-1.0.0.tgz#0fcdb787fe254fc9458ec5258143cb0d47052896"
 
-eslint-config-fusion@0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/eslint-config-fusion/-/eslint-config-fusion-0.1.2.tgz#cf380a75090d3cee0c9c086165b86fd60619e0aa"
+eslint-config-fusion@0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/eslint-config-fusion/-/eslint-config-fusion-0.2.1.tgz#39db6979719dab00953e561b2ff0af66981397bb"
   dependencies:
-    eslint-config-uber-universal-stage-3 "^1.0.0-rc.6"
+    eslint-config-uber-universal-stage-3 "^1.0.0-rc.7"
 
 eslint-config-prettier@^2.0.0:
   version "2.9.0"
@@ -1820,7 +1820,7 @@ eslint-config-uber-base@^1.0.0-rc.7:
   dependencies:
     eslint-config-prettier "^2.0.0"
 
-eslint-config-uber-universal-stage-3@^1.0.0-rc.6:
+eslint-config-uber-universal-stage-3@^1.0.0-rc.7:
   version "1.0.0-rc.7"
   resolved "https://registry.yarnpkg.com/eslint-config-uber-universal-stage-3/-/eslint-config-uber-universal-stage-3-1.0.0-rc.7.tgz#bd4de38543d3c27cf48d82925bfccb5efb5b541f"
   dependencies:
@@ -2661,8 +2661,8 @@ is-regex@^1.0.4:
     has "^1.0.1"
 
 is-resolvable@^1.0.0:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/is-resolvable/-/is-resolvable-1.0.1.tgz#acca1cd36dbe44b974b924321555a70ba03b1cf4"
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/is-resolvable/-/is-resolvable-1.1.0.tgz#fb18f87ce1feb925169c9a407c19318a3206ed88"
 
 is-stream@^1.0.1, is-stream@^1.1.0:
   version "1.1.0"
@@ -3985,8 +3985,8 @@ setprototypeof@1.0.3:
   resolved "https://registry.yarnpkg.com/setprototypeof/-/setprototypeof-1.0.3.tgz#66567e37043eeb4f04d91bd658c0cbefb55b8e04"
 
 sha.js@^2.4.0, sha.js@^2.4.8:
-  version "2.4.9"
-  resolved "https://registry.yarnpkg.com/sha.js/-/sha.js-2.4.9.tgz#98f64880474b74f4a38b8da9d3c0f2d104633e7d"
+  version "2.4.10"
+  resolved "https://registry.yarnpkg.com/sha.js/-/sha.js-2.4.10.tgz#b1fde5cd7d11a5626638a07c604ab909cfa31f9b"
   dependencies:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
