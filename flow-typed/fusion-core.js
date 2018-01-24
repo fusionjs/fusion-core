@@ -36,11 +36,20 @@ declare module 'fusion-core' {
     registered: Map<any, any>;
     plugins: Array<any>;
     renderer: any;
-    register<A, B>(Plugin: FusionPlugin<A, B>): aliaser<*>;
-    register<A, B>(token: B, Plugin: FusionPlugin<A, B>): aliaser<*>;
-    register<A: string>(token: A, val: string): aliaser<*>;
-    register<A: number>(token: A, val: number): aliaser<*>;
-    register<A: Object>(token: A, val: $Exact<A>): aliaser<*>;
+    enhance<Token, Deps>(
+      token: Token,
+      enhancer: (item: Token) => FusionPlugin<Deps, Token>
+    ): void;
+    enhance<Token>(token: Token, enhancer: (token: Token) => Token): void;
+    enhance<Token>(token: Token, enhancer: (token: Token) => Token): void;
+    register<Deps, Provides>(Plugin: FusionPlugin<Deps, Provides>): aliaser<*>;
+    register<Deps, Provides>(
+      token: Provides,
+      Plugin: FusionPlugin<Deps, Provides>
+    ): aliaser<*>;
+    register<Token: string>(token: Token, val: string): aliaser<*>;
+    register<Token: number>(token: Token, val: number): aliaser<*>;
+    register<Token: Object>(token: Token, val: $Exact<Token>): aliaser<*>;
     middleware<Deps>(deps: Deps, middleware: (Deps) => Middleware): void;
     middleware(middleware: Middleware): void;
     callback(): () => Promise<void>;

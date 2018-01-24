@@ -14,8 +14,11 @@ class FusionApp {
     }
     // the renderer is a special case, since it needs to be always run last
     this.plugins.push(token);
-    const aliases = new Map();
-    this.registered.set(token, {value, aliases});
+    const {aliases, enhancers} = this.registered.get(token) || {
+      aliases: new Map(),
+      enhancers: [],
+    };
+    this.registered.set(token, {value, aliases, enhancers});
     function alias(sourceToken, destToken) {
       aliases.set(sourceToken, destToken);
       return {alias};
@@ -27,6 +30,14 @@ class FusionApp {
       middleware = () => deps;
     }
     this.register(createPlugin({deps, middleware}));
+  }
+  enhance(token, enhancer) {
+    const {value, aliases, enhancers} = this.registered.get(token) || {
+      aliases: new Map(),
+      enhancers: [],
+    };
+    enhancers.push(enhancer);
+    this.registered.set(token, {value, aliases, enhancers});
   }
   resolve() {
     const resolved = new Map();
@@ -47,39 +58,54 @@ class FusionApp {
           `Cannot resolve circular dependency: ${token.toString()}`
         );
       }
+      let {value, aliases, enhancers} = registered.get(token) || {};
       // the type was never registered, throw error
-      if (!registered.has(token)) {
+      if (value === undefined) {
         // Attempt to get default value
-        const defaultValue = token();
-        if (defaultValue === undefined) {
+        value = token();
+        if (value === undefined) {
           throw new Error(
             `Cannot resolve to a default value of 'undefined' for token: ${token.toString()}`
           );
         }
-        this.register(token, defaultValue);
+        this.register(token, value);
       }
       // get the registered type and resolve it
       resolving.add(token);
-      let {value, aliases} = registered.get(token);
-      let provides = value;
 
-      if (value && value.__plugin__) {
-        const registeredDeps = value.deps || {};
+      function resolvePlugin(plugin) {
+        const registeredDeps = plugin.deps || {};
         const resolvedDeps = {};
         for (const key in registeredDeps) {
           const registeredToken = registeredDeps[key];
           resolvedDeps[key] = resolveToken(registeredToken, aliases);
         }
         // `provides` should be undefined if the plugin does not have a `provides` function
-        provides = value.provides ? value.provides(resolvedDeps) : undefined;
-        if (value.middleware) {
-          resolvedPlugins.push(value.middleware(resolvedDeps, provides));
+        let provides = plugin.provides
+          ? plugin.provides(resolvedDeps)
+          : undefined;
+        if (plugin.middleware) {
+          resolvedPlugins.push(plugin.middleware(resolvedDeps, provides));
         }
+        return provides;
+      }
+
+      let provides = value && value.__plugin__ ? resolvePlugin(value) : value;
+
+      if (enhancers && enhancers.length) {
+        enhancers.forEach(e => {
+          let nextProvides = e(provides);
+          if (nextProvides && nextProvides.__plugin__) {
+            nextProvides = resolvePlugin(nextProvides);
+          }
+          provides = nextProvides;
+        });
       }
       resolved.set(token, provides);
       resolving.delete(token);
       return provides;
     };
+
     for (let i = 0; i < this.plugins.length; i++) {
       resolveToken(this.plugins[i]);
     }

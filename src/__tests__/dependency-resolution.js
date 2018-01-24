@@ -331,7 +331,6 @@ tape('dependency registration with optional dependency', t => {
     },
   });
   app.register(TokenC, PluginWithOptionalDependency);
-
   app.resolve();
   t.end();
 });
