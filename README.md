@@ -78,11 +78,12 @@ Typically a plugin works the same way as a Koa middleware.
 ##### app.register
 
 ```js
-app.register([Token,] Plugin);
+app.register([Token,] Plugin | Value);
 ```
 
 - `Token: Object` - Optional. A token to register the plugin under. 
-- `Plugin: (dependencies: Object) => any` - Required. The function that is exported by a plugin package
+- `Plugin: Object` - The result from calling `createPlugin` to be registered
+- `Value: any` - The value to be registered. Alternative to Plugin.
 
 Call this method to register a plugin into a FusionJS application. An optional token can be passed as the first
 argument to allow integrating the plugin into the FusionJS dependency injection system. 
@@ -96,20 +97,47 @@ app.middleware(Middleware);
 
 This method is a useful shortcut for registering middleware plugins. 
 
-##### app.configure
+##### app.enhance
 
 ```js
-app.configure(Token, Value);
+app.enhance(Token, (value) => Plugin | Value);
 ```
 
-This method is a useful shortcut for registering configuration with the fusion-app. Since plugins are always
-functions that return a value, if you want to register primitives in the DI system you would need to register
-a function that returns the primitive. The `app.configure` allows you to register primitives without needing to
-wrap them in a function. For example, the following are equivalent:
+This method is useful for composing / enhancing functionality of existing tokens in the DI system. 
+For example, if you wanted to add a header to every request sent using the registered `fetch`.
+```js
+app.register(FetchToken, window.fetch);
+app.enhance(FetchToken, (fetch) => {
+  return (url, params = {}) => {
+    return fetch(url, {
+      ...params,
+      headers: {
+        ...params.headers,
+        'x-test': 'test',
+      }
+    });
+  }
+});
+```
+
+You can also return a `Plugin` from the enhancer function, which `provides` the enhanced value, allowing
+the enhancer to have dependencies and even middleware.
 
 ```js
-app.configure(SomeToken, 'SomeValue');
-app.register(SomeToken, () => 'SomeValue');
+app.register(FetchToken, window.fetch);
+app.enhance(FetchToken, (fetch) => {
+  return createPlugin({
+    provides: () => (url, params = {}) => {
+      return fetch(url, {
+        ...params,
+        headers: {
+          ...params.headers,
+          'x-test': 'test',
+        }
+      });
+    }
+  });
+});
 ```
 
 ##### ElementToken

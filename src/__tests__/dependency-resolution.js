@@ -331,7 +331,8 @@ tape('dependency registration with optional dependency', t => {
     },
   });
   app.register(TokenC, PluginWithOptionalDependency);
-
+  // eslint-disable-next-line
+  debugger;
   app.resolve();
   t.end();
 });
