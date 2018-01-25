@@ -46,8 +46,8 @@ const render = el => __NODE__ ? renderToString(el) : ReactDOM.render(el, documen
 
 export default function() {
   const app = new App();
-  app.configure(ElementToken, <Hello />);
-  app.configure(RenderToken, render);
+  app.register(ElementToken, <Hello />);
+  app.register(RenderToken, render);
   return app;
 }
 ```
@@ -70,7 +70,7 @@ The application is responsible for rendering (both virtual dom and server-side r
 
 An application can receive any number of plugins, which can augment the behavior of the application.
 
-Typically a plugin works the same way as a Koa middleware.
+Typically a plugin works similarly to a Koa middleware.
 
 
 #### App Instance members
@@ -146,10 +146,10 @@ app.enhance(FetchToken, (fetch) => {
 import SomeComponent from './components/some-component';
 import App, {ElementToken} from 'fusion-core';
 const app = new App();
-app.configure(ElementToken, <SomeComponent />);
+app.register(ElementToken, <SomeComponent />);
 ```
 
-The element token is used to configure the root element with the fusion app. This is typically a react/preact element.
+The element token is used to register the root element with the fusion app. This is typically a react/preact element.
 
 ##### RenderToken
 
@@ -159,22 +159,50 @@ import {renderToString} from 'react-dom/server';
 const render = el => __NODE__ ? renderToString(el) : ReactDOM.render(el, document.getElementById('root'));
 import App, {RenderToken} from 'fusion-core';
 const app = new App();
-app.configure(RenderToken, render);
+app.register(RenderToken, render);
 ```
 
-The render token is used to configure the render function with the fusion app. This is a function that knows how to
+The render token is used to register the render function with the fusion app. This is a function that knows how to
 render your application on the server/browser, and allows `fusion-core` to remain agnostic of the virtualdom library.
 
 ## Plugins
 
 Often we want to encapsulate some functionality into a single coherent package that exposes a programmatic API that can be consumed by others.
-In FusionJS, this is done via a Plugin. A plugin is simply a function that returns a value. For example, the following is a valid plugin.
+In FusionJS, this is done via a Plugin. FusionJS plugins can declare dependencies and provide programmatic apis and middlewares.
+
+##### createPlugin
 
 ```js
+import {createPlugin} from 'fusion-core';
+export default createPlugin({
+  // declare dependencies
+  deps: {
+    depA: TokenA,
+    depB: TokenB,
+  },
+  // dependency injected function to provide api
+  provides: ({depA, depB}) => {
+    return new Thing();
+  },
+  // dependency injected universal koa middleware
+  middleware: ({depA, depB}, thing) => {
+    return (ctx, next) => {
+      return next();
+    }
+  }
+});
+```
+
+#### Examples
+
+```js
+import {createPlugin} from 'fusion-core';
 // fusion-plugin-console-logger
-const ConsoleLoggerPlugin = () => {
-  return console;
-}
+const ConsoleLoggerPlugin = createPlugin({
+  provides: () => {
+    return console;
+  }
+});
 ```
 
 In order to use plugins, you need to register them with your FusionJS application. You do this by calling
@@ -196,21 +224,20 @@ export default function main() {
 }
 ```
 
-To use the logger we registered, we need to introduce the `withDependencies` helper from `fusion-core`. This function allows us to declare the dependencies we need. Lets write a new plugin that depends on a logger.
+Now lets say we have a plugin that requires a logger. We can declare a dependency on the logger token to get the logger injected.
 
 ```js
 // fusion-plugin-some-api
-import {withDependencies} from 'fusion-core';
+import {createPlugin} from 'fusion-core';
 import {LoggerToken} from 'fusion-tokens';
-export const MyApiSecretToken = '';
 
-const APIPlugin = withDependencies({
-  logger: LoggerToken,
-  secret: MyApiSecretToken,
-})(deps => {
- const {logger} = deps;
-  // Note: implementation of APIClient left out for brevity
-  return new APIClient(logger);
+const APIPlugin = createPlugin({
+  deps: {
+    logger: LoggerToken,
+  },
+  provides: ({logger}) => {
+    return new APIClient(logger);
+  }
 });
 ```
 
@@ -243,27 +270,24 @@ const middleware = () => async (ctx, next) => {
 }
 ```
 
-Plugins can add middlewares using the `withMiddleware` helper from `fusion-core`.
-Lets try adding a middleware to our logger plugin.
+Plugins can add dependency injected middlewares. Lets try adding a middleware to our api plugin.
 
 ```js
 // fusion-plugin-some-api
-import {withDependencies, withMiddleware} from 'fusion-core';
-import {LoggerToken} from 'fusion-tokens';
-export const MyApiSecretToken = '';
-
-const APIPlugin = withDependencies({
-  logger: LoggerToken,
-  secret: MyApiSecretToken,
-})(deps => {
- const {logger} = deps;
-  // Note: implementation of APIClient left out for brevity
-  const client = new APIClient(logger);
-  return withMiddleware(client, async (ctx, next) => {
-    // do middleware things...
-    await next(); 
-    // do middleware things...
-  });
+const APIPlugin = createPlugin({
+  deps: {
+    logger: LoggerToken,
+  },
+  provides: ({logger}) => {
+    return new APIClient(logger);
+  },
+  middleware: ({logger}, apiClient) => {
+    return async (ctx, next) => {
+      // do middleware things...
+      await next();
+      // do middleware things...
+    }
+  }
 });
 ```
 
@@ -293,21 +317,22 @@ The example below shows a plugin that grabs the project version from package.jso
 
 ```js
 // plugins/version-plugin.js
-import util from 'util';
 import fs from 'fs';
-import {html, withMiddleware} from 'fusion-core'; // html sanitization
-const read = __NODE__ && util.promisify(fs.readFile);
+import {html, createPlugin} from 'fusion-core'; // html sanitization
 
-export default withMiddleware(async (ctx, next) => {
-  if (__NODE__) {
-    const data = read('package.json');
-    const {version} = JSON.parse(data);
-    ctx.template.head.push(html`<meta id="app-version" content="${version}">`);
-    return next();
-  } else {
-    const version = document.getElementById('app-version').content;
-    console.log(`Version: ${version}`);
-    return next();
+export default createPlugin({
+  middleware: () => {
+    const data = __NODE__ && JSON.parse(fs.readFileSync('package.json').toString());
+    return async (ctx, next) => {
+      if (__NODE__) {
+        ctx.template.head.push(html`<meta id="app-version" content="${data.version}">`);
+        return next();
+      } else {
+        const version = document.getElementById('app-version').content;
+        console.log(`Version: ${version}`);
+        return next();
+      }
+    });
   }
 });
 ```
@@ -434,7 +459,7 @@ const middleware = (ctx, next) => {
 }
 ```
 
-If `userData` above was `<script>alert(1)</script>`, the string would be automatically turned into `<div>\u003Cscript\u003Ealert(1)\u003C/script\u003E</div>`. Note that only `userData` is escaped, but the HTML in your code stays intact.
+If `userData` above was `<script>alert(1)</script>`, ththe string would be automatically turned into `<div>\u003Cscript\u003Ealert(1)\u003C/script\u003E</div>`. Note that only `userData` is escaped, but the HTML in your code stays intact.
 
 If your HTML is complex and needs to be broken into smaller strings, you can also nest sanitized HTML strings like this:
 

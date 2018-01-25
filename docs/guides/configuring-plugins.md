@@ -4,26 +4,28 @@ Plugins can be configured through dependency injection.
 
 ```js
 // greeting-plugin.js
-import {withDependencies} from 'fusion-core';
+import {createPlugin} from 'fusion-core';
 import {LoggerToken, createToken} from 'fusion-tokens';
 
-export const GreetingToken = createToken('GreetingToken');
 export const GreetingNameToken = createToken('GreetingNameToken');
 
-export default withDependencies({
-  logger: LoggerToken, 
-  name: GreetingNameToken,
-})(({logger, name}) => {
-  return {
-    hello: () => logger.info(`hello ${name}`),
-  };
+export default createPlugin({
+  deps: {
+    logger: LoggerToken, 
+    name: GreetingNameToken,
+  }, 
+  provides: ({logger, name}) => {
+    return {
+      hello: () => logger.info(`hello ${name}`),
+    };
+  }
 });
 ```
 
 ```js
 // src/main.js
 import App from 'fusion-react';
-import GreetingPlugin, {GreetingToken, GreetingNameToken} from 'fusion-plugin-greeting';
+import GreetingPlugin, {GreetingNameToken} from 'fusion-plugin-greeting';
 import ConsoleLogger from 'fusion-plugin-console-logger';
 import {LoggerToken, createToken} from 'fusion-tokens';
 
@@ -31,7 +33,7 @@ export default () => {
   const app = new App();
   app.register(GreetingToken, GreetingPlugin);
   app.register(LoggerToken, ConsoleLogger);
-  app.configure(GreetingNameToken, 'Hello!');
+  app.register(GreetingNameToken, 'Hello!');
 }
 ```
 
