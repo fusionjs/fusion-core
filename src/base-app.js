@@ -41,6 +41,8 @@ class FusionApp {
   }
   resolve() {
     const resolved = new Map();
+    const dependedOn = new Set();
+    const nonPluginTokens = new Set();
     const resolving = new Set();
     const registered = this.registered;
     const resolvedPlugins = [];
@@ -78,6 +80,7 @@ class FusionApp {
         const resolvedDeps = {};
         for (const key in registeredDeps) {
           const registeredToken = registeredDeps[key];
+          dependedOn.add(registeredToken);
           resolvedDeps[key] = resolveToken(registeredToken, aliases);
         }
         // `provides` should be undefined if the plugin does not have a `provides` function
@@ -89,8 +92,12 @@ class FusionApp {
         }
         return provides;
       }
-
-      let provides = value && value.__plugin__ ? resolvePlugin(value) : value;
+      let provides = value;
+      if (value && value.__plugin__) {
+        provides = resolvePlugin(provides);
+      } else {
+        nonPluginTokens.add(token);
+      }
 
       if (enhancers && enhancers.length) {
         enhancers.forEach(e => {
@@ -108,6 +115,13 @@ class FusionApp {
 
     for (let i = 0; i < this.plugins.length; i++) {
       resolveToken(this.plugins[i]);
+    }
+    for (const token of nonPluginTokens) {
+      if (!dependedOn.has(token)) {
+        throw new Error(
+          `Registered token without depending on it: ${token.toString()}`
+        );
+      }
     }
     this.plugins = resolvedPlugins;
   }

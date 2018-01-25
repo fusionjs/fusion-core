@@ -338,16 +338,27 @@ tape('dependency registration with optional dependency', t => {
 tape('dependency registration with null value', t => {
   const app = new App('el', el => el);
 
-  t.plan(1);
-  const PluginC = createPlugin({
-    deps: {optionalNull: TokenOptionalWithNullDefault},
-    provides: deps => {
-      t.equal(deps.optionalNull, null, 'null provided as expected');
-    },
+  t.doesNotThrow(() => {
+    const PluginC = createPlugin({
+      deps: {optionalNull: TokenOptionalWithNullDefault},
+      provides: deps => {
+        t.equal(deps.optionalNull, null, 'null provided as expected');
+      },
+    });
+    app.register(TokenC, PluginC);
+    app.resolve();
   });
-  app.register(TokenC, PluginC);
 
-  app.resolve();
+  t.doesNotThrow(() => {
+    const app = new App('el', el => el);
+    // $FlowFixMe
+    app.register('something', null);
+    app.middleware({something: 'something'}, ({something}) => {
+      t.equal(something, null, 'null provided as expected');
+      return (ctx, next) => next();
+    });
+    app.resolve();
+  });
   t.end();
 });
 
@@ -363,22 +374,6 @@ tape('dependency registration with undefined value', t => {
   });
   app.register(TokenC, PluginC);
   t.throws(app.resolve, 'unable to resolve a default value of undefined');
-  t.end();
-});
-
-tape('dependency registration with null value', t => {
-  t.doesNotThrow(() => {
-    const app = new App('el', el => el);
-    // $FlowFixMe
-    app.register(null);
-    app.resolve();
-  });
-  t.doesNotThrow(() => {
-    const app = new App('el', el => el);
-    // $FlowFixMe
-    app.register('something', null);
-    app.resolve();
-  });
   t.end();
 });
 
@@ -491,5 +486,12 @@ tape('dependency configuration with missing deps', t => {
   );
   app.register(StringToken, 'string-a');
   t.throws(() => app.resolve(), 'throws if dependencies are not configured');
+  t.end();
+});
+
+tape('Extraneous dependencies', t => {
+  const app = new App('el', el => el);
+  app.register('test', 'some-value');
+  t.throws(() => app.resolve());
   t.end();
 });
