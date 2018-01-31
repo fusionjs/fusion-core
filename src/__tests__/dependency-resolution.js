@@ -4,14 +4,35 @@ import ClientAppFactory from '../client-app';
 import ServerAppFactory from '../server-app';
 import {createPlugin} from '../create-plugin';
 
-function createToken(name): any {
-  return () => {
-    throw new Error(`Missing dependency: ${name}`);
-  };
+/* Copied from fusion-tokens/index.js */
+const tokenTypes = {
+  Required: 0,
+  Optional: 1,
+};
+function Ref() {}
+class TokenImpl {
+  name: string;
+  ref: mixed;
+  type: $Values<typeof tokenTypes>;
+
+  constructor(name: string, ref: mixed) {
+    this.name = name;
+    this.ref = ref || new Ref();
+    this.type = ref ? tokenTypes.Optional : tokenTypes.Required;
+    if (!ref) {
+      // $FlowFixMe
+      this.optional = () => new TokenImpl(name, this.ref);
+    }
+  }
 }
 
-function createOptionalToken(name: string, defaultValue: any): any {
-  return () => defaultValue;
+type Token<T> = {
+  (): T,
+  optional: () => ?T,
+};
+function createToken(name: string): Token<any> {
+  // $FlowFixMe
+  return new TokenImpl(name);
 }
 
 const App = __BROWSER__ ? ClientAppFactory() : ServerAppFactory();
@@ -24,21 +45,14 @@ type BType = {
 type CType = {
   c: string,
 };
-const TokenA: AType = createToken('TokenA');
-const TokenB: BType = createToken('TokenB');
-const TokenC: CType = createToken('TokenC');
-const TokenD: BType = createToken('TokenD');
-const TokenOptionalE: BType = createOptionalToken('TokenOptionalE', {
-  b: 'default value',
-});
-const TokenOptionalWithNullDefault: * = createOptionalToken(
-  'TokenOptionalWithNullDefault',
-  null
-);
-const TokenOptionalWithUndefinedDefault: * = createOptionalToken(
-  'TokenOptionalWithUndefinedDefault',
-  undefined
-);
+type EType = {
+  e: string,
+};
+const TokenA: Token<AType> = createToken('TokenA');
+const TokenB: Token<BType> = createToken('TokenB');
+const TokenC: Token<CType> = createToken('TokenC');
+const TokenD: Token<BType> = createToken('TokenD');
+const TokenEAsNullable: Token<?EType> = createToken('TokenEAsNullable');
 
 tape('dependency registration', t => {
   const app = new App('el', el => el);
@@ -59,7 +73,7 @@ tape('dependency registration', t => {
       };
     },
   });
-  const PluginB: FusionPlugin<{a: AType}, BType> = createPlugin({
+  const PluginB: FusionPlugin<{a: Token<AType>}, BType> = createPlugin({
     deps: {
       a: TokenA,
     },
@@ -73,7 +87,7 @@ tape('dependency registration', t => {
     },
   });
 
-  type PluginCType = FusionPlugin<{a: AType, b: BType}, CType>;
+  type PluginCType = FusionPlugin<{a: Token<AType>, b: Token<BType>}, CType>;
   const PluginC: PluginCType = createPlugin({
     deps: {
       a: TokenA,
@@ -135,7 +149,7 @@ tape('dependency registration with aliases', t => {
       };
     },
   });
-  const PluginB: FusionPlugin<{a: AType}, BType> = createPlugin({
+  const PluginB: FusionPlugin<{a: Token<AType>}, BType> = createPlugin({
     deps: {
       a: TokenA,
     },
@@ -149,7 +163,7 @@ tape('dependency registration with aliases', t => {
     },
   });
 
-  type PluginCType = FusionPlugin<{a: AType, b: BType}, CType>;
+  type PluginCType = FusionPlugin<{a: Token<AType>, b: Token<BType>}, CType>;
   const PluginC: PluginCType = createPlugin({
     deps: {
       a: TokenA,
@@ -166,7 +180,7 @@ tape('dependency registration with aliases', t => {
     },
   });
 
-  const PluginD: FusionPlugin<{a: AType}, BType> = createPlugin({
+  const PluginD: FusionPlugin<{a: Token<AType>}, BType> = createPlugin({
     deps: {
       a: TokenA,
     },
@@ -205,7 +219,7 @@ tape('dependency registration with no token', t => {
       };
     },
   });
-  const PluginB: FusionPlugin<{a: AType}, BType> = createPlugin({
+  const PluginB: FusionPlugin<{a: Token<AType>}, BType> = createPlugin({
     deps: {
       a: TokenA,
     },
@@ -310,42 +324,18 @@ tape('dependency registration with missing dependency', t => {
   t.end();
 });
 
-tape('dependency registration with optional dependency', t => {
-  const app = new App('el', el => el);
-
-  t.plan(3);
-  const PluginWithOptionalDependency = createPlugin({
-    deps: {optionalE: TokenOptionalE},
-    provides: deps => {
-      t.ok(deps, 'deps are provided');
-      t.ok(deps.optionalE, 'optional dependency is provided');
-      t.equal(
-        deps.optionalE.b,
-        'default value',
-        'default value is provided for optional dependency'
-      );
-
-      return {
-        c: 'PluginC',
-      };
-    },
-  });
-  app.register(TokenC, PluginWithOptionalDependency);
-  app.resolve();
-  t.end();
-});
-
 tape('dependency registration with null value', t => {
   const app = new App('el', el => el);
 
   t.doesNotThrow(() => {
     const PluginC = createPlugin({
-      deps: {optionalNull: TokenOptionalWithNullDefault},
+      deps: {optionalNull: TokenEAsNullable},
       provides: deps => {
         t.equal(deps.optionalNull, null, 'null provided as expected');
       },
     });
-    app.register(TokenC, PluginC);
+    app.register(TokenEAsNullable, null);
+    app.register(PluginC);
     app.resolve();
   });
 
@@ -362,20 +352,20 @@ tape('dependency registration with null value', t => {
   t.end();
 });
 
-tape('dependency registration with undefined value', t => {
-  const app = new App('el', el => el);
+// tape('dependency registration with undefined value', t => {
+//   const app = new App('el', el => el);
 
-  t.plan(1);
-  const PluginC = createPlugin({
-    deps: {optionalUndefined: TokenOptionalWithUndefinedDefault},
-    provides: () => {
-      t.fail('should never reach here');
-    },
-  });
-  app.register(TokenC, PluginC);
-  t.throws(app.resolve, 'unable to resolve a default value of undefined');
-  t.end();
-});
+//   t.plan(1);
+//   const PluginC = createPlugin({
+//     deps: {optionalUndefined: TokenOptionalWithUndefinedDefault},
+//     provides: () => {
+//       t.fail('should never reach here');
+//     },
+//   });
+//   app.register(TokenC, PluginC);
+//   t.throws(app.resolve, 'unable to resolve a default value of undefined');
+//   t.end();
+// });
 
 tape('dependency registration with missing deep tree dependency', t => {
   const app = new App('el', el => el);
@@ -433,43 +423,43 @@ tape('dependency registration with circular dependency', t => {
   t.end();
 });
 
-tape('dependency configuration', t => {
-  const StringToken: string = (() => {}: any);
-  const OtherStringToken: string = (() => {}: any);
-  const NumberToken: number = (() => {}: any);
-  const ObjectToken: {|
-    a: string,
-  |} = (() => {}: any);
+// tape('dependency configuration', t => {
+//   const StringToken: string = (() => {}: any);
+//   const OtherStringToken: string = (() => {}: any);
+//   const NumberToken: number = (() => {}: any);
+//   const ObjectToken: {|
+//     a: string,
+//   |} = (() => {}: any);
 
-  const app = new App('el', el => el);
-  app.register(
-    createPlugin({
-      deps: {
-        a: StringToken,
-        b: OtherStringToken,
-        c: NumberToken,
-        d: ObjectToken,
-      },
-      provides: deps => {
-        t.equal(deps.a, 'string-a');
-        t.equal(deps.b, 'string-b');
-        t.equal(deps.c, 5);
-        t.deepLooseEqual(deps.d, {a: 'some-d'});
-        t.end();
-        return {};
-      },
-    })
-  );
-  app.register(StringToken, 'string-a');
-  app.register(OtherStringToken, 'string-b');
-  app.register(NumberToken, 5);
-  app.register(ObjectToken, {a: 'some-d'});
-  app.resolve();
-});
+//   const app = new App('el', el => el);
+//   app.register(
+//     createPlugin({
+//       deps: {
+//         a: StringToken,
+//         b: OtherStringToken,
+//         c: NumberToken,
+//         d: ObjectToken,
+//       },
+//       provides: deps => {
+//         t.equal(deps.a, 'string-a');
+//         t.equal(deps.b, 'string-b');
+//         t.equal(deps.c, 5);
+//         t.deepLooseEqual(deps.d, {a: 'some-d'});
+//         t.end();
+//         return {};
+//       },
+//     })
+//   );
+//   app.register(StringToken, 'string-a');
+//   app.register(OtherStringToken, 'string-b');
+//   app.register(NumberToken, 5);
+//   app.register(ObjectToken, {a: 'some-d'});
+//   app.resolve();
+// });
 
 tape('dependency configuration with missing deps', t => {
-  const StringToken: string = createToken('string-token');
-  const OtherStringToken: string = createToken('other-string-token');
+  const StringToken: Token<string> = createToken('string-token');
+  const OtherStringToken: Token<string> = createToken('other-string-token');
 
   const app = new App('el', el => el);
   app.register(
@@ -491,7 +481,8 @@ tape('dependency configuration with missing deps', t => {
 
 tape('Extraneous dependencies', t => {
   const app = new App('el', el => el);
-  app.register('test', 'some-value');
+  const TestToken = createToken('test');
+  app.register(TestToken, 'some-value');
   t.throws(() => app.resolve());
   t.end();
 });
