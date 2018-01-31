@@ -147,7 +147,7 @@ export default () => {
 import {html} from 'fusion-core';
 
 export default () => (ctx, next) => {
-  ctx.body.head.push(html`<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />`);
+  ctx.template.head.push(html`<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />`);
   return next();
 }
 ```

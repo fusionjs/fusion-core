@@ -128,7 +128,11 @@ class FusionApp {
     }
     for (const token of nonPluginTokens) {
       if (!dependedOn.has(token)) {
-        throw new Error(`Registered token without depending on it: ${token}`);
+        throw new Error(
+          `Registered token without depending on it: ${
+            token instanceof Function ? token() : String(token)
+          }`
+        );
       }
     }
     this.plugins = resolvedPlugins;
