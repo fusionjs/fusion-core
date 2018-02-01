@@ -195,9 +195,9 @@ tape('dependency registration with aliasing non-plugins', t => {
 
   const ValueA = 'some-value';
   const AliasedValue = 'some-aliased-value';
-  const ValueTokenA: string = createToken('ValueA');
-  const AliasedTokenA: string = createToken('AliasedTokenA');
-  const PluginB: FusionPlugin<{a: string}, BType> = createPlugin({
+  const ValueTokenA: Token<string> = createToken('ValueA');
+  const AliasedTokenA: Token<string> = createToken('AliasedTokenA');
+  const PluginB: FusionPlugin<{a: Token<string>}, BType> = createPlugin({
     deps: {
       a: ValueTokenA,
     },
@@ -211,7 +211,7 @@ tape('dependency registration with aliasing non-plugins', t => {
     },
   });
 
-  type PluginCType = FusionPlugin<{a: string}, CType>;
+  type PluginCType = FusionPlugin<{a: Token<string>}, CType>;
   const PluginC: PluginCType = createPlugin({
     deps: {
       a: ValueTokenA,
