@@ -42,7 +42,9 @@ declare class FusionApp {
   renderer: any;
   enhance<Token, Deps>(
     token: Token,
-    enhancer: (item: Token) => FusionPlugin<Deps, Token>
+    enhancer: (
+      item: $Call<ExtractReturnType, Token>
+    ) => FusionPlugin<Deps, $Call<ExtractReturnType, Token>>
   ): void;
   enhance<Token>(token: Token, enhancer: (token: Token) => Token): void;
   register<Deps, Provides>(Plugin: FusionPlugin<Deps, Provides>): aliaser<*>;
@@ -57,7 +59,10 @@ declare class FusionApp {
     token: Token,
     val: $Call<ExtractReturnType, Token>
   ): aliaser<*>;
-  middleware<Deps>(deps: Deps, middleware: (Deps) => Middleware): void;
+  middleware<Deps>(
+    deps: Deps,
+    middleware: (Deps: $ObjMap<Deps, ExtractReturnType>) => Middleware
+  ): void;
   middleware(middleware: Middleware): void;
   callback(): () => Promise<void>;
   resolve(): void;
