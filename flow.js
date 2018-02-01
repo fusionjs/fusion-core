@@ -52,9 +52,6 @@ declare class FusionApp {
     token: Token,
     Plugin: FusionPlugin<Deps, $Call<ExtractReturnType, Token>>
   ): aliaser<*>;
-  // register<Token: null>(token: Token, val: null): aliaser<*>;
-  // register<Token: string>(token: Token, val: string): aliaser<*>;
-  // register<Token: number>(token: Token, val: number): aliaser<*>;
   register<Token: Object>(
     token: Token,
     val: $Call<ExtractReturnType, Token>
