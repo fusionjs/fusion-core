@@ -1,12 +1,11 @@
 // @flow
 
-/* Copied from fusion-tokens/index.js */
 export const TokenType = {
   Required: 0,
   Optional: 1,
 };
 function Ref() {}
-class TokenImpl {
+export class TokenImpl {
   name: string;
   ref: mixed;
   type: $Values<typeof TokenType>;

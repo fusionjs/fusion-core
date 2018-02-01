@@ -462,40 +462,6 @@ tape('dependency registration with circular dependency', t => {
   t.end();
 });
 
-// tape('dependency configuration', t => {
-//   const StringToken: string = (() => {}: any);
-//   const OtherStringToken: string = (() => {}: any);
-//   const NumberToken: number = (() => {}: any);
-//   const ObjectToken: {|
-//     a: string,
-//   |} = (() => {}: any);
-
-//   const app = new App('el', el => el);
-//   app.register(
-//     createPlugin({
-//       deps: {
-//         a: StringToken,
-//         b: OtherStringToken,
-//         c: NumberToken,
-//         d: ObjectToken,
-//       },
-//       provides: deps => {
-//         t.equal(deps.a, 'string-a');
-//         t.equal(deps.b, 'string-b');
-//         t.equal(deps.c, 5);
-//         t.deepLooseEqual(deps.d, {a: 'some-d'});
-//         t.end();
-//         return {};
-//       },
-//     })
-//   );
-//   app.register(StringToken, 'string-a');
-//   app.register(OtherStringToken, 'string-b');
-//   app.register(NumberToken, 5);
-//   app.register(ObjectToken, {a: 'some-d'});
-//   app.resolve();
-// });
-
 tape('dependency configuration with missing deps', t => {
   const StringToken: Token<string> = createToken('string-token');
   const OtherStringToken: Token<string> = createToken('other-string-token');
