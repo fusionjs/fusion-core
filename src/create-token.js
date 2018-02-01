@@ -9,7 +9,7 @@ export class TokenImpl {
   name: string;
   ref: mixed;
   type: $Values<typeof TokenType>;
-  optional: TokenImpl;
+  optional: ?TokenImpl;
 
   constructor(name: string, ref: mixed) {
     this.name = name;
