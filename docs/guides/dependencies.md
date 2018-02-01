@@ -45,7 +45,7 @@ export default () => {
 
 The `Name` plugin simply saves the value in `?name=[value]` to a cookie session if that querystring value is defined.
 
-Notice that the `middleware` method of the `Name` plugin receives `{Session}` as an argument. This is the same `{Session}` that we passed to `app.register(SessionToken, Session)` and it's [how FusionJS plugins do dependency injection](https://github.com/fusionjs/fusion-core/blob/master/docs/guides/configuring-plugins.md).
+Notice that the `middleware` method of the `Name` plugin receives `{Session}` as an argument. This is the same `{Session}` that we passed to `app.register(SessionToken, Session)` and it's [how FusionJS plugins do dependency injection](https://github.com/fusionjs/fusion-core/blob/master/docs/guides/creating-a-plugin.md#configuration).
 
 We then called `Session.from(ctx)`, which is how that plugin creates a memoized instance per request.
 

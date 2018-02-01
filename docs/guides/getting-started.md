@@ -190,7 +190,6 @@ Here are some more in-depth sections covering various aspects of FusionJS:
 * [Universal code](https://github.com/fusionjs/fusion-core/blob/master/docs/guides/universal-code.md)
 * [Creating a plugin](https://github.com/fusionjs/fusion-core/blob/master/docs/guides/creating-a-plugin.md)
   * [Dependencies](https://github.com/fusionjs/fusion-core/blob/master/docs/guides/dependencies.md)
-  * [Configuring plugins](https://github.com/fusionjs/fusion-core/blob/master/docs/guides/configuring-plugins.md)
   * [Creating endpoints](https://github.com/fusionjs/fusion-core/blob/master/docs/guides/creating-endpoints.md)
   * [Creating providers](https://github.com/fusionjs/fusion-core/blob/master/docs/guides/creating-providers.md)
   * [Modifying the HTML template](https://github.com/fusionjs/fusion-core/blob/master/docs/guides/modifying-html-template.md)
