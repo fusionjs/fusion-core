@@ -49,10 +49,13 @@ class FusionApp {
     const resolving = new Set(); // Token.ref || Token
     const registered = this.registered; // Token.ref || Token -> {value, aliases, enhancers}
     const resolvedPlugins = []; // Plugins
+    const allAliases = new Set();
     const resolveToken = (token, tokenAliases) => {
       // Base: if we have already resolved the type, return it
       if (tokenAliases && tokenAliases.has(token)) {
-        token = tokenAliases.get(token);
+        const newToken = tokenAliases.get(token);
+        allAliases.add([token, newToken]);
+        token = newToken;
       }
       if (resolved.has(token.ref || token)) {
         return resolved.get(token.ref || token);
@@ -124,6 +127,12 @@ class FusionApp {
 
     for (let i = 0; i < this.plugins.length; i++) {
       resolveToken(this.plugins[i]);
+    }
+    for (const aliasPair of allAliases) {
+      const [sourceToken, destToken] = aliasPair;
+      if (dependedOn.has(sourceToken)) {
+        dependedOn.add(destToken);
+      }
     }
     for (const token of nonPluginTokens) {
       if (!dependedOn.has(token.ref || token)) {

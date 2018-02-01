@@ -183,6 +183,61 @@ tape('dependency registration with aliases', t => {
   t.end();
 });
 
+tape('dependency registration with aliasing non-plugins', t => {
+  const app = new App('el', el => el);
+  t.ok(app, 'creates an app');
+  const counters = {
+    a: 0,
+    b: 0,
+    c: 0,
+    d: 0,
+  };
+
+  const ValueA = 'some-value';
+  const AliasedValue = 'some-aliased-value';
+  const ValueTokenA: string = createToken('ValueA');
+  const AliasedTokenA: string = createToken('AliasedTokenA');
+  const PluginB: FusionPlugin<{a: string}, BType> = createPlugin({
+    deps: {
+      a: ValueTokenA,
+    },
+    provides: deps => {
+      counters.b++;
+      t.equal(deps.a, 'some-value');
+      t.equal(counters.b, 1, 'only instantiates once');
+      return {
+        b: 'PluginB',
+      };
+    },
+  });
+
+  type PluginCType = FusionPlugin<{a: string}, CType>;
+  const PluginC: PluginCType = createPlugin({
+    deps: {
+      a: ValueTokenA,
+    },
+    provides: deps => {
+      counters.c++;
+      t.equal(deps.a, 'some-aliased-value');
+      t.equal(counters.c, 1, 'only instantiates once');
+      return {
+        c: 'PluginC',
+      };
+    },
+  });
+
+  app.register(ValueTokenA, ValueA);
+  app.register(TokenB, PluginB);
+  app.register(TokenC, PluginC).alias(ValueTokenA, AliasedTokenA);
+  app.register(AliasedTokenA, AliasedValue);
+  t.equal(counters.b, 0, 'does not instantiate until resolve is called');
+  t.equal(counters.c, 0, 'does not instantiate until resolve is called');
+  app.resolve();
+  t.equal(counters.b, 1, 'only instantiates once');
+  t.equal(counters.c, 1, 'only instantiates once');
+  t.end();
+});
+
 tape('dependency registration with no token', t => {
   const app = new App('el', el => el);
   const PluginA: FusionPlugin<void, AType> = createPlugin({
