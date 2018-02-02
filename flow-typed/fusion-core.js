@@ -73,10 +73,6 @@ declare module 'fusion-core' {
   declare export function createPlugin<Deps, Service>(
     options: FusionPlugin<Deps, Service>
   ): FusionPlugin<Deps, Service>;
-  declare export type Token<T> = {
-    (): T,
-    optional: () => ?T,
-  };
   declare export function createToken(name: string): Token<any>;
   declare export function html(
     strings: Array<string>,
