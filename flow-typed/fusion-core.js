@@ -21,8 +21,12 @@ declare module 'fusion-core' {
       body: Array<string>,
     },
   } & KoaContext;
+  declare export type Token<T> = {
+    (): T,
+    optional: () => void | T,
+  };
   declare export type Context = SSRContext | KoaContext;
-  declare type FusionPlugin<Deps, Service> = {
+  declare export type FusionPlugin<Deps, Service> = {
     deps?: Deps,
     provides?: (Deps: $ObjMap<Deps, ExtractReturnType>) => Service,
     middleware?: (
