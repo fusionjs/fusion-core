@@ -5,7 +5,6 @@ import ClientAppFactory from '../client-app';
 import ServerAppFactory from '../server-app';
 import {createPlugin} from '../create-plugin';
 import {createToken} from '../create-token';
-import {ElementToken} from '../tokens';
 
 const App = __BROWSER__ ? ClientAppFactory() : ServerAppFactory();
 type AType = {
@@ -59,7 +58,7 @@ test('sync render', async t => {
   t.end();
 });
 
-test.only('render plugin order', async t => {
+test('render plugin order', async t => {
   let numRenders = 0;
   const element = 'hi';
   const renderFn = el => {
@@ -70,7 +69,6 @@ test.only('render plugin order', async t => {
     });
   };
   const renderPlugin = createPlugin({
-    deps: {},
     provides: () => renderFn,
     middleware: () => (ctx, next) => {
       t.equal(
@@ -81,6 +79,7 @@ test.only('render plugin order', async t => {
       return next();
     },
   });
+  // TODO(#137): fix flow types for renderPlugin
   // $FlowFixMe
   const app = new App(element, renderPlugin);
   const ctx = await run(app);
