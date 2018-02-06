@@ -1,6 +1,6 @@
 import {createPlugin} from './create-plugin';
 import {ElementToken, RenderToken} from './tokens';
-import {TokenType, TokenImpl} from './create-token';
+import {createToken, TokenType, TokenImpl} from './create-token';
 
 class FusionApp {
   constructor(element, render) {
@@ -10,8 +10,20 @@ class FusionApp {
     render && this.register(RenderToken, render);
   }
   register(token, value) {
-    if (value === undefined) {
+    if (token && token.__plugin__) {
       value = token;
+      token = createToken(String(value));
+    }
+    if (!(token instanceof TokenImpl) && value === undefined) {
+      throw new Error(
+        __DEV__
+          ? `Cannot register ${
+              token
+            } without a token. Did you accidentally register a ${
+              __NODE__ ? 'browser' : 'server'
+            } plugin on the ${__NODE__ ? 'server' : 'browser'}?`
+          : 'Invalid configuration registration'
+      );
     }
     // the renderer is a special case, since it needs to be always run last
     this.plugins.push(token);
