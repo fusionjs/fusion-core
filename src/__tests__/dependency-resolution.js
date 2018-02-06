@@ -505,8 +505,10 @@ tape('Extraneous dependencies', t => {
 
 tape('Missing token errors reasonably', t => {
   const app = new App('el', el => el);
+  // $FlowFixMe
   t.throws(() => app.register('some-value'), /Cannot register some-value/);
   const BrowserPlugin = null; // idiomatic browser plugin implementation for server-only plugin is `export default null`;
+  // $FlowFixMe
   t.throws(() => app.register(BrowserPlugin), /Cannot register null/);
   t.end();
 });
