@@ -1,6 +1,6 @@
 # Working with secrets
 
-Handle secrets like any other plugin configuration; Just register them to provide them to the plugin you're using.
+Handle secrets like any other plugin configuration. Just register them to provide them to the plugin you're using.
 
 In the example below, the secret for the JWT session plugin is being provisioned via environment variables.
 
