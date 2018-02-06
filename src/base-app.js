@@ -18,9 +18,7 @@ class FusionApp {
     if (!(token instanceof TokenImpl) && value === undefined) {
       throw new Error(
         __DEV__
-          ? `Cannot register ${
-              token
-            } without a token. Did you accidentally register a ${
+          ? `Cannot register ${token} without a token. Did you accidentally register a ${
               __NODE__ ? 'browser' : 'server'
             } plugin on the ${__NODE__ ? 'server' : 'browser'}?`
           : 'Invalid configuration registration'
