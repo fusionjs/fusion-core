@@ -1,5 +1,6 @@
 /* @flow */
 import type {Context as KoaContext} from 'koa';
+
 declare var __NODE__: Boolean;
 declare var __BROWSER__: Boolean;
 
@@ -34,17 +35,22 @@ declare type FusionPlugin<Deps, Service> = {
     Deps: $ObjMap<Deps, ExtractReturnType>,
     Service: Service
   ) => Middleware,
+  cleanup?: (service: Service) => Promise<any>,
 };
 declare type Middleware = (
   ctx: Context,
   next: () => Promise<void>
 ) => Promise<*>;
 
+type cleanupFn = (thing: any) => Promise<any>;
+
 declare class FusionApp {
   constructor<Element>(element: Element, render: (Element) => any): FusionApp;
+  cleanups: Array<cleanupFn>;
   registered: Map<any, any>;
   plugins: Array<any>;
   renderer: any;
+  cleanup(): Promise<any>;
   enhance<Token, Deps>(
     token: Token,
     enhancer: (

@@ -5,7 +5,6 @@ import timing, {TimingToken} from './plugins/timing';
 import BaseApp from './base-app';
 import createClientHydrate from './plugins/client-hydrate';
 import createClientRenderer from './plugins/client-renderer';
-
 import {RenderToken, ElementToken} from './tokens';
 
 export default function(): Class<FusionApp> {
