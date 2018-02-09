@@ -12,11 +12,11 @@ export default function getRendererPlugin({render, timing}) {
       renderTime = now() - renderStart;
     }
 
+    timer.upstreamStart = now();
     await next();
 
     if (ctx.element) {
       timer.render.resolve(renderTime);
     }
-    timer.upstreamStart = now();
   };
 }
