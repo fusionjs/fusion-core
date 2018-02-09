@@ -5,16 +5,17 @@ export default function getRendererPlugin({render, timing}) {
     const timer = timing.from(ctx);
     timer.downstream.resolve(now() - timer.start);
 
-    let renderStart = -1;
+    let renderTime = 0;
     if (ctx.element) {
-      renderStart = now();
+      const renderStart = now();
       ctx.rendered = await render(ctx.element);
+      renderTime = now() - renderStart;
     }
 
     await next();
 
     if (ctx.element) {
-      timer.render.resolve(now() - renderStart);
+      timer.render.resolve(renderTime);
     }
     timer.upstreamStart = now();
   };
