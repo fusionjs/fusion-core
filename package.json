@@ -40,7 +40,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "lint": "eslint . --ignore-path .gitignore",
-    "transpile": "npm run clean && cup build",
+    "transpile": "npm run clean && cup build --skip-flow",
     "build-test": "rm -rf dist-tests && cup build-tests",
     "just-test":
       "unitest --browser=dist-tests/browser.js --node=dist-tests/node.js",
