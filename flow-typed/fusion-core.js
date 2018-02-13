@@ -50,13 +50,7 @@ declare module 'fusion-core' {
     plugins: Array<any>;
     renderer: any;
     cleanup(): Promise<any>;
-    enhance<Token, Deps>(
-      token: Token,
-      enhancer: (
-        item: $Call<ExtractReturnType, Token>
-      ) => FusionPlugin<Deps, $Call<ExtractReturnType, Token>>
-    ): void;
-    enhance<Token>(token: Token, enhancer: (token: Token) => Token): void;
+    enhance<Token, Deps>(token: Token, enhancer: Function): void;
     register<Deps, Provides>(Plugin: FusionPlugin<Deps, Provides>): aliaser<*>;
     register<Token, Deps>(
       token: Token,
