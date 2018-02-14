@@ -4,7 +4,7 @@
 
 ### Guides
 
-* [What is FusionJS](https://github.com/fusionjs/fusion-core/blob/master/docs/guides/what-is-fusion.md)
+* [What is Fusion.js](https://github.com/fusionjs/fusion-core/blob/master/docs/guides/what-is-fusion.md)
 * [Getting started](https://github.com/fusionjs/fusion-core/blob/master/docs/guides/getting-started.md)
 * [Framework comparison](https://github.com/fusionjs/fusion-core/blob/master/docs/guides/framework-comparison.md)
 
@@ -22,7 +22,7 @@
 
 ## fusion-core
 
-The `fusion-core` package provides a generic entry point class for FusionJS applications that is used by the FusionJS runtime.
+The `fusion-core` package provides a generic entry point class for Fusion.js applications that is used by the Fusion.js runtime.
 
 If you're using React, you should use the [`fusion-react`](https://github.com/fusionjs/fusion-react) package instead.
 
@@ -86,8 +86,8 @@ app.register([Token,] Plugin | Value);
 * `Plugin: Object` - The result from calling `createPlugin` to be registered
 * `Value: any` - The value to be registered. Alternative to Plugin.
 
-Call this method to register a plugin into a FusionJS application. Optionally pass a token as the first
-argument to allow integrating the plugin into the FusionJS dependency injection system.
+Call this method to register a plugin into a Fusion.js application. Optionally pass a token as the first
+argument to allow integrating the plugin into the Fusion.js dependency injection system.
 
 ##### app.middleware
 
@@ -181,7 +181,7 @@ render your application on the server/browser, and allows `fusion-core` to remai
 ## Plugins
 
 Often we want to encapsulate some functionality into a single coherent package that exposes a programmatic API that can be consumed by others.
-In FusionJS, this is done via a Plugin. FusionJS plugins can declare dependencies and provide programmatic apis and middlewares.
+In Fusion.js, this is done via a Plugin. Fusion.js plugins can declare dependencies and provide programmatic apis and middlewares.
 
 ##### createPlugin
 
@@ -224,7 +224,7 @@ const ConsoleLoggerPlugin = createPlugin({
 });
 ```
 
-To use plugins, you need to register them with your FusionJS application. You do this by calling
+To use plugins, you need to register them with your Fusion.js application. You do this by calling
 `app.register` with the plugin and a token for that plugin. The token is a value used to keep track of
 what plugins are registered, and to allow plugins to depend on one another. Tokens also work nicely with `flow`.
 You can think of Tokens like interfaces. We keep a list of standard tokens in the `fusion-tokens` repository.
@@ -264,7 +264,7 @@ The API plugin is declaring that it needs a logger that matches the API document
 
 ## Middleware
 
-A middleware function is essentially a [Koa](http://koajs.com/) middleware, a function that takes two argument: a `ctx` object that has some FusionJS-specific properties, and a `next` callback function.
+A middleware function is essentially a [Koa](http://koajs.com/) middleware, a function that takes two argument: a `ctx` object that has some Fusion.js-specific properties, and a `next` callback function.
 However, it has some additional properties on `ctx` and can run both on the `server` and the `browser`.
 
 ```js
@@ -273,7 +273,7 @@ const middleware = (ctx, next) => {
 };
 ```
 
-In FusionJS, the `next()` call represents the time when virtual dom rendering happens. Typically, you'll want to run all your logic before that, and simply have a `return next()` statement at the end of the function. Even in cases where virtual DOM rendering is not applicable, this pattern is still the simplest way to write a middleware.
+In Fusion.js, the `next()` call represents the time when virtual dom rendering happens. Typically, you'll want to run all your logic before that, and simply have a `return next()` statement at the end of the function. Even in cases where virtual DOM rendering is not applicable, this pattern is still the simplest way to write a middleware.
 
 In a few more advanced cases, however, you might want to do things _after_ virtual dom rendering. In that case, you can call `await next()` instead:
 
@@ -448,7 +448,7 @@ In the server, `ctx` also exposes the same properties as a [Koa context](http://
     * `properties: Object` - is merged to the error object
   * `respond: boolean` - set to true to bypass Koa's built-in response handling. You should not use this flag.
 
-Additionally, when server-side rendering a page, FusionJS sets `ctx.template` to an object with the following properties:
+Additionally, when server-side rendering a page, Fusion.js sets `ctx.template` to an object with the following properties:
 
 * `ctx: Object`
   * `template: Object`
