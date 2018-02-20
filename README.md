@@ -4,7 +4,7 @@
 
 ### Guides
 
-* [What is FusionJS](https://github.com/fusionjs/fusion-core/blob/master/docs/guides/what-is-fusion.md)
+* [What is Fusion.js](https://github.com/fusionjs/fusion-core/blob/master/docs/guides/what-is-fusion.md)
 * [Getting started](https://github.com/fusionjs/fusion-core/blob/master/docs/guides/getting-started.md)
 * [Framework comparison](https://github.com/fusionjs/fusion-core/blob/master/docs/guides/framework-comparison.md)
 
