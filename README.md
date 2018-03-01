@@ -635,17 +635,13 @@ app.enhance(FetchToken, fetch => {
 });
 ```
 
-#### Controling SSR behavior
+#### Controlling SSR behavior
 
-You can control SSR behavior by enhancing the SSRDeciderToken. This will give you the ability to apply custom logic around which routes go through the renderer.
+You can control SSR behavior by enhancing the SSRDeciderToken. This will give you the ability to apply custom logic around which routes go through the renderer. You may enhance the SSRDeciderToken with either a function, or a plugin if you need dependencies.
 
 ```js
 import {SSRDeciderToken} from 'fusion-core';
-const SSRDeciderEnhancer = ssrDecider =>
-  createPlugin({
-    provides: () => ctx => {
-      return ssrDecider(ctx) && !ctx.path.startsWith('/path/to/disable/ssr');
-    },
-  });
-app.enhance(SSRDeciderToken, SSRDeciderEnhancer);
+app.enhance(SSRDeciderToken, decide => ctx =>
+  decide(ctx) && !ctx.path.match(/ignore-ssr-route/)
+);
 ```

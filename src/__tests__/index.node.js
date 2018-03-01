@@ -81,7 +81,7 @@ test('ssr without valid accept header', async t => {
   t.end();
 });
 
-test('disable SSR by composing SSRDecider', async t => {
+test('disable SSR by composing SSRDecider with a plugin', async t => {
   const flags = {render: false};
   const element = 'hi';
   const render = () => {
@@ -110,6 +110,50 @@ test('disable SSR by composing SSRDecider', async t => {
       });
     };
     app.enhance(SSRDeciderToken, SSRDeciderEnhancer);
+    return app;
+  }
+
+  try {
+    let initialCtx = {
+      path: '/foo',
+    };
+    const ctx = await run(buildApp(), initialCtx);
+
+    t.notok(ctx.element, 'non-ssr route does not set ctx.element');
+    t.notok(ctx.type, 'non-ssr route does not set ctx.type');
+    t.ok(!flags.render, 'non-ssr route does not call render');
+    t.equals(ctx.body, '_NO_SSR_', 'can set body in plugin during non-ssr');
+
+    let validSSRPathCtx = {
+      path: '/some-path',
+    };
+    const renderCtx = await run(buildApp(), validSSRPathCtx);
+    t.equals(renderCtx.element, element, 'ssr route sets ctx.element');
+    t.equals(renderCtx.type, 'text/html', 'ssr route sets ctx.type');
+  } catch (e) {
+    t.ifError(e, 'does not error');
+  }
+  t.end();
+});
+
+test('disable SSR by composing SSRDecider with a function', async t => {
+  const flags = {render: false};
+  const element = 'hi';
+  const render = () => {
+    flags.render = true;
+  };
+
+  function buildApp() {
+    const app = new App(element, render);
+
+    app.middleware((ctx, next) => {
+      ctx.body = '_NO_SSR_';
+      return next();
+    });
+
+    app.enhance(SSRDeciderToken, decide => ctx =>
+      decide(ctx) && !ctx.path.startsWith('/foo')
+    );
     return app;
   }
 
