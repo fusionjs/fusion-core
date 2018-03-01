@@ -7,7 +7,7 @@ const SSRDecider = createPlugin({
     return ctx => {
       // If the request has one of these extensions, we assume it's not something that requires server-side rendering of virtual dom
       // TODO(#46): this check should probably look at the asset manifest to ensure asset 404s are handled correctly
-      if (ctx.path.match(/\.js$/)) return false;
+      if (ctx.path.match(/\.(js|gif|jpg|png|pdf|json)$/)) return false;
       // The Accept header is a good proxy for whether SSR should happen
       // Requesting an HTML page via the browser url bar generates a request with `text/html` in its Accept headers
       // XHR/fetch requests do not have `text/html` in the Accept headers

@@ -637,7 +637,7 @@ app.enhance(FetchToken, fetch => {
 
 #### Controlling SSR behavior
 
-You can control SSR behavior by enhancing the SSRDeciderToken. This will give you the ability to apply custom logic around which routes go through the renderer. You may enhance the SSRDeciderToken with either a function, or a plugin if you need dependencies.
+By default we do not perfrom SSR for any paths that match the following extensions: js, gif, jpg, png, pdf and json. You can control SSR behavior by enhancing the SSRDeciderToken. This will give you the ability to apply custom logic around which routes go through the renderer. You may enhance the SSRDeciderToken with either a function, or a plugin if you need dependencies.
 
 ```js
 import {SSRDeciderToken} from 'fusion-core';

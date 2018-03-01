@@ -180,6 +180,48 @@ test('disable SSR by composing SSRDecider with a function', async t => {
   t.end();
 });
 
+test('SSR extension handling', async t => {
+  const extensionToSSRSupported = {
+    js: false,
+    gif: false,
+    jpg: false,
+    png: false,
+    pdf: false,
+    json: false,
+    html: true,
+  };
+
+  const flags = {render: false};
+  const element = 'hi';
+  const render = () => {
+    flags.render = true;
+  };
+
+  function buildApp() {
+    const app = new App(element, render);
+    return app;
+  }
+
+  try {
+    for (let i in extensionToSSRSupported) {
+      flags.render = false;
+      let initialCtx = {
+        path: `/some-path.${i}`,
+      };
+      await run(buildApp(), initialCtx);
+      const shouldSSR = extensionToSSRSupported[i];
+      t.equals(
+        flags.render,
+        shouldSSR,
+        `extension of ${i} should ${shouldSSR ? '' : 'not'} have ssr`
+      );
+    }
+  } catch (e) {
+    t.ifError(e, 'does not error');
+  }
+  t.end();
+});
+
 test('HTML escaping works', async t => {
   const element = 'hi';
   const render = el => el;
