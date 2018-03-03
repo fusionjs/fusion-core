@@ -60,8 +60,6 @@ declare module 'fusion-core' {
       token: Token,
       val: $Call<ExtractReturnType, Token>
     ): aliaser<*>;
-    // Register a plugin /w middleware and no dependencies
-    register(val: ?() => void): aliaser<*>;
     middleware<Deps>(
       deps: Deps,
       middleware: (Deps: $ObjMap<Deps, ExtractReturnType>) => Middleware
