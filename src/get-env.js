@@ -10,7 +10,7 @@ function load(key, value) {
 export function loadEnv() {
   const rootDir = load('ROOT_DIR', '.');
   const env = load('NODE_ENV', 'development');
-  if (!(env === 'development' || env === 'production')) {
+  if (!(env === 'development' || env === 'production' || env === 'test')) {
     throw new Error(`Invalid NODE_ENV loaded: ${env}.`);
   }
   const prefix = load('ROUTE_PREFIX', '');
