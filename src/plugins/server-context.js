@@ -1,6 +1,6 @@
-import getEnv from '../get-env.js';
 import uuidv4 from 'uuid/v4';
 import UAParser from 'ua-parser-js';
+import getEnv from '../get-env.js';
 
 const envVars = getEnv();
 
