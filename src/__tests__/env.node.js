@@ -1,3 +1,4 @@
+/* eslint-env node */
 import tape from 'tape-cup';
 import {loadEnv} from '../get-env.js';
 
@@ -43,19 +44,19 @@ tape('loadEnv overrides', t => {
 
 tape('loadEnv validation', t => {
   process.env.NODE_ENV = 'LOL';
-  t.throws(loadEnv, /Invalid NODE_ENV loaded/);
+  t.throws(loadEnv(), /Invalid NODE_ENV loaded/);
   process.env.NODE_ENV = '';
 
   process.env.ROUTE_PREFIX = 'test/';
-  t.throws(loadEnv, /ROUTE_PREFIX must not end with /);
+  t.throws(loadEnv(), /ROUTE_PREFIX must not end with /);
   process.env.ROUTE_PREFIX = '';
 
   process.env.FRAMEWORK_STATIC_ASSET_PATH = 'test/';
-  t.throws(loadEnv, /FRAMEWORK_STATIC_ASSET_PATH must not end with /);
+  t.throws(loadEnv(), /FRAMEWORK_STATIC_ASSET_PATH must not end with /);
   process.env.FRAMEWORK_STATIC_ASSET_PATH = '';
 
   process.env.CDN_URL = 'test/';
-  t.throws(loadEnv, /CDN_URL must not end with /);
+  t.throws(loadEnv(), /CDN_URL must not end with /);
   process.env.CDN_URL = '';
   t.end();
 });
