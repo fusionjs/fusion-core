@@ -1,6 +1,7 @@
 /* @flow */
 
 declare module 'fusion-core' {
+  // $FlowFixMe
   import type {Context as KoaContext} from 'koa';
 
   // TODO(#61): Type checking here isn't very good, as it allows you to
@@ -68,7 +69,7 @@ declare module 'fusion-core' {
     callback(): () => Promise<void>;
     resolve(): void;
   }
-  declare export default typeof FusionApp;
+  declare export default typeof FusionApp
   declare export function createPlugin<Deps, Service>(
     options: FusionPlugin<Deps, Service>
   ): FusionPlugin<Deps, Service>;
