@@ -15,7 +15,7 @@ class FusionApp {
   register(token, value) {
     if (token && token.__plugin__) {
       value = token;
-      token = createToken(String(value));
+      token = createToken('UnnamedPlugin');
     }
     if (!(token instanceof TokenImpl) && value === undefined) {
       throw new Error(
@@ -39,7 +39,7 @@ class FusionApp {
       aliases: new Map(),
       enhancers: [],
     };
-    this.registered.set(getTokenRef(token), {value, aliases, enhancers});
+    this.registered.set(getTokenRef(token), {value, aliases, enhancers, token});
     function alias(sourceToken, destToken) {
       aliases.set(sourceToken, destToken);
       return {alias};
@@ -60,7 +60,7 @@ class FusionApp {
       enhancers: [],
     };
     enhancers.push(enhancer);
-    this.registered.set(getTokenRef(token), {value, aliases, enhancers});
+    this.registered.set(getTokenRef(token), {value, aliases, enhancers, token});
   }
   cleanup() {
     return Promise.all(this.cleanups.map(fn => fn()));
@@ -101,11 +101,37 @@ class FusionApp {
         if (token.type === TokenType.Optional) {
           this.register(token, undefined);
         } else {
+          const dependents = Array.from(this.registered.entries());
+
+          /**
+           * Iterate over the entire list of dependencies and find all
+           * dependencies of a given token.
+           */
+          const findDependentTokens = token => {
+            return dependents
+              .filter(entry => {
+                if (!entry[1].value || !entry[1].value.deps) {
+                  return false;
+                }
+                const deps = entry[1].value.deps;
+                for (let dep in deps) {
+                  if (deps[dep] === token) {
+                    return true;
+                  }
+                }
+
+                return false;
+              })
+              .map(entry => entry[1].token);
+          };
+          const dependentTokens = findDependentTokens(token);
+
           // otherwise, we cannot resolve this token
           throw new Error(
             `Cannot resolve to a value for token: ${
               token.name
-            }.  Ensure this token has been registered`
+            }.  Ensure this token has been registered.\n
+Dependent tokens are: ${dependentTokens.map(token => token.name).join(', ')}.`
           );
         }
       }
