@@ -281,9 +281,9 @@ test('SSR with redirects downstream', async t => {
   try {
     const ctx = await run(app);
     t.equal(ctx.status, 302, 'sends 302 status code');
-    t.notok(ctx.rendered, 'does not render');
+    t.ok(ctx.rendered, 'should call render for SSR-based component redirects');
     t.equal(typeof ctx.body, 'string');
-    t.notok(flags.render, 'does not call render');
+    t.ok(flags.render, 'calls render for SSR-based component redirects');
   } catch (e) {
     t.ifError(e, 'should not error');
   }
