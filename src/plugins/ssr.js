@@ -157,9 +157,9 @@ function getChunkPreloaderScript({nonce = '', preloadChunks}) {
       var val = el.getAttribute("data-webpack-preload");
       if (val === null) return;
       var id = parseInt(val, 10);
-      if (__HANDLE_ERROR) return __HANDLE_ERROR(id);
+      if (__HANDLE_ERROR) return __HANDLE_ERROR(id, e);
       if (!__UNHANDLED_ERRORS__) __UNHANDLED_ERRORS__ = [];
-      __UNHANDLED_ERRORS__.push(id);
+      __UNHANDLED_ERRORS__.push([id, e]);
     }
     addEventListener("error", onError, true);
     addEventListener("load", function() {
