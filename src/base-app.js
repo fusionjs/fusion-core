@@ -6,6 +6,7 @@ import {SSRDecider} from './plugins/ssr';
 class FusionApp {
   constructor(el, render) {
     this.registered = new Map(); // getTokenRef(token) -> {value, aliases, enhancers}
+    this.enhancerToToken = new Map(); // enhancer -> token
     this.plugins = []; // Token
     this.cleanups = [];
     el && this.register(ElementToken, el);
@@ -59,6 +60,7 @@ class FusionApp {
       aliases: new Map(),
       enhancers: [],
     };
+    this.enhancerToToken.set(enhancer, token);
     enhancers.push(enhancer);
     this.registered.set(getTokenRef(token), {value, aliases, enhancers, token});
   }
@@ -77,6 +79,7 @@ class FusionApp {
     const registered = this.registered; // Token.ref || Token -> {value, aliases, enhancers}
     const resolvedPlugins = []; // Plugins
     const allAliases = new Set(); // Token.ref || Token
+    const appliedEnhancers = [];
     const resolveToken = (token, tokenAliases) => {
       // Base: if we have already resolved the type, return it
       if (tokenAliases && tokenAliases.has(token)) {
@@ -107,31 +110,43 @@ class FusionApp {
            * Iterate over the entire list of dependencies and find all
            * dependencies of a given token.
            */
-          const findDependentTokens = token => {
+          const findDependentTokens = () => {
             return dependents
               .filter(entry => {
                 if (!entry[1].value || !entry[1].value.deps) {
                   return false;
                 }
-                const deps = entry[1].value.deps;
-                for (let dep in deps) {
-                  if (deps[dep] === token) {
-                    return true;
-                  }
-                }
-
-                return false;
+                return Object.values(entry[1].value.deps).includes(token);
               })
-              .map(entry => entry[1].token);
+              .map(entry => entry[1].token.name);
           };
-          const dependentTokens = findDependentTokens(token);
+          const findDependentEnhancers = () => {
+            return appliedEnhancers
+              .filter(([, provides]) => {
+                if (!provides || !provides.deps) {
+                  return false;
+                }
+                return Object.values(provides.deps).includes(token);
+              })
+              .map(([enhancer]) => {
+                const enhancedToken = this.enhancerToToken.get(enhancer);
+                return `EnhancerOf<${enhancedToken.name}>`;
+              });
+          };
+          const dependentTokens = [
+            ...findDependentTokens(),
+            ...findDependentEnhancers(),
+          ];
 
           // otherwise, we cannot resolve this token
           throw new Error(
-            `Cannot resolve to a value for token: ${
+            `Could not resolve token: "${
               token.name
-            }.  Ensure this token has been registered.\n
-Dependent tokens are: ${dependentTokens.map(token => token.name).join(', ')}.`
+            }", which is required by plugins registered with tokens: ${dependentTokens
+              .map(token => `"${token}"`)
+              .join(', ')}. Did you forget to register a value for "${
+              token.name
+            }"?`
           );
         }
       }
@@ -170,6 +185,7 @@ Dependent tokens are: ${dependentTokens.map(token => token.name).join(', ')}.`
       if (enhancers && enhancers.length) {
         enhancers.forEach(e => {
           let nextProvides = e(provides);
+          appliedEnhancers.push([e, nextProvides]);
           if (nextProvides && nextProvides.__plugin__) {
             nextProvides = resolvePlugin(nextProvides);
           }
@@ -193,7 +209,7 @@ Dependent tokens are: ${dependentTokens.map(token => token.name).join(', ')}.`
     for (const token of nonPluginTokens) {
       if (!dependedOn.has(getTokenRef(token))) {
         throw new Error(
-          `Registered token without depending on it: ${token.name}`
+          `Registered token without depending on it: "${token.name}"`
         );
       }
     }

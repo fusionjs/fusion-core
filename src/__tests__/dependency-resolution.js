@@ -494,7 +494,10 @@ tape('dependency configuration with missing deps', t => {
   );
   app.register(StringToken, 'string-a');
   t.throws(() => app.resolve(), 'throws if dependencies are not configured');
-  t.throws(() => app.resolve(), /\nDependent tokens are: parent-token/);
+  t.throws(
+    () => app.resolve(),
+    /required by plugins registered with tokens: "parent-token"/
+  );
   t.end();
 });
 
@@ -516,7 +519,10 @@ tape('error message when dependent plugin does not have token', t => {
     })
   );
   app.register(StringToken, 'string-a');
-  t.throws(() => app.resolve(), /\nDependent tokens are: UnnamedPlugin/);
+  t.throws(
+    () => app.resolve(),
+    /required by plugins registered with tokens: "UnnamedPlugin"/
+  );
   t.end();
 });
 
