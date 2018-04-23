@@ -4,10 +4,15 @@ import {createPlugin} from './create-plugin';
 import {createToken, TokenType, TokenImpl} from './create-token';
 import {ElementToken, RenderToken, SSRDeciderToken} from './tokens';
 import {SSRDecider} from './plugins/ssr';
-import type {cleanupFn, MiddlewareWithDeps, Token} from './types.js';
+import type {
+  cleanupFn,
+  Middleware,
+  MiddlewareWithDeps,
+  Token,
+} from './types.js';
 
 class FusionApp {
-  constructor(el: Element, render: *) {
+  constructor(el: Element | string, render: *) {
     this.registered = new Map(); // getTokenRef(token) -> {value, aliases, enhancers}
     this.enhancerToToken = new Map(); // enhancer -> token
     this.plugins = []; // Token
@@ -69,11 +74,16 @@ class FusionApp {
     }
     return {alias};
   }
-  middleware<Deps>(deps: Deps, middleware: MiddlewareWithDeps<Deps>) {
-    if (middleware === undefined) {
-      middleware = () => deps;
+  // middleware<Deps>(deps: Deps, middleware: MiddlewareWithDeps<Deps>) {
+  middleware<Deps>(...args: Array<any>) {
+    if (args[1] === undefined) {
+      const middleware: () => Middleware = () => args[0];
+      this.register(createPlugin({middleware}));
+    } else {
+      const deps: Deps = args[0];
+      const middleware: MiddlewareWithDeps<Deps> = args[1];
+      this.register(createPlugin({deps, middleware}));
     }
-    this.register(createPlugin({deps, middleware}));
   }
   enhance<TResolved>(token: Token<TResolved>, enhancer: Function) {
     const {value, aliases, enhancers} = this.registered.get(

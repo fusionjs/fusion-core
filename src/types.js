@@ -1,11 +1,9 @@
 // @flow
 
 import type {Context as KoaContext} from 'koa';
+import {TokenImpl} from './create-token.js';
 
-export type Token<T> = {
-  (): T,
-  optional: () => void | T,
-};
+export type Token<T> = TokenImpl<T>;
 
 type ExtendedKoaContext = KoaContext & {memoized: Map<Object, mixed>};
 
@@ -27,6 +25,7 @@ export type Middleware = (
 ) => Promise<*> | void;
 
 export type MiddlewareWithDeps<Deps> = (
+  // $FlowFixMe
   Deps: $ObjMap<Deps, ExtractReturnType>
 ) => Middleware;
 
