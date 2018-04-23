@@ -43,7 +43,7 @@ class FusionApp {
     let token;
     let value;
 
-    if (args.length === 1 && args[0] && args[0].__plugin__) {
+    if (args.length === 1 && args[0] !== null && args[0].__plugin__) {
       value = args[0];
       token = createToken('UnnamedPlugin');
     } else {
@@ -53,9 +53,9 @@ class FusionApp {
     if (!(token instanceof TokenImpl) && value === undefined) {
       throw new Error(
         __DEV__
-          ? `Cannot register ${
-              token ? String(token) : '(UnknownToken)'
-            } without a token. Did you accidentally register a ${
+          ? `Cannot register ${String(
+              token
+            )} without a token. Did you accidentally register a ${
               __NODE__ ? 'browser' : 'server'
             } plugin on the ${__NODE__ ? 'server' : 'browser'}?`
           : 'Invalid configuration registration'
