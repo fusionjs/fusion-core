@@ -1,5 +1,7 @@
 // @flow
 
+import type {Token} from './types.js';
+
 export const TokenType = {
   Required: 0,
   Optional: 1,
@@ -21,8 +23,7 @@ export class TokenImpl<TResolved> {
   }
 }
 
-export function createToken<TResolvedType>(
-  name: string
-): TokenImpl<TResolvedType> {
+export function createToken<TResolvedType>(name: string): Token<TResolvedType> {
+  // $FlowFixMe
   return new TokenImpl(name);
 }

@@ -1,9 +1,11 @@
 // @flow
 
 import type {Context as KoaContext} from 'koa';
-import {TokenImpl} from './create-token.js';
 
-export type Token<T> = TokenImpl<T>;
+export type Token<T> = {
+  (): T,
+  optional: () => void | T,
+};
 
 type ExtendedKoaContext = KoaContext & {memoized: Map<Object, mixed>};
 
@@ -43,8 +45,8 @@ export type FusionPlugin<Deps, Service> = {
   cleanup?: (service: Service) => Promise<any>,
 };
 
-type aliaser<Token> = {
-  alias: (sourceToken: Token, destToken: Token) => aliaser<*>,
+export type aliaser<Token> = {
+  alias: (sourceToken: Token, destToken: Token) => aliaser<Token>,
 };
 
 export type cleanupFn = (thing: any) => Promise<any>;
