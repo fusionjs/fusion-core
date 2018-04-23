@@ -46,6 +46,9 @@ class FusionApp {
     if (args.length === 1 && args[0] && args[0].__plugin__) {
       value = args[0];
       token = createToken('UnnamedPlugin');
+    } else {
+      token = args[0];
+      value = args[1];
     }
     if (!(token instanceof TokenImpl) && value === undefined) {
       throw new Error(
