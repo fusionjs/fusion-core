@@ -1,5 +1,7 @@
 // @flow
 
+import type {Token} from './types.js';
+
 export const TokenType = {
   Required: 0,
   Optional: 1,

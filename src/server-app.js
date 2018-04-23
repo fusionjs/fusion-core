@@ -8,7 +8,7 @@ import {RenderToken, ElementToken, SSRDeciderToken} from './tokens';
 import ssrPlugin from './plugins/ssr';
 import contextMiddleware from './plugins/server-context.js';
 
-export default function(): Class<FusionApp> {
+export default function(): typeof BaseApp {
   const Koa = require('koa');
 
   return class ServerApp extends BaseApp {
