@@ -9,13 +9,15 @@ export type Token<T> = {
 
 type ExtendedKoaContext = KoaContext & {memoized: Map<Object, mixed>};
 
+export type SanitizedHTMLWrapper = Object;
+
 export type SSRContext = {
   element: any,
   template: {
     htmlAttrs: Object,
     title: string,
-    head: Array<string>,
-    body: Array<string>,
+    head: Array<SanitizedHTMLWrapper>,
+    body: Array<SanitizedHTMLWrapper>,
   },
 } & ExtendedKoaContext;
 
