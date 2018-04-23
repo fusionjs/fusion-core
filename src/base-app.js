@@ -7,6 +7,7 @@ import {SSRDecider} from './plugins/ssr';
 import type {
   aliaser,
   cleanupFn,
+  FusionPlugin,
   Middleware,
   MiddlewareWithDeps,
   Token,
@@ -26,7 +27,12 @@ class FusionApp {
   // eslint-disable-next-line
   registered: Map<
     any,
-    {aliases?: Map<any, any>, enhancers?: Array<any>, token: any, value?: any}
+    {
+      aliases?: Map<any, any>,
+      enhancers?: Array<any>,
+      token: any,
+      value?: FusionPlugin<*, *>,
+    }
   >;
   enhancerToToken: Map<any, any>;
   plugins: Array<any>;
@@ -209,7 +215,7 @@ class FusionApp {
       resolving.add(getTokenRef(token));
 
       function resolvePlugin(plugin) {
-        const registeredDeps = plugin.deps || {};
+        const registeredDeps = (plugin && plugin.deps) || {};
         const resolvedDeps = {};
         for (const key in registeredDeps) {
           const registeredToken = registeredDeps[key];
@@ -217,10 +223,9 @@ class FusionApp {
           resolvedDeps[key] = resolveToken(registeredToken, aliases);
         }
         // `provides` should be undefined if the plugin does not have a `provides` function
-        let provides = plugin.provides
-          ? plugin.provides(resolvedDeps)
-          : undefined;
-        if (plugin.middleware) {
+        let provides =
+          plugin && plugin.provides ? plugin.provides(resolvedDeps) : undefined;
+        if (plugin && plugin.middleware) {
           resolvedPlugins.push(plugin.middleware(resolvedDeps, provides));
         }
         return provides;
@@ -230,6 +235,7 @@ class FusionApp {
       if (value && value.__plugin__) {
         provides = resolvePlugin(provides);
         if (value.cleanup) {
+          // $FlowFixMe
           this.cleanups.push(() => value.cleanup(provides));
         }
       } else {

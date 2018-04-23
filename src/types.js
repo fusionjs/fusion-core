@@ -34,6 +34,7 @@ export type MiddlewareWithDeps<Deps> = (
 type ExtractReturnType = <V>(() => V) => V;
 
 export type FusionPlugin<Deps, Service> = {
+  __plugin__?: boolean,
   deps?: Deps,
   // $FlowFixMe
   provides?: (Deps: $ObjMap<Deps & {}, ExtractReturnType>) => Service,
