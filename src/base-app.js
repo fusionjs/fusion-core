@@ -5,14 +5,7 @@ import {createToken, TokenType, TokenImpl} from './create-token';
 import {ElementToken, RenderToken, SSRDeciderToken} from './tokens';
 import {SSRDecider} from './plugins/ssr';
 
-import type {
-  aliaser,
-  cleanupFn,
-  FusionPlugin,
-  Middleware,
-  MiddlewareWithDeps,
-  Token,
-} from './types.js';
+import type {aliaser, cleanupFn, FusionPlugin, Token} from './types.js';
 
 class FusionApp {
   constructor(el: Element | string, render: *) {
