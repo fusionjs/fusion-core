@@ -4,6 +4,7 @@ import {createPlugin} from './create-plugin';
 import {createToken, TokenType, TokenImpl} from './create-token';
 import {ElementToken, RenderToken, SSRDeciderToken} from './tokens';
 import {SSRDecider} from './plugins/ssr';
+
 import type {
   aliaser,
   cleanupFn,
@@ -39,16 +40,11 @@ class FusionApp {
   cleanups: Array<cleanupFn>;
   renderer: any;
 
-  register(...args: any[]): aliaser<*> {
-    let token;
-    let value;
-
-    if (args.length === 1 && args[0] !== null && args[0].__plugin__) {
-      value = args[0];
+  register(token: *, value: *): aliaser<*> {
+    // $FlowFixMe
+    if (token && token.__plugin__) {
+      value = token;
       token = createToken('UnnamedPlugin');
-    } else {
-      token = args[0];
-      value = args[1];
     }
     if (!(token instanceof TokenImpl) && value === undefined) {
       throw new Error(
@@ -69,17 +65,9 @@ class FusionApp {
           throw new Error('Aliasing for RenderToken not supported.');
         },
       };
-    } else if (token) {
-      return this._register(token, value);
     }
-
-    return {
-      alias: () => {
-        throw new Error('Called alias without registering a token');
-      },
-    };
+    return this._register(token, value);
   }
-
   _register<TResolved>(token: Token<TResolved>, value: *) {
     this.plugins.push(token);
     const {aliases, enhancers} = this.registered.get(getTokenRef(token)) || {
@@ -95,18 +83,12 @@ class FusionApp {
     }
     return {alias};
   }
-
-  middleware<Deps>(...args: Array<any>) {
-    if (args[1] === undefined) {
-      const middleware: () => Middleware = () => args[0];
-      this.register(createPlugin({middleware}));
-    } else {
-      const deps: Deps = args[0];
-      const middleware: MiddlewareWithDeps<Deps> = args[1];
-      this.register(createPlugin({deps, middleware}));
+  middleware(deps: *, middleware: *) {
+    if (middleware === undefined) {
+      middleware = () => deps;
     }
+    this.register(createPlugin({deps, middleware}));
   }
-
   enhance<TResolved>(token: Token<TResolved>, enhancer: Function) {
     const {value, aliases, enhancers} = this.registered.get(
       getTokenRef(token)
@@ -116,16 +98,15 @@ class FusionApp {
       value: undefined,
     };
     this.enhancerToToken.set(enhancer, token);
+
     if (enhancers && Array.isArray(enhancers)) {
       enhancers.push(enhancer);
     }
     this.registered.set(getTokenRef(token), {value, aliases, enhancers, token});
   }
-
   cleanup() {
     return Promise.all(this.cleanups.map(fn => fn()));
   }
-
   resolve<TResolved>() {
     if (!this.renderer) {
       throw new Error('Missing registration for RenderToken');
@@ -272,9 +253,7 @@ class FusionApp {
     for (const token of nonPluginTokens) {
       if (!dependedOn.has(getTokenRef(token))) {
         throw new Error(
-          `Registered token without depending on it: "${
-            token ? token.name : '(unknown)'
-          }"`
+          `Registered token without depending on it: "${token.name}"`
         );
       }
     }
