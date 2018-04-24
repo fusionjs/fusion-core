@@ -34,6 +34,7 @@ export default function(): typeof BaseApp {
       this.resolve();
       // $FlowFixMe
       this._app.use(compose(this.plugins));
+      // $FlowFixMe
       return this._app.callback();
     }
   };
