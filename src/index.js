@@ -34,4 +34,5 @@ export {createToken} from './create-token';
 export {getEnv};
 
 type FusionApp = typeof BaseApp;
+declare export default typeof BaseApp;
 export type {Context, FusionApp, FusionPlugin, Middleware, Token};
