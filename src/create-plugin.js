@@ -2,7 +2,7 @@
 
 import type {FusionPlugin} from './types.js';
 
-// eslint-disable-next-line
+// eslint-disable-next-line flowtype/generic-spacing
 type FusionPluginNoHidden<TDeps, TService> = $Diff<
   FusionPlugin<TDeps, TService>,
   {__plugin__: boolean}
