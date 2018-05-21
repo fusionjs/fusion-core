@@ -7,7 +7,10 @@
  */
 
 import {createToken} from './create-token';
+import type {SSRDecider, Token} from './types.js';
 
 export const RenderToken = createToken('RenderToken');
 export const ElementToken = createToken('ElementToken');
-export const SSRDeciderToken = createToken('SSRDeciderToken');
+export const SSRDeciderToken: Token<SSRDecider> = createToken(
+  'SSRDeciderToken'
+);

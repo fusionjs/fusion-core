@@ -51,6 +51,8 @@ export type FusionPlugin<Deps, Service> = {|
   cleanup?: (service: Service) => Promise<void>,
 |};
 
+export type SSRDecider = Context => boolean;
+
 export type aliaser<TToken> = {
   alias: (sourceToken: TToken, destToken: TToken) => aliaser<TToken>,
 };
