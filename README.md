@@ -339,7 +339,8 @@ In the server, `ctx` also exposes the same properties as a [Koa context](http://
   * `respond: boolean` - set to true to bypass Koa's built-in response handling. You should not use this flag.
   * `app: Object` - a reference to the Koa instance
   * `cookies: {get, set}` - cookies based on [Cookie Module](https://github.com/pillarjs/cookies)
-  <details><summary>Properties below are aliases of Koa's cookie object</summary>
+  
+  <details><summary>View Koa cookies details</summary>
   
   * `get: (name: string, options: ?Object) => string` - get a cookie
     * `name: string`
@@ -359,7 +360,7 @@ In the server, `ctx` also exposes the same properties as a [Koa context](http://
 
   </details>
   
-  <details><summary>Properties below are aliases of Koa's request object</summary>
+  <details><summary>View Koa request details</summary>
  
   * `header: Object` - alias of `request.headers`
   * `headers: Object` - map of parsed HTTP headers
@@ -391,7 +392,7 @@ In the server, `ctx` also exposes the same properties as a [Koa context](http://
   
   </details>
   
-  <details><summary>Properties below are aliases of Koa's response object</summary>
+  <details><summary>View Koa response details</summary>
   
   * `header: Object` - alias of `request.headers`
   * `headers: Object` - map of parsed HTTP headers  
