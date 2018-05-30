@@ -322,7 +322,46 @@ When a request does not require a server-side render, `ctx.body` follows regular
 In the server, `ctx` also exposes the same properties as a [Koa context](http://koajs.com/#context)
 
 * `ctx: Object`
-  * `header: Object` - alias of `ctx.headers`
+  * `req: http.IncomingMessage` - [Node's `request` object](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
+  * `res: Response` - [Node's `response` object](https://nodejs.org/api/http.html#http_class_http_serverresponse)
+  * `request: Request` - [Koa's `request` object](https://koajs.com/#request)
+  * `response: Response` - [Koa's `response` object](https://koajs.com/#response)
+  * `state: Object` - recommended namespace for passing information through middleware and to your frontend views `ctx.state.user = await User.find(id)`
+  * `throw: (status: ?number, message: ?string, properties: ?Object) => void` - throws an error
+    * `status: number` - HTTP status code
+    * `message: string` - error message
+    * `properties: Object` - is merged to the error object
+  * `assert: (value: any, status: ?number, message: ?string, properties: ?Object)` - throws if `value` is falsy. Uses [Assert](https://github.com/jshttp/http-assert)
+    * `value: any`
+    * `status: number` - HTTP status code
+    * `message: string` - error message
+    * `properties: Object` - is merged to the error object
+  * `respond: boolean` - set to true to bypass Koa's built-in response handling. You should not use this flag.
+  * `app: Object` - a reference to the Koa instance
+  * `cookies: {get, set}` - cookies based on [Cookie Module](https://github.com/pillarjs/cookies)
+  <details><summary>Properties below are aliases of Koa's cookie object</summary>
+  
+  * `get: (name: string, options: ?Object) => string` - get a cookie
+    * `name: string`
+    * `options: {signed: boolean}`
+  * `set: (name: string, value: string, options: ?Object)`
+    * `name: string`
+    * `value: string`
+    * `options: Object` - Optional
+      * `maxAge: number` - a number representing the milliseconds from Date.now() for expiry
+      * `signed: boolean` - sign the cookie value
+      * `expires: Date` - a Date for cookie expiration
+      * `path: string` - cookie path, /' by default
+      * `domain: string` - cookie domain
+      * `secure: boolean` - secure cookie
+      * `httpOnly: boolean` - server-accessible cookie, true by default
+      * `overwrite: boolean` - a boolean indicating whether to overwrite previously set cookies of the same name (false by default). If this is true, all cookies set during the same request with the same name (regardless of path or domain) are filtered out of the Set-Cookie header when setting this cookie.
+
+  </details>
+  
+  <details><summary>Properties below are aliases of Koa's request object</summary>
+ 
+  * `header: Object` - alias of `request.headers`
   * `headers: Object` - map of parsed HTTP headers
   * `method: string` - HTTP method
   * `url: string` - request URL
@@ -331,55 +370,53 @@ In the server, `ctx` also exposes the same properties as a [Koa context](http://
   * `query: Object` - parsed querystring as an object
   * `querystring: string` - querystring without `?`
   * `host: string` - host and port
-  * `hostname: string`
+  * `hostname: string` - get hostname when present. Supports X-Forwarded-Host when app.proxy is true, otherwise Host is used
+  * `length:number` - return request Content-Length as a number when present, or undefined.
   * `origin: string` - request origin, including protocol and host
   * `href: string` - full URL including protocol, host, and URL
   * `fresh: boolean` - check for cache negotiation
   * `stale: boolean` - inverse of `fresh`
   * `socket: Socket` - request socket
-  * `protocol: string`
-  * `secure: boolean`
+  * `protocol: string` - return request protocol, "https" or "http". Supports X-Forwarded-Proto when app.proxy is true
+  * `secure: boolean` - shorthand for ctx.protocol == "https" to check if a request was issued via TLS.
   * `ip: string` - remote IP address
   * `ips: Array<string>` - proxy IPs
-  * `subdomains: Array<string>`
-  * `is: (...types: ...string) => boolean` - response type check
+  * `subdomains: Array<string>` - return subdomains as an array.For example, if the domain is "tobi.ferrets.example.com": If app.subdomainOffset is not set, ctx.subdomains is \["ferrets", "tobi"\]
+  * `is: (...types: ...string) => boolean` - request type check `is('json', 'urlencoded')`
   * `accepts: (...types: ...string) => boolean` - request MIME type check
-  * `acceptsEncoding: (...encodings: ...string) => boolean`
-  * `acceptsCharset: (...charsets: ...string) => boolean`
-  * `acceptsLanguage: (...languages: ...string) => boolean`
-  * `get: (name: String) => string` - returns a header
-  * `req: http.IncomingMessage` - [Node's `request` object](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
-  * `res: Response` - [Node's `response` object](https://nodejs.org/api/http.html#http_class_http_serverresponse)
-  * `request: Request` - [Koa's `request` object](https://github.com/koajs/koa/blob/master/docs/api/request.md)
-  * `response: Response` - [Koa's `response` object](https://github.com/koajs/koa/blob/master/docs/api/response.md)
-  * `state: Object` - A state bag for Koa middlewares
-  * `app: Object` - a reference to the Koa instance
-  * `cookies: {get, set}`
-    * `get: (name: string, options: ?Object) => string` - get a cookie
-      * `name: string`
-      * `options: {signed: boolean}`
-    * `set: (name: string, value: string, options: ?Object)`
-      * `name: string`
-      * `value: string`
-      * `options: Object` - Optional
-        * `maxAge: number` - a number representing the milliseconds from Date.now() for expiry
-        * `signed: boolean` - sign the cookie value
-        * `expires: Date` - a Date for cookie expiration
-        * `path: string` - cookie path, /' by default
-        * `domain: string` - cookie domain
-        * `secure: boolean` - secure cookie
-        * `httpOnly: boolean` - server-accessible cookie, true by default
-        * `overwrite: boolean` - a boolean indicating whether to overwrite previously set cookies of the same name (false by default). If this is true, all cookies set during the same request with the same name (regardless of path or domain) are filtered out of the Set-Cookie header when setting this cookie.
-  * `throw: (status: number, message: ?string, properties: ?Object) => void` - throws an error
-    * `status: number` - HTTP status code
-    * `message: string` - error message
-    * `properties: Object` - is merged to the error object
-  * `assert: (value: any, status: ?number, message: ?string, properties)` - throws if value is falsy
-    * `value: any`
-    * `status: number` - HTTP status code
-    * `message: string` - error message
-    * `properties: Object` - is merged to the error object
-  * `respond: boolean` - set to true to bypass Koa's built-in response handling. You should not use this flag.
+  * `acceptsEncodings: (...encodings: ...string) => boolean` - check if encodings are acceptable
+  * `acceptsCharset: (...charsets: ...string) => boolean` - check if charsets are acceptable
+  * `acceptsLanguages: (...languages: ...string) => boolean` - check if langs are acceptable
+  * `get: (name: String) => string` - returns a header field
+  
+  </details>
+  
+  <details><summary>Properties below are aliases of Koa's response object</summary>
+  
+  * `header: Object` - alias of `request.headers`
+  * `headers: Object` - map of parsed HTTP headers  
+  * `socket: Socket` - response socket
+  * `status: String` - response status. By default, `response.status` is set to `404` unlike node's `res.statusCode` which defaults to `200`.
+  * `message: String` - response status message. By default, `response.message` is associated with `response.status`.
+  * `length: Number` - response Content-Length as a number when present, or deduce from `ctx.body` when possible, or `undefined`.
+  * `body: String, Buffer, Stream, Object(JSON), null` - get response body
+  * `get: (name: String) => string` - returns a header field
+  * `set: (field: String, value: String) => undefined` - set response header `field` to `value`
+  * `set: (fields: Object) => undefined` - set response `fields`
+  * `append: (field: String, value: String) => undefined` - append response header `field` with `value`
+  * `remove: (field: String) => undefined` - remove header `field`
+  * `type: String` - response `Content-Type`
+  * `is: (...types: ...string) => boolean` - response type check `is('json', 'urlencoded')`
+  * `redirect: (url: String, alt: ?String) => undefined`- perform a 302 redirect to `url`  
+  * `attachment (filename: ?String) => undefined` - set `Content-Disposition` to "attachment" to signal the client to prompt for download. Optionally specify the `filename` of the download.
+  * `headerSent: boolean` - check if a response header has already been sent
+  * `lastModified: Date` - `Last-Modified` header as a `Date`
+  * `etag: String` - set the ETag of a response including the wrapped `"`s.
+  * `vary: (field: String) => String` - vary on `field`
+  * `flushHeaders () => undefined` - flush any set headers, and begin the body
+                                     
+  </details>
+
 
 #### Sanitization
 
