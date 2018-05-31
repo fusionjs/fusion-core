@@ -338,9 +338,7 @@ In the server, `ctx` also exposes the same properties as a [Koa context](http://
     * `properties: Object` - is merged to the error object
   * `respond: boolean` - set to true to bypass Koa's built-in response handling. You should not use this flag.
   * `app: Object` - a reference to the Koa instance
-  * `cookies: {get, set}` - cookies based on [Cookie Module](https://github.com/pillarjs/cookies)
-
-  <details><summary>View Koa cookies details</summary>
+  * `cookies: {get, set}` - cookies based on [Cookie Module](https://github.com/pillarjs/cookies): <details><summary>View Koa cookies details</summary>
   
     * `get: (name: string, options: ?Object) => string` - get a cookie
       * `name: string`
