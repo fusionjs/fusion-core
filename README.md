@@ -339,60 +339,58 @@ In the server, `ctx` also exposes the same properties as a [Koa context](http://
   * `respond: boolean` - set to true to bypass Koa's built-in response handling. You should not use this flag.
   * `app: Object` - a reference to the Koa instance
   * `cookies: {get, set}` - cookies based on [Cookie Module](https://github.com/pillarjs/cookies)
-  
+
   <details><summary>View Koa cookies details</summary>
   
-  * `get: (name: string, options: ?Object) => string` - get a cookie
-    * `name: string`
-    * `options: {signed: boolean}`
-  * `set: (name: string, value: string, options: ?Object)`
-    * `name: string`
-    * `value: string`
-    * `options: Object` - Optional
-      * `maxAge: number` - a number representing the milliseconds from Date.now() for expiry
-      * `signed: boolean` - sign the cookie value
-      * `expires: Date` - a Date for cookie expiration
-      * `path: string` - cookie path, /' by default
-      * `domain: string` - cookie domain
-      * `secure: boolean` - secure cookie
-      * `httpOnly: boolean` - server-accessible cookie, true by default
-      * `overwrite: boolean` - a boolean indicating whether to overwrite previously set cookies of the same name (false by default). If this is true, all cookies set during the same request with the same name (regardless of path or domain) are filtered out of the Set-Cookie header when setting this cookie.
+    * `get: (name: string, options: ?Object) => string` - get a cookie
+      * `name: string`
+      * `options: {signed: boolean}`
+    * `set: (name: string, value: string, options: ?Object)`
+      * `name: string`
+      * `value: string`
+      * `options: Object` - Optional
+        * `maxAge: number` - a number representing the milliseconds from Date.now() for expiry
+        * `signed: boolean` - sign the cookie value
+        * `expires: Date` - a Date for cookie expiration
+        * `path: string` - cookie path, /' by default
+        * `domain: string` - cookie domain
+        * `secure: boolean` - secure cookie
+        * `httpOnly: boolean` - server-accessible cookie, true by default
+        * `overwrite: boolean` - a boolean indicating whether to overwrite previously set cookies of the same name (false by default). If this is true, all cookies set during the same request with the same name (regardless of path or domain) are filtered out of the Set-Cookie header when setting this cookie.
 
   </details>
   
-  <details><summary>View Koa request details</summary>
+  * `request: Object`: <details><summary>View Koa request details</summary>
  
-  * `header: Object` - alias of `request.headers`
-  * `headers: Object` - map of parsed HTTP headers
-  * `method: string` - HTTP method
-  * `url: string` - request URL
-  * `originalUrl: string` - same as `url`, except that `url` may be modified (e.g. for URL rewriting)
-  * `path: string` - request pathname
-  * `query: Object` - parsed querystring as an object
-  * `querystring: string` - querystring without `?`
-  * `host: string` - host and port
-  * `hostname: string` - get hostname when present. Supports X-Forwarded-Host when app.proxy is true, otherwise Host is used
-  * `length:number` - return request Content-Length as a number when present, or undefined.
-  * `origin: string` - request origin, including protocol and host
-  * `href: string` - full URL including protocol, host, and URL
-  * `fresh: boolean` - check for cache negotiation
-  * `stale: boolean` - inverse of `fresh`
-  * `socket: Socket` - request socket
-  * `protocol: string` - return request protocol, "https" or "http". Supports X-Forwarded-Proto when app.proxy is true
-  * `secure: boolean` - shorthand for ctx.protocol == "https" to check if a request was issued via TLS.
-  * `ip: string` - remote IP address
-  * `ips: Array<string>` - proxy IPs
-  * `subdomains: Array<string>` - return subdomains as an array.For example, if the domain is "tobi.ferrets.example.com": If app.subdomainOffset is not set, ctx.subdomains is \["ferrets", "tobi"\]
-  * `is: (...types: ...string) => boolean` - request type check `is('json', 'urlencoded')`
-  * `accepts: (...types: ...string) => boolean` - request MIME type check
-  * `acceptsEncodings: (...encodings: ...string) => boolean` - check if encodings are acceptable
-  * `acceptsCharset: (...charsets: ...string) => boolean` - check if charsets are acceptable
-  * `acceptsLanguages: (...languages: ...string) => boolean` - check if langs are acceptable
-  * `get: (name: String) => string` - returns a header field
+    * `header: Object` - alias of `request.headers`
+    * `headers: Object` - map of parsed HTTP headers
+    * `method: string` - HTTP method
+    * `url: string` - request URL
+    * `originalUrl: string` - same as `url`, except that `url` may be modified (e.g. for URL rewriting)
+    * `path: string` - request pathname
+    * `query: Object` - parsed querystring as an object
+    * `querystring: string` - querystring without `?`
+    * `host: string` - host and port
+    * `hostname: string` - get hostname when present. Supports X-Forwarded-Host when app.proxy is true, otherwise Host is used
+    * `length:number` - return request Content-Length as a number when present, or undefined.
+    * `origin: string` - request origin, including protocol and host
+    * `href: string` - full URL including protocol, host, and URL
+    * `fresh: boolean` - check for cache negotiation
+    * `stale: boolean` - inverse of `fresh`
+    * `socket: Socket` - request socket
+    * `protocol: string` - return request protocol, "https" or "http". Supports X-Forwarded-Proto when app.proxy is true
+    * `secure: boolean` - shorthand for ctx.protocol == "https" to check if a request was issued via TLS.
+    * `ip: string` - remote IP address
+    * `ips: Array<string>` - proxy IPs
+    * `subdomains: Array<string>` - return subdomains as an array.For example, if the domain is "tobi.ferrets.example.com": If app.subdomainOffset is not set, ctx.subdomains is \["ferrets", "tobi"\]
+    * `is: (...types: ...string) => boolean` - request type check `is('json', 'urlencoded')`
+    * `accepts: (...types: ...string) => boolean` - request MIME type check
+    * `acceptsEncodings: (...encodings: ...string) => boolean` - check if encodings are acceptable
+    * `acceptsCharset: (...charsets: ...string) => boolean` - check if charsets are acceptable
+    * `acceptsLanguages: (...languages: ...string) => boolean` - check if langs are acceptable
+    * `get: (name: String) => string` - returns a header field
   
   </details>
-  
-  
   
   * `response: Object`: <details><summary>View Koa response details</summary>
   
