@@ -392,7 +392,9 @@ In the server, `ctx` also exposes the same properties as a [Koa context](http://
   
   </details>
   
-  <details><summary>View Koa response details</summary>
+  
+  
+  * `response: Object`: <details><summary>View Koa response details</summary>
   
   * `header: Object` - alias of `request.headers`
   * `headers: Object` - map of parsed HTTP headers  
