@@ -396,27 +396,27 @@ In the server, `ctx` also exposes the same properties as a [Koa context](http://
   
   * `response: Object`: <details><summary>View Koa response details</summary>
   
-  * `header: Object` - alias of `request.headers`
-  * `headers: Object` - map of parsed HTTP headers  
-  * `socket: Socket` - response socket
-  * `status: String` - response status. By default, `response.status` is set to `404` unlike node's `res.statusCode` which defaults to `200`.
-  * `message: String` - response status message. By default, `response.message` is associated with `response.status`.
-  * `length: Number` - response Content-Length as a number when present, or deduce from `ctx.body` when possible, or `undefined`.
-  * `body: String, Buffer, Stream, Object(JSON), null` - get response body
-  * `get: (name: String) => string` - returns a header field
-  * `set: (field: String, value: String) => undefined` - set response header `field` to `value`
-  * `set: (fields: Object) => undefined` - set response `fields`
-  * `append: (field: String, value: String) => undefined` - append response header `field` with `value`
-  * `remove: (field: String) => undefined` - remove header `field`
-  * `type: String` - response `Content-Type`
-  * `is: (...types: ...string) => boolean` - response type check `is('json', 'urlencoded')`
-  * `redirect: (url: String, alt: ?String) => undefined`- perform a 302 redirect to `url`  
-  * `attachment (filename: ?String) => undefined` - set `Content-Disposition` to "attachment" to signal the client to prompt for download. Optionally specify the `filename` of the download.
-  * `headerSent: boolean` - check if a response header has already been sent
-  * `lastModified: Date` - `Last-Modified` header as a `Date`
-  * `etag: String` - set the ETag of a response including the wrapped `"`s.
-  * `vary: (field: String) => String` - vary on `field`
-  * `flushHeaders () => undefined` - flush any set headers, and begin the body
+    * `header: Object` - alias of `request.headers`
+    * `headers: Object` - map of parsed HTTP headers  
+    * `socket: Socket` - response socket
+    * `status: String` - response status. By default, `response.status` is set to `404` unlike node's `res.statusCode` which defaults to `200`.
+    * `message: String` - response status message. By default, `response.message` is associated with `response.status`.
+    * `length: Number` - response Content-Length as a number when present, or deduce from `ctx.body` when possible, or `undefined`.
+    * `body: String, Buffer, Stream, Object(JSON), null` - get response body
+    * `get: (name: String) => string` - returns a header field
+    * `set: (field: String, value: String) => undefined` - set response header `field` to `value`
+    * `set: (fields: Object) => undefined` - set response `fields`
+    * `append: (field: String, value: String) => undefined` - append response header `field` with `value`
+    * `remove: (field: String) => undefined` - remove header `field`
+    * `type: String` - response `Content-Type`
+    * `is: (...types: ...string) => boolean` - response type check `is('json', 'urlencoded')`
+    * `redirect: (url: String, alt: ?String) => undefined`- perform a 302 redirect to `url`  
+    * `attachment (filename: ?String) => undefined` - set `Content-Disposition` to "attachment" to signal the client to prompt for download. Optionally specify the `filename` of the download.
+    * `headerSent: boolean` - check if a response header has already been sent
+    * `lastModified: Date` - `Last-Modified` header as a `Date`
+    * `etag: String` - set the ETag of a response including the wrapped `"`s.
+    * `vary: (field: String) => String` - vary on `field`
+    * `flushHeaders () => undefined` - flush any set headers, and begin the body
                                      
   </details>
 
