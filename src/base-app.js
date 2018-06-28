@@ -218,12 +218,11 @@ class FusionApp {
       if (value && value.__plugin__) {
         provides = resolvePlugin(provides);
         if (value.cleanup) {
-          this.cleanups.push(
-            () =>
-              typeof value.cleanup === 'function'
-                ? value.cleanup(provides)
-                : Promise.resolve()
-          );
+          this.cleanups.push(function() {
+            return typeof value.cleanup === 'function'
+              ? value.cleanup(provides)
+              : Promise.resolve();
+          });
         }
       } else {
         nonPluginTokens.add(token);
