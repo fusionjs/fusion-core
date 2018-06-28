@@ -60,6 +60,7 @@ test('app.cleanup does not cleanup if cleanup was not given a function', async t
   app.register(
     createPlugin({
       provides: () => 'hello world',
+      // $FlowFixMe - Ignore this to test branch
       cleanup: 'notafunc',
       middleware: () => (ctx, next) => next(),
     })
