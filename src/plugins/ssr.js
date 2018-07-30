@@ -152,7 +152,7 @@ function getChunkScripts(ctx) {
   const preloaded = getUrls(ctx, ctx.preloadChunks).map(({id, url}) => {
     return `<script defer${crossOrigin} src="${url}" data-webpack-preload="${id}"></script>`;
   });
-  return [...sync, ...preloaded].join('');
+  return [ ...preloaded, ...sync].join('');
 }
 
 function getPreloadHintLinks(ctx) {
