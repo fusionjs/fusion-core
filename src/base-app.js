@@ -68,12 +68,42 @@ class FusionApp {
     return this._register(token, value);
   }
   _register<TResolved>(token: Token<TResolved>, value: *) {
-    this.plugins.push(token);
-    const {aliases, enhancers} = this.registered.get(getTokenRef(token)) || {
+    const {value: registeredValue, aliases, enhancers} = this.registered.get(
+      getTokenRef(token)
+    ) || {
+      value: null,
       aliases: new Map(),
       enhancers: [],
     };
-    this.registered.set(getTokenRef(token), {value, aliases, enhancers, token});
+    if (token.isCompound) {
+      if (!registeredValue) {
+        // Initial value is set as an empty array
+        this.registered.set(getTokenRef(token), {
+          // $FlowFixMe
+          value: [],
+          aliases,
+          enhancers,
+          token,
+        });
+      }
+      this.enhance(token, originalValue => {
+        return createPlugin({
+          deps: {...value.deps},
+          provides: (...args) => {
+            value = value.provides ? value.provides(...args) : value;
+            return [...originalValue, value];
+          },
+        });
+      });
+    } else {
+      this.registered.set(getTokenRef(token), {
+        value,
+        aliases,
+        enhancers,
+        token,
+      });
+    }
+    this.plugins.push(token);
     function alias(sourceToken: *, destToken: *) {
       if (aliases) {
         aliases.set(sourceToken, destToken);
@@ -101,7 +131,12 @@ class FusionApp {
     if (enhancers && Array.isArray(enhancers)) {
       enhancers.push(enhancer);
     }
-    this.registered.set(getTokenRef(token), {value, aliases, enhancers, token});
+    this.registered.set(getTokenRef(token), {
+      value,
+      aliases,
+      enhancers,
+      token,
+    });
   }
   cleanup() {
     return Promise.all(this.cleanups.map(fn => fn()));

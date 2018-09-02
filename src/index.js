@@ -41,7 +41,7 @@ export {
   HttpServerToken,
 } from './tokens';
 export {createPlugin} from './create-plugin';
-export {createToken} from './create-token';
+export {createToken, createArrayToken} from './create-token';
 export {getEnv};
 
 type FusionApp = typeof BaseApp;

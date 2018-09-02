@@ -11,6 +11,14 @@ import type {Context as KoaContext} from 'koa';
 export type Token<T> = {
   (): T,
   optional: () => void | T,
+  isCompound: false,
+};
+
+export type ArrayToken<T> = {
+  (): T,
+} & {
+  ...Token<Array<T>>,
+  isCompound: true,
 };
 
 type ExtendedKoaContext = KoaContext & {memoized: Map<Object, mixed>};
