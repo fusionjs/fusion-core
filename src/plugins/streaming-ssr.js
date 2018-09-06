@@ -54,9 +54,7 @@ export default function createSSRPlugin({
     ctx.type = 'text/html';
     
     await next();
-                
-    ctx.status = 200;
-    
+                    
     if (streaming) {
       ctx.body = multi_stream
       ([
