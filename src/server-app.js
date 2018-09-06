@@ -10,8 +10,8 @@ import {compose} from './compose.js';
 import Timing, {TimingToken} from './plugins/timing';
 import BaseApp from './base-app';
 import serverRenderer from './plugins/server-renderer';
-import {RenderToken, ElementToken, SSRDeciderToken} from './tokens';
-import ssrPlugin from './plugins/ssr';
+import {RenderToken, ElementToken, SSRDeciderToken, StreamingToken} from './tokens';
+import ssrPlugin from './plugins/streaming-ssr';
 import contextMiddleware from './plugins/server-context.js';
 
 export default function(): typeof BaseApp {
@@ -25,7 +25,7 @@ export default function(): typeof BaseApp {
       this.middleware(contextMiddleware);
       this.register(TimingToken, Timing);
       this.middleware(
-        {element: ElementToken, ssrDecider: SSRDeciderToken},
+        {element: ElementToken, ssrDecider: SSRDeciderToken, streaming: StreamingToken.optional},
         ssrPlugin
       );
     }
@@ -43,3 +43,4 @@ export default function(): typeof BaseApp {
     }
   };
 }
+
