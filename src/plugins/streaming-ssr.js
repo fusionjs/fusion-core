@@ -55,37 +55,38 @@ export default function createSSRPlugin({
     // This is especially useful for things like ctx.redirect
     if (ctx.body && ctx.respond !== false) {
       return;
-    }
-
-    const {htmlAttrs, bodyAttrs, title, head, body} = ctx.template;
-    const safeAttrs = Object.keys(htmlAttrs)
-      .map(attrKey => {
-        return ` ${escape(attrKey)}="${escape(htmlAttrs[attrKey])}"`;
-      })
-      .join('');
-
-    const safeBodyAttrs = Object.keys(bodyAttrs)
-      .map(attrKey => {
-        return ` ${escape(attrKey)}="${escape(bodyAttrs[attrKey])}"`;
-      })
-      .join('');
-
-    const safeTitle = escape(title);
-    // $FlowFixMe
-    const safeHead = head.map(consumeSanitizedHTML).join('');
-    // $FlowFixMe
-    const safeBody = body.map(consumeSanitizedHTML).join('');
-
-    const preloadHintLinks = getPreloadHintLinks(ctx);
-    const coreGlobals = getCoreGlobals(ctx);
-    const chunkScripts = getChunkScripts(ctx);
-    const bundleSplittingBootstrap = [
-      preloadHintLinks,
-      coreGlobals,
-      chunkScripts,
-    ].join('');
+    }    
     
-    const header = `
+    const header = (ctx) => {
+      const {htmlAttrs, bodyAttrs, title, head} = ctx.template;
+      const safeAttrs = Object.keys(htmlAttrs)
+        .map(attrKey => {
+          return ` ${escape(attrKey)}="${escape(htmlAttrs[attrKey])}"`;
+        })
+        .join('');
+
+      const safeBodyAttrs = Object.keys(bodyAttrs)
+        .map(attrKey => {
+          return ` ${escape(attrKey)}="${escape(bodyAttrs[attrKey])}"`;
+        })
+        .join('');
+
+      const safeTitle = escape(title);
+      // $FlowFixMe
+      const safeHead = head.map(consumeSanitizedHTML).join('');
+      // $FlowFixMe
+
+
+      const preloadHintLinks = getPreloadHintLinks(ctx);
+      const coreGlobals = getCoreGlobals(ctx);
+      const chunkScripts = getChunkScripts(ctx);
+      const bundleSplittingBootstrap = [
+        preloadHintLinks,
+        coreGlobals,
+        chunkScripts,
+      ].join('');
+      
+      `
       <!doctype html>
       <html${safeAttrs}>
       <head>
@@ -95,15 +96,20 @@ export default function createSSRPlugin({
       </head>
       <body${safeBodyAttrs}>
     `;
+    };
     
-    const footer = `${safeBody}</body></html>`;
+    const footer = (ctx) => {
+      const {body} = ctx.template;
+      const safeBody = body.map(consumeSanitizedHTML).join('');
+      `${safeBody}</body></html>`;
+    };
     
     ctx.status = 200
     ctx.body = multi_stream
     ([
-      string_stream(header),
+      string_stream(header(ctx)),
       typeof content === 'string' ? string_stream(ctx.rendered) : ctx.rendered,
-      string_stream(footer)
+      string_stream(footer(ctx))
     ])           
   };
 }
