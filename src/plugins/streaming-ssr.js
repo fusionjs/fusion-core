@@ -9,6 +9,8 @@
 import {createPlugin} from '../create-plugin';
 import {escape, consumeSanitizedHTML} from '../sanitization';
 import type {Context, SSRDecider as SSRDeciderService} from '../types.js';
+import string_stream from 'string-to-stream';
+import multi_stream from 'multistream';
 
 const SSRDecider = createPlugin({
   provides: () => {
@@ -48,9 +50,7 @@ export default function createSSRPlugin({
     ctx.rendered = '';
     ctx.template = template;
     ctx.type = 'text/html';
-    
-    await next();
-    
+           
     // Allow someone to override the ssr by setting ctx.body
     // This is especially useful for things like ctx.redirect
     if (ctx.body && ctx.respond !== false) {
@@ -94,26 +94,19 @@ export default function createSSRPlugin({
       ${bundleSplittingBootstrap}${safeHead}
       </head>
       <body${safeBodyAttrs}>
-    `
+    `;
     
-    ctx.res.write(header);
+    const footer = `${safeBody}</body></html>`;
     
-    await pipe(ctx.rendered, ctx.res, { end: false });
-    
-    ctx.res.write(`${safeBody}</body></html>`);
-    ctx.res.end();
+    ctx.status = 200
+    ctx.body = multi_stream
+    ([
+      string_stream(header),
+      typeof content === 'string' ? string_stream(ctx.rendered) : ctx.rendered,
+      string_stream(footer)
+    ])           
   };
 }
-
-function pipe(from, to, options)
-{
-  return new Promise((resolve, reject) =>
-  {
-    from.pipe(to, options);
-    from.on('error', reject);
-    from.on('end', resolve);
-  });
-};
 
 function getCoreGlobals(ctx) {
   const {webpackPublicPath, nonce} = ctx;
