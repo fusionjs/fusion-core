@@ -104,7 +104,7 @@ export default function createSSRPlugin({
     ctx.body = multi_stream
     ([
       string_stream(header(ctx)),
-      typeof content === 'string' ? string_stream(ctx.rendered) : ctx.rendered,
+      typeof ctx.rendered === 'string' ? string_stream(ctx.rendered) : ctx.rendered,
       string_stream(footer(ctx))
     ])           
   };
