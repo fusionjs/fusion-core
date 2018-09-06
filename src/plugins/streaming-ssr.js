@@ -50,13 +50,9 @@ export default function createSSRPlugin({
     ctx.rendered = '';
     ctx.template = template;
     ctx.type = 'text/html';
-           
-    // Allow someone to override the ssr by setting ctx.body
-    // This is especially useful for things like ctx.redirect
-    if (ctx.body && ctx.respond !== false) {
-      return;
-    }    
     
+    await next();
+            
     const header = (ctx) => {
       const {htmlAttrs, bodyAttrs, title, head} = ctx.template;
       const safeAttrs = Object.keys(htmlAttrs)
