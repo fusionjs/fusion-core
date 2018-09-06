@@ -63,6 +63,9 @@ export default function createSSRPlugin({
         string_stream(footer(ctx))
       ])         
     } else {
+      
+      // Allow someone to override the ssr by setting ctx.body
+      // This is especially useful for things like ctx.redirect
       if (ctx.body && ctx.respond !== false) {
         return;
       } 
