@@ -104,13 +104,13 @@ export default function createSSRPlugin({
 
 function pipe(from, to, options)
 {
-	return new Promise((resolve, reject) =>
-	{
-		from.pipe(to, options)
-		from.on('error', reject)
-		from.on('end', resolve)
-	})
-}
+  return new Promise((resolve, reject) =>
+  {
+    from.pipe(to, options);
+    from.on('error', reject);
+    from.on('end', resolve);
+  });
+};
 
 function getCoreGlobals(ctx) {
   const {webpackPublicPath, nonce} = ctx;
