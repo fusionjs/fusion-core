@@ -49,7 +49,8 @@ export default function createSSRPlugin({
     ctx.template = template;
     ctx.type = 'text/html';
     
-
+    await next();
+    
     // Allow someone to override the ssr by setting ctx.body
     // This is especially useful for things like ctx.redirect
     if (ctx.body && ctx.respond !== false) {
@@ -95,10 +96,12 @@ export default function createSSRPlugin({
       <body${safeBodyAttrs}>
     `
     
-    ctx.res.write(header)
-    await pipe(ctx.rendered, ctx.res, { end: false })
-    ctx.res.write(`${safeBody}</body></html>`)
-    ctx.res.end()
+    ctx.res.write(header);
+    
+    await pipe(ctx.rendered, ctx.res, { end: false });
+    
+    ctx.res.write(`${safeBody}</body></html>`);
+    ctx.res.end();
   };
 }
 
