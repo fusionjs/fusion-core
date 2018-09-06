@@ -71,7 +71,7 @@ export default function createSSRPlugin({
 
       ctx.body = [
         header(ctx),
-        ctx.rendered},
+        ctx.rendered,
         footer(ctx),
       ].join('');
     }                    
