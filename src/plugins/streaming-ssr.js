@@ -32,9 +32,11 @@ export {SSRDecider};
 export default function createSSRPlugin({
   element,
   ssrDecider,
+  streaming,
 }: {
   element: any,
   ssrDecider: SSRDeciderService,
+  streaming: boolean,                                         
 }) {
   return async function ssrPlugin(ctx: Context, next: () => Promise<void>) {
     if (!ssrDecider(ctx)) return next();
@@ -99,14 +101,26 @@ export default function createSSRPlugin({
       const safeBody = body.map(consumeSanitizedHTML).join('');
       `${safeBody}</body></html>`;
     };
+    ctx.status = 200;
     
-    ctx.status = 200
-    ctx.body = multi_stream
-    ([
-      string_stream(header(ctx)),
-      typeof ctx.rendered === 'string' ? string_stream(ctx.rendered) : ctx.rendered,
-      string_stream(footer(ctx))
-    ])           
+    if (streaming) {
+      ctx.body = multi_stream
+      ([
+        string_stream(header(ctx)),
+        typeof ctx.rendered === 'string' ? string_stream(ctx.rendered) : ctx.rendered,
+        string_stream(footer(ctx))
+      ])         
+    } else {
+      if (ctx.body && ctx.respond !== false) {
+        return;
+      } 
+
+      ctx.body = [
+        header(ctx),
+        ctx.rendered},
+        footer(ctx),
+      ].join('');
+    }                    
   };
 }
 
