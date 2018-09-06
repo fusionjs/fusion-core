@@ -54,53 +54,7 @@ export default function createSSRPlugin({
     ctx.type = 'text/html';
     
     await next();
-            
-    const header = (ctx) => {
-      const {htmlAttrs, bodyAttrs, title, head} = ctx.template;
-      const safeAttrs = Object.keys(htmlAttrs)
-        .map(attrKey => {
-          return ` ${escape(attrKey)}="${escape(htmlAttrs[attrKey])}"`;
-        })
-        .join('');
-
-      const safeBodyAttrs = Object.keys(bodyAttrs)
-        .map(attrKey => {
-          return ` ${escape(attrKey)}="${escape(bodyAttrs[attrKey])}"`;
-        })
-        .join('');
-
-      const safeTitle = escape(title);
-      // $FlowFixMe
-      const safeHead = head.map(consumeSanitizedHTML).join('');
-      // $FlowFixMe
-
-
-      const preloadHintLinks = getPreloadHintLinks(ctx);
-      const coreGlobals = getCoreGlobals(ctx);
-      const chunkScripts = getChunkScripts(ctx);
-      const bundleSplittingBootstrap = [
-        preloadHintLinks,
-        coreGlobals,
-        chunkScripts,
-      ].join('');
-      
-      `
-      <!doctype html>
-      <html${safeAttrs}>
-      <head>
-      <meta charset="utf-8" />
-      <title>${safeTitle}</title>
-      ${bundleSplittingBootstrap}${safeHead}
-      </head>
-      <body${safeBodyAttrs}>
-    `;
-    };
-    
-    const footer = (ctx) => {
-      const {body} = ctx.template;
-      const safeBody = body.map(consumeSanitizedHTML).join('');
-      `${safeBody}</body></html>`;
-    };
+                
     ctx.status = 200;
     
     if (streaming) {
@@ -123,6 +77,53 @@ export default function createSSRPlugin({
     }                    
   };
 }
+
+function header(ctx){
+  const {htmlAttrs, bodyAttrs, title, head} = ctx.template;
+  const safeAttrs = Object.keys(htmlAttrs)
+    .map(attrKey => {
+      return ` ${escape(attrKey)}="${escape(htmlAttrs[attrKey])}"`;
+    })
+    .join('');
+
+  const safeBodyAttrs = Object.keys(bodyAttrs)
+    .map(attrKey => {
+      return ` ${escape(attrKey)}="${escape(bodyAttrs[attrKey])}"`;
+    })
+    .join('');
+
+  const safeTitle = escape(title);
+  // $FlowFixMe
+  const safeHead = head.map(consumeSanitizedHTML).join('');
+  // $FlowFixMe
+
+
+  const preloadHintLinks = getPreloadHintLinks(ctx);
+  const coreGlobals = getCoreGlobals(ctx);
+  const chunkScripts = getChunkScripts(ctx);
+  const bundleSplittingBootstrap = [
+    preloadHintLinks,
+    coreGlobals,
+    chunkScripts,
+  ].join('');
+
+  return `
+    <!doctype html>
+    <html${safeAttrs}>
+    <head>
+    <meta charset="utf-8" />
+    <title>${safeTitle}</title>
+    ${bundleSplittingBootstrap}${safeHead}
+    </head>
+    <body${safeBodyAttrs}>
+  `;
+};
+    
+function footer(ctx) {
+  const {body} = ctx.template;
+  const safeBody = body.map(consumeSanitizedHTML).join('');
+  return `${safeBody}</body></html>`;
+};
 
 function getCoreGlobals(ctx) {
   const {webpackPublicPath, nonce} = ctx;
