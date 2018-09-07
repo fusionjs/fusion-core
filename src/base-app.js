@@ -9,7 +9,7 @@
 import {createPlugin} from './create-plugin';
 import {createToken, TokenType, TokenImpl} from './create-token';
 import {ElementToken, RenderToken, SSRDeciderToken} from './tokens';
-import {SSRDecider} from './plugins/streaming-ssr';
+import {SSRDecider} from './plugins/ssr';
 
 import type {aliaser, cleanupFn, FusionPlugin, Token} from './types.js';
 

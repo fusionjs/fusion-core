@@ -11,7 +11,7 @@ import Timing, {TimingToken} from './plugins/timing';
 import BaseApp from './base-app';
 import serverRenderer from './plugins/server-renderer';
 import {RenderToken, ElementToken, SSRDeciderToken} from './tokens';
-import ssrPlugin from './plugins/streaming-ssr';
+import ssrPlugin from './plugins/ssr';
 import contextMiddleware from './plugins/server-context.js';
 
 export default function(): typeof BaseApp {
