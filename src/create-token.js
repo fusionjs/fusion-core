@@ -30,5 +30,5 @@ export class TokenImpl<TResolved> {
 }
 
 export function createToken<TResolvedType>(name: string): Token<TResolvedType> {
-  return (((new TokenImpl(name)): any): Token<TResolvedType>);
+  return ((new TokenImpl(name): any): Token<TResolvedType>);
 }
