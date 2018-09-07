@@ -38,7 +38,6 @@ export {
   RenderToken,
   ElementToken,
   SSRDeciderToken,
-  StreamingToken,
   HttpServerToken,
 } from './tokens';
 export {createPlugin} from './create-plugin';

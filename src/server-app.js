@@ -10,7 +10,7 @@ import {compose} from './compose.js';
 import Timing, {TimingToken} from './plugins/timing';
 import BaseApp from './base-app';
 import serverRenderer from './plugins/server-renderer';
-import {RenderToken, ElementToken, SSRDeciderToken, StreamingToken} from './tokens';
+import {RenderToken, ElementToken, SSRDeciderToken} from './tokens';
 import ssrPlugin from './plugins/streaming-ssr';
 import contextMiddleware from './plugins/server-context.js';
 
