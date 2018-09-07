@@ -17,7 +17,7 @@ export function renderNonStreaming(ctx){
     header(ctx),
     ctx.rendered,
     footer(ctx)
-  ];
+  ].join('');
 };
 
 function header(ctx){

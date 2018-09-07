@@ -8,7 +8,7 @@
 
 import {createPlugin} from '../create-plugin';
 import type {Context, SSRDecider as SSRDeciderService} from '../types.js';
-import {renderStreaming, renderNonStreaming} from './utils.js';
+import {renderStreaming, renderNonStreaming} from './ssr-helpers.js';
 
 const SSRDecider = createPlugin({
   provides: () => {
