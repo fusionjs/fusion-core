@@ -52,6 +52,12 @@ export default function createSSRPlugin({
     ctx.type = 'text/html';
     
     await next();
+
+    // Allow someone to override the ssr by setting ctx.body
+    // This is especially useful for things like ctx.redirect
+    if (ctx.body && ctx.respond !== false) {
+      return;
+    }
                     
     ctx.body = multi_stream
     ([
