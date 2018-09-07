@@ -1,6 +1,26 @@
 import {escape, consumeSanitizedHTML} from '../sanitization';
+import string_stream from 'string-to-stream';
+import multi_stream from 'multistream';
 
-export function header(ctx){
+export function renderStreaming(ctx){
+  ctx.body = 
+    multi_stream
+    ([
+      string_stream(header(ctx)),
+      typeof ctx.rendered === 'string' ? string_stream(ctx.rendered) : ctx.rendered,
+      string_stream(footer(ctx))
+    ]);
+};
+
+export function renderNonStreaming(ctx){
+  ctx.body = [
+    header(ctx),
+    ctx.rendered,
+    footer(ctx)
+  ];
+};
+
+function header(ctx){
   const {htmlAttrs, bodyAttrs, title, head} = ctx.template;
   const safeAttrs = Object.keys(htmlAttrs)
     .map(attrKey => {
@@ -18,7 +38,6 @@ export function header(ctx){
   // $FlowFixMe
   const safeHead = head.map(consumeSanitizedHTML).join('');
   // $FlowFixMe
-
 
   const preloadHintLinks = getPreloadHintLinks(ctx);
   const coreGlobals = getCoreGlobals(ctx);
@@ -41,7 +60,7 @@ export function header(ctx){
   `;
 };
     
-export function footer(ctx) {
+function footer(ctx) {
   const {body} = ctx.template;
   const safeBody = body.map(consumeSanitizedHTML).join('');
   return `${safeBody}</body></html>`;
