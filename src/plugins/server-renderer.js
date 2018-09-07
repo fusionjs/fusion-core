@@ -24,7 +24,7 @@ export default function getRendererPlugin({
     let renderTime = null;
     if (ctx.element && !ctx.body && ctx.respond !== false) {
       const renderStart = now();
-      ctx.rendered = await render(ctx.element, ctx);
+      ctx.rendered = await render(ctx.element);
       renderTime = now() - renderStart;
     }
 
