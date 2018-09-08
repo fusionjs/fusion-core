@@ -1,18 +1,17 @@
 import {escape, consumeSanitizedHTML} from '../sanitization';
-import string_stream from 'string-to-stream';
-import multi_stream from 'multistream';
 
 export function renderStreaming(ctx){
-  ctx.body = 
-    multi_stream
-    ([
-      string_stream(header(ctx)),
-      typeof ctx.rendered === 'string' ? string_stream(ctx.rendered) : ctx.rendered,
-      string_stream(footer(ctx))
-    ]);
+  const multi_stream = require('multistream');
+  const string_stream = require('string-to-stream');
+  ctx.body = multi_stream
+  ([
+    string_stream(header(ctx)),
+    typeof ctx.rendered === 'string' ? string_stream(ctx.rendered) : ctx.rendered,
+    string_stream(footer(ctx))
+  ])
 };
 
-export function renderNonStreaming(ctx){
+export function renderNonStreaming(ctx){  
   ctx.body = [
     header(ctx),
     ctx.rendered,
