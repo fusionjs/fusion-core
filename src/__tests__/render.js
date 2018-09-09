@@ -25,10 +25,30 @@ function delay() {
   });
 }
 
-
-test('async render', async t => {
+test('streaming rendering with element', async t => {
   let numRenders = 0;
   const element = 'hi';
+  const renderFn = el => {
+    t.equals(el, element, 'render receives correct args');
+    return delay().then(() => {
+      numRenders++;
+      return el;
+    });
+  };
+  const app = new App(element, renderFn);
+  __NODE__ && app.register(StreamingToken, true);
+  const ctx = await run(app);
+  t.ok(ctx.element, 'sets ctx.element');
+  t.equal(ctx.rendered, element);
+  t.equal(numRenders, 1, 'calls render once');
+  t.equal(ctx.element, element, 'sets ctx.element');
+  t.end();
+});
+
+test('streaming rendering with streaming element', async t => {
+  const string_stream = require('string-to-stream');
+  let numRenders = 0;
+  const element = string_stream('hi');
   const renderFn = el => {
     t.equals(el, element, 'render receives correct args');
     return delay().then(() => {
