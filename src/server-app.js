@@ -25,7 +25,7 @@ export default function(): typeof BaseApp {
       this.middleware(contextMiddleware);
       this.register(TimingToken, Timing);
       this.middleware(
-        {element: ElementToken, ssrDecider: SSRDeciderToken, streaming: StreamingToken},
+        {element: ElementToken, ssrDecider: SSRDeciderToken, streaming: StreamingToken.optional},
         ssrPlugin
       );
     }
