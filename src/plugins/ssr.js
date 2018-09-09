@@ -30,7 +30,7 @@ export {SSRDecider};
 export default function createSSRPlugin({
   element,
   ssrDecider,
-  streaming = false,
+  streaming,
 }: {
   element: any,
   ssrDecider: SSRDeciderService,

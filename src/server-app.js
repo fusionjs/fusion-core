@@ -19,8 +19,8 @@ export default function(): typeof BaseApp {
 
   return class ServerApp extends BaseApp {
     _app: Koa;
-    constructor(el, render) {
-      super(el, render);
+    constructor(el, render, streaming) {
+      super(el, render, streaming);
       this._app = new Koa();
       this.middleware(contextMiddleware);
       this.register(TimingToken, Timing);

@@ -8,13 +8,13 @@
 
 import {createPlugin} from './create-plugin';
 import {createToken, TokenType, TokenImpl} from './create-token';
-import {ElementToken, RenderToken, SSRDeciderToken} from './tokens';
+import {ElementToken, RenderToken, SSRDeciderToken, StreamingToken} from './tokens';
 import {SSRDecider} from './plugins/ssr';
 
 import type {aliaser, cleanupFn, FusionPlugin, Token} from './types.js';
 
 class FusionApp {
-  constructor(el: Element | string, render: *) {
+  constructor(el: Element | string, render: *, streaming: boolean) {
     this.registered = new Map(); // getTokenRef(token) -> {value, aliases, enhancers}
     this.enhancerToToken = new Map(); // enhancer -> token
     this.plugins = []; // Token
@@ -22,6 +22,7 @@ class FusionApp {
     el && this.register(ElementToken, el);
     render && this.register(RenderToken, render);
     this.register(SSRDeciderToken, SSRDecider);
+    (__NODE__ && streaming) && this.register(StreamingToken, streaming);
   }
 
   // eslint-disable-next-line
