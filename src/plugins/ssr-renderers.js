@@ -6,28 +6,27 @@
  * @flow
  */
 
+import type {Context} from '../types.js';
+
 import {escape, consumeSanitizedHTML} from '../sanitization';
 
-export function renderStreaming(ctx){
+export function renderStreaming(ctx: Context) {
   const multi_stream = require('multistream');
   const string_stream = require('string-to-stream');
-  ctx.body = multi_stream
-  ([
+  ctx.body = multi_stream([
     string_stream(header(ctx)),
-    typeof ctx.rendered === 'string' ? string_stream(ctx.rendered) : ctx.rendered,
-    string_stream(footer(ctx))
-  ])
-};
+    typeof ctx.rendered === 'string'
+      ? string_stream(ctx.rendered)
+      : ctx.rendered,
+    string_stream(footer(ctx)),
+  ]);
+}
 
-export function renderNonStreaming(ctx){  
-  ctx.body = [
-    header(ctx),
-    ctx.rendered,
-    footer(ctx)
-  ].join('');
-};
+export function renderNonStreaming(ctx: Context) {
+  ctx.body = [header(ctx), ctx.rendered, footer(ctx)].join('');
+}
 
-function header(ctx){
+function header(ctx) {
   const {htmlAttrs, bodyAttrs, title, head} = ctx.template;
   const safeAttrs = Object.keys(htmlAttrs)
     .map(attrKey => {
@@ -65,13 +64,13 @@ function header(ctx){
     </head>
     <body${safeBodyAttrs}>
   `;
-};
-    
+}
+
 function footer(ctx) {
   const {body} = ctx.template;
   const safeBody = body.map(consumeSanitizedHTML).join('');
   return `${safeBody}</body></html>`;
-};
+}
 
 function getCoreGlobals(ctx) {
   const {webpackPublicPath, nonce} = ctx;

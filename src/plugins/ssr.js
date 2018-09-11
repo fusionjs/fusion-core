@@ -8,7 +8,7 @@
 
 import {createPlugin} from '../create-plugin';
 import type {Context, SSRDecider as SSRDeciderService} from '../types.js';
-import {renderStreaming, renderNonStreaming} from './ssr-helpers.js';
+import {renderStreaming, renderNonStreaming} from './ssr-renderers.js';
 
 const SSRDecider = createPlugin({
   provides: () => {
@@ -34,7 +34,7 @@ export default function createSSRPlugin({
 }: {
   element: any,
   ssrDecider: SSRDeciderService,
-  streaming: boolean,
+  streaming: ?boolean,
 }) {
   return async function ssrPlugin(ctx: Context, next: () => Promise<void>) {
     if (!ssrDecider(ctx)) return next();
@@ -50,7 +50,7 @@ export default function createSSRPlugin({
     ctx.rendered = '';
     ctx.template = template;
     ctx.type = 'text/html';
-    
+
     await next();
 
     // Allow someone to override the ssr by setting ctx.body

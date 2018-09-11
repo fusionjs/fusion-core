@@ -10,7 +10,12 @@ import {compose} from './compose.js';
 import Timing, {TimingToken} from './plugins/timing';
 import BaseApp from './base-app';
 import serverRenderer from './plugins/server-renderer';
-import {RenderToken, ElementToken, SSRDeciderToken, StreamingToken} from './tokens';
+import {
+  RenderToken,
+  ElementToken,
+  SSRDeciderToken,
+  StreamingToken,
+} from './tokens';
 import ssrPlugin from './plugins/ssr';
 import contextMiddleware from './plugins/server-context.js';
 
@@ -25,7 +30,11 @@ export default function(): typeof BaseApp {
       this.middleware(contextMiddleware);
       this.register(TimingToken, Timing);
       this.middleware(
-        {element: ElementToken, ssrDecider: SSRDeciderToken, streaming: StreamingToken.optional},
+        {
+          element: ElementToken,
+          ssrDecider: SSRDeciderToken,
+          streaming: StreamingToken.optional,
+        },
         ssrPlugin
       );
     }
