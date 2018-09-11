@@ -16,7 +16,7 @@ import type {
 } from './types.js';
 
 declare class FusionApp {
-  constructor<Element>(element: Element, render: *): FusionApp;
+  constructor<Element>(element: Element, render: *, streaming: ?boolean): FusionApp;
   cleanups: Array<cleanupFn>;
   registered: Map<any, any>;
   plugins: Array<any>;
