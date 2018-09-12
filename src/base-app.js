@@ -17,6 +17,7 @@ class FusionApp {
   constructor(el: Element | string, render: *) {
     this.registered = new Map(); // getTokenRef(token) -> {value, aliases, enhancers}
     this.enhancerToToken = new Map(); // enhancer -> token
+    this.services = new Map(); // Token.ref || Token => Service
     this.plugins = []; // Token
     this.cleanups = [];
     el && this.register(ElementToken, el);
@@ -35,6 +36,7 @@ class FusionApp {
     }
   >;
   enhancerToToken: Map<any, any>;
+  services: Map<any, any>;
   plugins: Array<any>;
   cleanups: Array<cleanupFn>;
   renderer: any;
@@ -73,7 +75,12 @@ class FusionApp {
       aliases: new Map(),
       enhancers: [],
     };
-    this.registered.set(getTokenRef(token), {value, aliases, enhancers, token});
+    this.registered.set(getTokenRef(token), {
+      value,
+      aliases,
+      enhancers,
+      token,
+    });
     function alias(sourceToken: *, destToken: *) {
       if (aliases) {
         aliases.set(sourceToken, destToken);
@@ -101,7 +108,12 @@ class FusionApp {
     if (enhancers && Array.isArray(enhancers)) {
       enhancers.push(enhancer);
     }
-    this.registered.set(getTokenRef(token), {value, aliases, enhancers, token});
+    this.registered.set(getTokenRef(token), {
+      value,
+      aliases,
+      enhancers,
+      token,
+    });
   }
   cleanup() {
     return Promise.all(this.cleanups.map(fn => fn()));
@@ -111,7 +123,7 @@ class FusionApp {
       throw new Error('Missing registration for RenderToken');
     }
     this._register(RenderToken, this.renderer);
-    const resolved = new Map(); // Token.ref || Token => Service
+    const resolved = this.services; // Token.ref || Token => Service
     const dependedOn = new Set(); // Token.ref || Token
     const nonPluginTokens = new Set(); // Token
     const resolving = new Set(); // Token.ref || Token
@@ -243,6 +255,7 @@ class FusionApp {
       return provides;
     };
 
+    resolved.clear();
     for (let i = 0; i < this.plugins.length; i++) {
       resolveToken(this.plugins[i]);
     }
@@ -259,6 +272,8 @@ class FusionApp {
         );
       }
     }
+
+    this.services = resolved;
     this.plugins = resolvedPlugins;
   }
 }
