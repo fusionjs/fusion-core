@@ -76,14 +76,9 @@ export default function createSSRPlugin({
     // $FlowFixMe
     const safeBody = body.map(consumeSanitizedHTML).join('');
 
-    const preloadHintLinks = getPreloadHintLinks(ctx);
     const coreGlobals = getCoreGlobals(ctx);
     const chunkScripts = getChunkScripts(ctx);
-    const bundleSplittingBootstrap = [
-      preloadHintLinks,
-      coreGlobals,
-      chunkScripts,
-    ].join('');
+    const bundleSplittingBootstrap = [coreGlobals, chunkScripts].join('');
 
     ctx.body = [
       '<!doctype html>',
@@ -143,12 +138,4 @@ function getChunkScripts(ctx) {
     }" defer${crossOrigin} src="${url}"></script>`;
   });
   return [...preloaded, ...sync].join('');
-}
-
-function getPreloadHintLinks(ctx) {
-  const chunks = [...ctx.preloadChunks, ...ctx.syncChunks];
-  const hints = getUrls(ctx, chunks).map(({url}) => {
-    return `<link rel="preload" href="${url}" as="script" />`;
-  });
-  return hints.join('');
 }
