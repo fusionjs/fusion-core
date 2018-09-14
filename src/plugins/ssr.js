@@ -31,7 +31,7 @@ const SSRDecider = createPlugin({
 });
 export {SSRDecider};
   
-const defaultProcessBody = ({header, rendered, footer}) => {
+const defaultProcessBodyTemplate = ({header, rendered, footer}) => {
  return [
    header,
    rendered,
