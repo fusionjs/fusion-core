@@ -7,51 +7,42 @@
  */
 /* eslint-env node */
 import assert from 'assert';
+import {URL} from 'url';
 
 export default (__BROWSER__ ? () => {} : loadEnv());
 
-function load(key, value) {
-  return process.env[key] || value;
+function load(key) {
+  const value = process.env[key];
+  if (value === null) {
+    return void 0;
+  }
+  return value;
 }
 
 export function loadEnv() {
-  const rootDir = load('ROOT_DIR', '.');
-  const env = load('NODE_ENV', 'development');
-  if (!(env === 'development' || env === 'production' || env === 'test')) {
-    throw new Error(`Invalid NODE_ENV loaded: ${env}.`);
+  let prefix = load('ROUTE_PREFIX');
+  if (typeof prefix === 'string') {
+    assert(!prefix.endsWith('/'), 'ROUTE_PREFIX must not end with /');
+    assert(prefix.startsWith('/'), 'ROUTE_PREFIX must start with /');
   }
-  const prefix = load('ROUTE_PREFIX', '');
-  assert(!prefix.endsWith('/'), 'ROUTE_PREFIX must not end with /');
-  const baseAssetPath = load('FRAMEWORK_STATIC_ASSET_PATH', `/_static`);
-  assert(
-    !baseAssetPath.endsWith('/'),
-    'FRAMEWORK_STATIC_ASSET_PATH must not end with /'
-  );
-  const cdnUrl = load('CDN_URL', '');
-  assert(!cdnUrl.endsWith('/'), 'CDN_URL must not end with /');
 
-  const assetPath = `${prefix}${baseAssetPath}`;
+  let cdnUrl = load('CDN_URL');
+  if (typeof cdnUrl === 'string') {
+    assert(!cdnUrl.endsWith('/'), 'CDN_URL must not end with /');
+    assert(new URL(cdnUrl), 'CDN_URL must be valid absolute URL');
+  }
+
   return function loadEnv(): Env {
     return {
-      rootDir,
-      env,
       prefix,
-      assetPath,
-      baseAssetPath,
       cdnUrl,
-      webpackPublicPath: cdnUrl || assetPath,
     };
   };
 }
 
 // Handle flow-types for export so browser export is ignored.
 type Env = {
-  rootDir: string,
-  env: string,
-  prefix: string,
-  assetPath: string,
-  baseAssetPath: string,
-  cdnUrl: string,
-  webpackPublicPath: string,
+  prefix?: string,
+  cdnUrl?: string,
 };
 declare export default () => Env;

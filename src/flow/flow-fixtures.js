@@ -127,23 +127,10 @@ async function cleanup() {
 
 /*   - Case: getEnv typing */
 async function checkEnv() {
-  const {
-    rootDir,
-    env,
-    prefix,
-    assetPath,
-    baseAssetPath,
-    cdnUrl,
-    webpackPublicPath,
-  } = getEnv();
+  const {prefix, cdnUrl} = getEnv();
   return {
-    rootDir,
-    env,
     prefix,
-    assetPath,
-    baseAssetPath,
     cdnUrl,
-    webpackPublicPath,
   };
 }
 
