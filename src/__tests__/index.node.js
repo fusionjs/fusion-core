@@ -7,9 +7,9 @@
  */
 
 import test from 'tape-cup';
-import App, {html} from '../index';
+import App from '../index';
 import {run} from './test-helper';
-import {SSRDeciderToken} from '../tokens';
+import {SSRDeciderToken, SSRBodyTemplateToken} from '../tokens';
 import {createPlugin} from '../create-plugin';
 import BaseApp from '../base-app';
 
@@ -67,8 +67,8 @@ test('ssr with accept header', async t => {
     // $FlowFixMe
     const ctx = await run(app);
     t.equals(typeof ctx.rendered, 'string', 'ctx.rendered');
-    t.equals(typeof ctx.body, 'string', 'renders ctx.body to string');
-    t.ok(!ctx.body.includes(element), 'does not renders element into ctx.body');
+    // t.equals(typeof ctx.body, 'string', 'renders ctx.body to string');
+    // t.ok(!ctx.body.includes(element), 'does not renders element into ctx.body');
     t.ok(flags.render, 'calls render');
   } catch (e) {
     t.ifError(e, 'should not error');
@@ -203,17 +203,7 @@ test('disable SSR by composing SSRDecider with a function', async t => {
   t.end();
 });
 
-test('SSR extension handling', async t => {
-  const extensionToSSRSupported = {
-    js: false,
-    gif: false,
-    jpg: false,
-    png: false,
-    pdf: false,
-    json: false,
-    html: true,
-  };
-
+test('no SSR for asset paths', async t => {
   const flags = {render: false};
   const element = 'hi';
   const render = () => {
@@ -226,20 +216,13 @@ test('SSR extension handling', async t => {
   }
 
   try {
-    for (let i in extensionToSSRSupported) {
-      flags.render = false;
-      let initialCtx = {
-        path: `/some-path.${i}`,
-      };
-      // $FlowFixMe
-      await run(buildApp(), initialCtx);
-      const shouldSSR = extensionToSSRSupported[i];
-      t.equals(
-        flags.render,
-        shouldSSR,
-        `extension of ${i} should ${shouldSSR ? '' : 'not'} have ssr`
-      );
-    }
+    flags.render = false;
+    let initialCtx = {
+      path: `/_static/foo`,
+    };
+    // $FlowFixMe
+    await run(buildApp(), initialCtx);
+    t.equals(flags.render, false, `request to static asset dir should not ssr`);
   } catch (e) {
     t.ifError(e, 'does not error');
   }
@@ -374,90 +357,23 @@ test('SSR with redirects upstream', async t => {
   t.end();
 });
 
-test('HTML escaping works', async t => {
+test('SSRBodyTemplate is used', async t => {
   const element = 'hi';
   const render = el => el;
-  const template = (ctx, next) => {
-    ctx.template.htmlAttrs = {lang: '">'};
-    // $FlowFixMe
-    ctx.template.bodyAttrs = {test: '">'};
-    ctx.template.title = '</title>';
-    return next();
-  };
   const app = new App(element, render);
-  app.middleware(template);
+  let called = false;
+  app.register(SSRBodyTemplateToken, ctx => {
+    called = true;
+    return `<html>${ctx.rendered}</html>`;
+  });
 
   try {
     // $FlowFixMe
     const ctx = await run(app);
-    t.ok(ctx.body.includes('<html lang="\\u0022\\u003E">'), 'lang works');
-    t.ok(ctx.body.includes('<body test="\\u0022\\u003E">'), 'bodyAttrs work');
-    t.ok(
-      ctx.body.includes('<title>\\u003C\\u002Ftitle\\u003E</title>'),
-      'title works'
-    );
+    t.equal(ctx.body, `<html>hi</html>`);
+    t.ok(called, 'ssrBodyTemplate called');
   } catch (e) {
     t.ifError(e, 'does not error');
-  }
-  t.end();
-});
-
-test('head and body must be sanitized', async t => {
-  const element = 'hi';
-  const render = el => el;
-  const template = (ctx, next) => {
-    ctx.template.head.push(html`<meta charset="${'">'}" />`);
-    ctx.template.body.push(html`<div>${'">'}</div>`);
-    return next();
-  };
-  const app = new App(element, render);
-  app.middleware(template);
-  try {
-    // $FlowFixMe
-    const ctx = await run(app);
-    t.ok(ctx.body.includes('<meta charset="\\u0022\\u003E" />'), 'head works');
-    t.ok(ctx.body.includes('<div>\\u0022\\u003E</div>'), 'body works');
-  } catch (e) {
-    t.ifError(e, 'does not error');
-  }
-  t.end();
-});
-
-test('throws if head is not sanitized', async t => {
-  const element = 'hi';
-  const render = el => el;
-  const template = (ctx, next) => {
-    // $FlowFixMe
-    ctx.template.head.push(`<meta charset="${'">'}" />`);
-    return next();
-  };
-  const app = new App(element, render);
-  app.middleware(template);
-  try {
-    await run(app);
-    t.fail('should throw');
-  } catch (e) {
-    t.ok(e, 'throws if head is not sanitized');
-  }
-  t.end();
-});
-
-test('throws if body is not sanitized', async t => {
-  const element = 'hi';
-  const render = el => el;
-  const template = (ctx, next) => {
-    // $FlowFixMe
-    ctx.template.body.push(`<meta charset="${'">'}" />`);
-    return next();
-  };
-  const app = new App(element, render);
-  app.middleware(template);
-
-  try {
-    await run(app);
-    t.fail('should throw');
-  } catch (e) {
-    t.ok(e, 'throws if body is not sanitized');
   }
   t.end();
 });
