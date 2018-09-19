@@ -30,5 +30,15 @@ test('memoize', t => {
   t.equal(memoizedB(mockCtx), 1, 'memoizes correctly');
   t.equal(memoized(mockCtx), 1, 'calls function when it has no value');
   t.equal(memoized(mockCtx), 1, 'memoizes correctly');
+
+  // New context object should cause new calculation
+  const mockCtx2: Context = ({}: any);
+  t.equal(memoized(mockCtx2), 2, 'calls function when it has no value');
+  t.equal(memoized(mockCtx2), 2, 'memoizes correctly');
+  t.equal(memoizedB(mockCtx2), 2, 'calls function when it has no value');
+  t.equal(memoizedB(mockCtx2), 2, 'memoizes correctly');
+  t.equal(memoized(mockCtx2), 2, 'calls function when it has no value');
+  t.equal(memoized(mockCtx2), 2, 'memoizes correctly');
+
   t.end();
 });
