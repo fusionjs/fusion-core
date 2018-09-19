@@ -12,10 +12,7 @@ import {memoize} from '../memoize';
 import type {Context} from '../types.js';
 
 test('memoize', t => {
-  // $FlowFixMe
-  const mockCtx: Context = {
-    memoized: new Map(),
-  };
+  const mockCtx: Context = ({}: any);
 
   let counter = 0;
   const memoized = memoize(() => {
