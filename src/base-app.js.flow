@@ -19,6 +19,7 @@ declare class FusionApp {
   constructor<Element>(element: Element, render: *): FusionApp;
   cleanups: Array<cleanupFn>;
   registered: Map<any, any>;
+  services: Map<any, any>;
   plugins: Array<any>;
   renderer: any;
   cleanup(): Promise<void>;
