@@ -10,16 +10,35 @@ import type {Context} from './types.js';
 
 type MemoizeFn<A> = (ctx: Context) => A;
 
-function Container() {}
-
 export function memoize<A>(fn: MemoizeFn<A>): MemoizeFn<A> {
-  const memoizeKey = __NODE__ ? Symbol('memoize-key') : new Container();
-  return function memoized(ctx: Context) {
-    if (ctx.memoized.has(memoizeKey)) {
-      return ctx.memoized.get(memoizeKey);
+  if (__BROWSER__) {
+    return browserMemoize(fn);
+  }
+
+  const wm = new WeakMap();
+  return ctx => {
+    if (wm.has(ctx)) {
+      return ((wm.get(ctx): any): A); // Refinement doesn't seem to work
+    } else {
+      const result = fn(ctx);
+      wm.set(ctx, result);
+      return result;
     }
-    const result = fn(ctx);
-    ctx.memoized.set(memoizeKey, result);
-    return result;
+  };
+}
+
+/**
+ * There is only ever a single ctx object in the browser.
+ * Therefore we can use a simple memoization function.
+ */
+function browserMemoize<A>(fn: MemoizeFn<A>): MemoizeFn<A> {
+  let memoized;
+  let called = false;
+  return ctx => {
+    if (!called) {
+      memoized = fn(ctx);
+      called = true;
+    }
+    return memoized;
   };
 }
