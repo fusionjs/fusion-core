@@ -6,7 +6,7 @@
  * @flow
  */
 
-import type {Token} from './types.js';
+import type {Token, ArrayToken} from './types.js';
 
 export const TokenType = {
   Required: 0,
@@ -18,6 +18,7 @@ export class TokenImpl<TResolved> {
   ref: mixed;
   type: $Values<typeof TokenType>;
   optional: ?TokenImpl<TResolved>;
+  isCompound = false;
 
   constructor(name: string, ref: mixed) {
     this.name = name;
@@ -31,4 +32,13 @@ export class TokenImpl<TResolved> {
 
 export function createToken<TResolvedType>(name: string): Token<TResolvedType> {
   return ((new TokenImpl(name): any): Token<TResolvedType>);
+}
+
+export function createArrayToken<TResolvedType>(
+  name: string
+): ArrayToken<TResolvedType> {
+  const token = new TokenImpl(name);
+  token.isCompound = true;
+  // $FlowFixMe
+  return token;
 }
