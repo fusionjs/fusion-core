@@ -18,3 +18,4 @@ export const HttpServerToken = createToken('HttpServerToken');
 export const SSRBodyTemplateToken: Token<SSRBodyTemplate> = createToken(
   'SSRBodyTemplateToken'
 );
+export const RoutePrefixToken: Token<string> = createToken('RoutePrefixToken');

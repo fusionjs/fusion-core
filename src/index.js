@@ -40,6 +40,7 @@ export {
   SSRDeciderToken,
   HttpServerToken,
   SSRBodyTemplateToken,
+  RoutePrefixToken,
 } from './tokens';
 export {createPlugin} from './create-plugin';
 export {createToken} from './create-token';
