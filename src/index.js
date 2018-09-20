@@ -5,7 +5,13 @@
  *
  * @flow
  */
-import type {Context, FusionPlugin, Middleware, Token} from './types.js';
+import type {
+  Context,
+  FusionPlugin,
+  Middleware,
+  Token,
+  SSRBodyTemplate,
+} from './types.js';
 
 import BaseApp from './base-app';
 import serverApp from './server-app';
@@ -48,4 +54,11 @@ export {getEnv};
 
 type FusionApp = typeof BaseApp;
 declare export default typeof BaseApp;
-export type {Context, FusionApp, FusionPlugin, Middleware, Token};
+export type {
+  Context,
+  FusionApp,
+  FusionPlugin,
+  Middleware,
+  Token,
+  SSRBodyTemplate,
+};
