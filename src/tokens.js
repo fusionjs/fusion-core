@@ -19,3 +19,6 @@ export const SSRBodyTemplateToken: Token<SSRBodyTemplate> = createToken(
   'SSRBodyTemplateToken'
 );
 export const RoutePrefixToken: Token<string> = createToken('RoutePrefixToken');
+export const CriticalChunkIdsToken: Token<Set<number>> = createToken(
+  'CriticalChunkIdsToken'
+);

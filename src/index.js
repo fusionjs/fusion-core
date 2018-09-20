@@ -47,6 +47,7 @@ export {
   HttpServerToken,
   SSRBodyTemplateToken,
   RoutePrefixToken,
+  CriticalChunkIdsToken,
 } from './tokens';
 export {createPlugin} from './create-plugin';
 export {createToken} from './create-token';
