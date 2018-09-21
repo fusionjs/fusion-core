@@ -276,7 +276,7 @@ class FusionApp {
   }
   getService<TResolved>(token: Token<TResolved>): any {
     if (!this._getService) {
-      throw new Error(`Cannot get service from unresolved app: ${token.name}`);
+      throw new Error('Cannot get service from unresolved app');
     }
     return this._getService(token);
   }
