@@ -13,8 +13,10 @@ import {
   RenderToken,
   SSRDeciderToken,
   SSRBodyTemplateToken,
+  RoutePrefixToken,
 } from './tokens';
 import {SSRDecider, SSRBodyTemplate} from './plugins/ssr';
+import RoutePrefixPlugin from './plugins/route-prefix';
 
 import type {aliaser, cleanupFn, FusionPlugin, Token} from './types.js';
 
@@ -28,6 +30,7 @@ class FusionApp {
     render && this.register(RenderToken, render);
     this.register(SSRDeciderToken, SSRDecider);
     this.register(SSRBodyTemplateToken, SSRBodyTemplate);
+    this.register(RoutePrefixToken, RoutePrefixPlugin);
   }
 
   // eslint-disable-next-line

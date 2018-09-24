@@ -121,7 +121,6 @@ function getCoreGlobals(ctx) {
   return [
     `<script nonce="${nonce}">`,
     `window.performance && window.performance.mark && window.performance.mark('firstRenderStart');`,
-    `__ROUTE_PREFIX__ = ${JSON.stringify(ctx.prefix)};`, // consumed by ./client
     `__WEBPACK_PUBLIC_PATH__ = ${JSON.stringify(webpackPublicPath)};`, // consumed by fusion-clientries/client-entry
     `</script>`,
   ].join('');
