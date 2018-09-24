@@ -7,7 +7,7 @@
  */
 
 import {createToken} from './create-token';
-import type {SSRDecider, SSRBodyTemplate, Token} from './types.js';
+import type {SSRDecider, SSRBodyTemplate, Token, Context} from './types.js';
 
 export const RenderToken = createToken('RenderToken');
 export const ElementToken = createToken('ElementToken');
@@ -19,6 +19,13 @@ export const SSRBodyTemplateToken: Token<SSRBodyTemplate> = createToken(
   'SSRBodyTemplateToken'
 );
 export const RoutePrefixToken: Token<string> = createToken('RoutePrefixToken');
-export const CriticalChunkIdsToken: Token<Set<number>> = createToken(
-  'CriticalChunkIdsToken'
-);
+
+export type CriticalChunkIds = Set<number>;
+
+export type CriticalChunkIdsService = {
+  from(ctx: Context): CriticalChunkIds,
+};
+
+export const CriticalChunkIdsToken: Token<
+  CriticalChunkIdsService
+> = createToken('CriticalChunkIdsToken');
