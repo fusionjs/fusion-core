@@ -27,7 +27,7 @@ export default createPlugin({
       if (ctx.element) {
         ctx.template.head.push(
           dangerouslySetHTML(
-            `<script nonce="${ctx.nonce}">__ROUTE_PREFIX__ = ${JSON.stringify(
+            `<script nonce=${ctx.nonce}>__ROUTE_PREFIX__ = ${JSON.stringify(
               routePrefix
             )}</script>`
           )
