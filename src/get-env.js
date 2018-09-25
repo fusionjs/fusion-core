@@ -15,6 +15,8 @@ function load(key, value) {
 }
 
 export function loadEnv() {
+  console.warn('Warning: getEnv from fusion-core is deprecated.'); // eslint-disable-line no-console
+
   const rootDir = load('ROOT_DIR', '.');
   const env = load('NODE_ENV', 'development');
   if (!(env === 'development' || env === 'production' || env === 'test')) {

@@ -6,13 +6,21 @@
  * @flow
  */
 
-import {createPlugin} from '../create-plugin';
-import {escape, consumeSanitizedHTML} from '../sanitization';
+/* eslint-env node */
+
 import type {
   Context,
   SSRDecider as SSRDeciderService,
   SSRBodyTemplate as SSRBodyTemplateService,
 } from '../types.js';
+
+import {createPlugin} from '../create-plugin';
+import {escape, consumeSanitizedHTML} from '../sanitization';
+
+const isTest = Boolean(process.env.NODE_ENV === 'test' || process.env.JEST_ENV);
+
+// Flow workaround: https://github.com/facebook/flow/issues/285#issuecomment-382044301
+const {defineProperty} = Object;
 
 const SSRDecider = createPlugin({
   provides: () => {
@@ -31,54 +39,6 @@ const SSRDecider = createPlugin({
 });
 export {SSRDecider};
 
-const SSRBodyTemplate = createPlugin({
-  provides: () => {
-    return ctx => {
-      const {htmlAttrs, bodyAttrs, title, head, body} = ctx.template;
-      const safeAttrs = Object.keys(htmlAttrs)
-        .map(attrKey => {
-          return ` ${escape(attrKey)}="${escape(htmlAttrs[attrKey])}"`;
-        })
-        .join('');
-
-      const safeBodyAttrs = Object.keys(bodyAttrs)
-        .map(attrKey => {
-          return ` ${escape(attrKey)}="${escape(bodyAttrs[attrKey])}"`;
-        })
-        .join('');
-
-      const safeTitle = escape(title);
-      // $FlowFixMe
-      const safeHead = head.map(consumeSanitizedHTML).join('');
-      // $FlowFixMe
-      const safeBody = body.map(consumeSanitizedHTML).join('');
-
-      const preloadHintLinks = getPreloadHintLinks(ctx);
-      const coreGlobals = getCoreGlobals(ctx);
-      const chunkScripts = getChunkScripts(ctx);
-      const bundleSplittingBootstrap = [
-        preloadHintLinks,
-        coreGlobals,
-        chunkScripts,
-      ].join('');
-
-      return [
-        '<!doctype html>',
-        `<html${safeAttrs}>`,
-        `<head>`,
-        `<meta charset="utf-8" />`,
-        `<title>${safeTitle}</title>`,
-        `${bundleSplittingBootstrap}${safeHead}`,
-        `</head>`,
-        `<body${safeBodyAttrs}>${ctx.rendered}${safeBody}</body>`,
-        '</html>',
-      ].join('');
-    };
-  },
-});
-
-export {SSRBodyTemplate};
-
 export default function createSSRPlugin({
   element,
   ssrDecider,
@@ -86,7 +46,7 @@ export default function createSSRPlugin({
 }: {
   element: any,
   ssrDecider: SSRDeciderService,
-  ssrBodyTemplate: SSRBodyTemplateService,
+  ssrBodyTemplate?: SSRBodyTemplateService,
 }) {
   return async function ssrPlugin(ctx: Context, next: () => Promise<void>) {
     if (!ssrDecider(ctx)) return next();
@@ -111,10 +71,90 @@ export default function createSSRPlugin({
       return;
     }
 
-    ctx.body = ssrBodyTemplate(ctx);
+    if (ssrBodyTemplate) {
+      ctx.body = ssrBodyTemplate(ctx);
+    } else {
+      let legacyBody = legacySSRTemplate(ctx);
+
+      if (!isTest) {
+        if (__DEV__) {
+          // eslint-disable-next-line no-console
+          console.warn([
+            'Warning: no SSRBodyTemplate token was registered.',
+            'Upgrading fusion-cli will probably resolve this warning.',
+          ]);
+        }
+        ctx.body = legacyBody;
+      } else {
+        defineProperty(ctx, 'body', {
+          get: () => {
+            // eslint-disable-next-line no-console
+            console.warn([
+              'In the next major version of fusion-core,',
+              'if no SSRBodyTemplate token is registered,',
+              'ctx.body will not be set during SSR.',
+              'This means simulation tests should assert against ctx.rendered instead of ctx.body',
+            ]);
+            return legacyBody;
+          },
+          set: newBody => {
+            legacyBody = newBody;
+          },
+          writeable: true,
+          enumerable: true,
+          configurable: true,
+        });
+      }
+    }
   };
 }
 
+/**
+ * This template should be deleted
+ *
+ */
+
+function legacySSRTemplate(ctx) {
+  const {htmlAttrs, bodyAttrs, title, head, body} = ctx.template;
+  const safeAttrs = Object.keys(htmlAttrs)
+    .map(attrKey => {
+      return ` ${escape(attrKey)}="${escape(htmlAttrs[attrKey])}"`;
+    })
+    .join('');
+
+  const safeBodyAttrs = Object.keys(bodyAttrs)
+    .map(attrKey => {
+      return ` ${escape(attrKey)}="${escape(bodyAttrs[attrKey])}"`;
+    })
+    .join('');
+
+  const safeTitle = escape(title);
+  // $FlowFixMe
+  const safeHead = head.map(consumeSanitizedHTML).join('');
+  // $FlowFixMe
+  const safeBody = body.map(consumeSanitizedHTML).join('');
+
+  const preloadHintLinks = getPreloadHintLinks(ctx);
+  const coreGlobals = getCoreGlobals(ctx);
+  const chunkScripts = getChunkScripts(ctx);
+  const bundleSplittingBootstrap = [
+    preloadHintLinks,
+    coreGlobals,
+    chunkScripts,
+  ].join('');
+
+  return [
+    '<!doctype html>',
+    `<html${safeAttrs}>`,
+    `<head>`,
+    `<meta charset="utf-8" />`,
+    `<title>${safeTitle}</title>`,
+    `${bundleSplittingBootstrap}${safeHead}`,
+    `</head>`,
+    `<body${safeBodyAttrs}>${ctx.rendered}${safeBody}</body>`,
+    '</html>',
+  ].join('');
+}
 function getCoreGlobals(ctx) {
   const {webpackPublicPath, nonce} = ctx;
 
