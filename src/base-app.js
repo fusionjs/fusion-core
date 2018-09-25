@@ -15,7 +15,7 @@ import {
   SSRBodyTemplateToken,
   RoutePrefixToken,
 } from './tokens';
-import {SSRDecider, SSRBodyTemplate} from './plugins/ssr';
+import {SSRDecider} from './plugins/ssr';
 import RoutePrefixPlugin from './plugins/route-prefix';
 
 import type {aliaser, cleanupFn, FusionPlugin, Token} from './types.js';
@@ -29,7 +29,6 @@ class FusionApp {
     el && this.register(ElementToken, el);
     render && this.register(RenderToken, render);
     this.register(SSRDeciderToken, SSRDecider);
-    this.register(SSRBodyTemplateToken, SSRBodyTemplate);
     this.register(RoutePrefixToken, RoutePrefixPlugin);
   }
 
