@@ -30,9 +30,18 @@ const SSRDecider = createPlugin({
   },
 });
 export {SSRDecider};
+  
+const defaultProcessBodyTemplate = ({header, rendered, footer}) => {
+ return [
+   header,
+   rendered,
+   footer
+ ].join('');
+}
 
 const SSRBodyTemplate = createPlugin({
-  provides: () => {
+  deps: {processBodyTemplate: ProcessBodyTemplateToken.optional},
+  provides: ({processBodyTemplate = defaultProcessBodyTemplate}) => {
     return ctx => {
       const {htmlAttrs, bodyAttrs, title, head, body} = ctx.template;
       const safeAttrs = Object.keys(htmlAttrs)
@@ -61,8 +70,8 @@ const SSRBodyTemplate = createPlugin({
         coreGlobals,
         chunkScripts,
       ].join('');
-
-      return [
+      
+      const header = [
         '<!doctype html>',
         `<html${safeAttrs}>`,
         `<head>`,
@@ -70,9 +79,17 @@ const SSRBodyTemplate = createPlugin({
         `<title>${safeTitle}</title>`,
         `${bundleSplittingBootstrap}${safeHead}`,
         `</head>`,
-        `<body${safeBodyAttrs}>${ctx.rendered}${safeBody}</body>`,
+        `<body${safeBodyAttrs}>`
+      ].join('');
+      
+      const rendered = ctx.rendered
+      
+      const footer = [
+        `${safeBody}</body>`,
         '</html>',
       ].join('');
+
+      return processBodyTemplate({header, rendered, footer});
     };
   },
 });
