@@ -163,10 +163,50 @@ class FusionApp {
         if (token instanceof TokenImpl && token.type === TokenType.Optional) {
           this.register(token, undefined);
         } else {
+          const dependents = Array.from(this.registered.entries());
+
+          /**
+           * Iterate over the entire list of dependencies and find all
+           * dependencies of a given token.
+           */
+          const findDependentTokens = () => {
+            return dependents
+              .filter(entry => {
+                if (!entry[1].value || !entry[1].value.deps) {
+                  return false;
+                }
+                return Object.values(entry[1].value.deps).includes(token);
+              })
+              .map(entry => entry[1].token.name);
+          };
+          const findDependentEnhancers = () => {
+            return appliedEnhancers
+              .filter(([, provides]) => {
+                if (!provides || !provides.deps) {
+                  return false;
+                }
+                return Object.values(provides.deps).includes(token);
+              })
+              .map(([enhancer]) => {
+                const enhancedToken = this.enhancerToToken.get(enhancer);
+                return `EnhancerOf<${
+                  enhancedToken ? enhancedToken.name : '(unknown)'
+                }>`;
+              });
+          };
+          const dependentTokens = [
+            ...findDependentTokens(),
+            ...findDependentEnhancers(),
+          ];
+
           const base =
             'A plugin depends on a token, but the token was not registered';
-          const meta =
-            `Required token: ${token ? token.name : ''}\n` + token.stack;
+          const downstreams =
+            'Dependents: ' +
+            dependentTokens.map(token => `"${token}"`).join(', ');
+          const meta = `Required token: ${
+            token ? token.name : ''
+          }\n${downstreams}\n${token.stack}`;
           const clue = 'Different tokens with the same name were detected:\n\n';
           const suggestions = token
             ? this.plugins
@@ -179,7 +219,8 @@ class FusionApp {
             'Ensure that `yarn list [the-plugin]` results in one version, ' +
             'and use a yarn resolution or merge package version in your lock file to consolidate versions.\n\n';
           throw new Error(
-            `${base}\n\n${meta}\n\n${suggestions && clue + suggestions + help}`
+            `${base}\n\n${meta}\n${dependents}\n\n${suggestions &&
+              clue + suggestions + help}`
           );
         }
       }
