@@ -219,8 +219,7 @@ class FusionApp {
             'Ensure that `yarn list [the-plugin]` results in one version, ' +
             'and use a yarn resolution or merge package version in your lock file to consolidate versions.\n\n';
           throw new Error(
-            `${base}\n\n${meta}\n${dependents}\n\n${suggestions &&
-              clue + suggestions + help}`
+            `${base}\n\n${meta}\n\n${suggestions && clue + suggestions + help}`
           );
         }
       }
