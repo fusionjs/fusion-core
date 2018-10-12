@@ -202,7 +202,7 @@ class FusionApp {
           const base =
             'A plugin depends on a token, but the token was not registered';
           const downstreams =
-            'Dependents: ' +
+            'This token is required by plugins registered with tokens: ' +
             dependentTokens.map(token => `"${token}"`).join(', ');
           const meta = `Required token: ${
             token ? token.name : ''
