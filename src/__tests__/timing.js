@@ -38,3 +38,39 @@ test('timing plugin', async t => {
     t.end();
   });
 });
+
+test('timing plugin on error middleware', async t => {
+  const element = 'hi';
+  const renderFn = el => {
+    return el;
+  };
+  const app = new App(element, renderFn);
+  let resolved = {
+    downstream: false,
+    upstream: false,
+    render: false,
+  };
+  app.middleware((ctx, next) => {
+    ctx.timing.downstream.then(result => {
+      resolved.downstream = true;
+    });
+    ctx.timing.render.then(result => {
+      resolved.render = true;
+    });
+    ctx.timing.upstream.then(result => {
+      resolved.upstream = true;
+    });
+    ctx.timing.end.then(result => {
+      t.equal(typeof result, 'number', 'sets end timing result');
+      t.equal(resolved.downstream, false, 'does not resolve downstream');
+      t.equal(resolved.render, false, 'does not resolve render');
+      t.equal(resolved.upstream, false, 'does not resolve upstream');
+      t.end();
+    });
+    return next();
+  });
+  app.middleware((ctx, next) => {
+    throw new Error('fail request');
+  });
+  await run(app).catch(e => {});
+});
