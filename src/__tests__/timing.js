@@ -72,6 +72,7 @@ test('timing plugin on error middleware', async t => {
   });
   app.middleware((ctx, next) => {
     const e = new Error('fail request');
+    // $FlowFixMe
     e.status = 500;
     throw e;
   });
