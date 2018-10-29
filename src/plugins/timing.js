@@ -62,6 +62,10 @@ function middleware(ctx, next) {
     .catch(e => {
       // currently we only resolve upstream and downstream when the request does not error
       // we should however always resolve the request end timing
+      if (e && e.status) {
+        // this ensures any logging / metrics based on ctx.status will recieve the correct status code
+        ctx.status = e.status;
+      }
       const endTime = now() - ctx.timing.start;
       end.resolve(endTime);
       throw e;

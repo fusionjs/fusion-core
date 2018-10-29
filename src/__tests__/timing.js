@@ -65,12 +65,15 @@ test('timing plugin on error middleware', async t => {
       t.equal(resolved.downstream, false, 'does not resolve downstream');
       t.equal(resolved.render, false, 'does not resolve render');
       t.equal(resolved.upstream, false, 'does not resolve upstream');
+      t.equal(ctx.status, 500, 'sets ctx.status');
       t.end();
     });
     return next();
   });
   app.middleware((ctx, next) => {
-    throw new Error('fail request');
+    const e = new Error('fail request');
+    e.status = 500;
+    throw e;
   });
   await run(app).catch(e => {});
 });
