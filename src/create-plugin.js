@@ -19,6 +19,7 @@ export function createPlugin<TDeps, TService>(
 ): FusionPlugin<TDeps, TService> {
   return {
     __plugin__: true,
+    stack: new Error().stack,
     ...opts,
   };
 }

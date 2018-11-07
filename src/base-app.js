@@ -68,6 +68,10 @@ class FusionApp {
         },
       };
     }
+    token.stacks.push({type: 'register', stack: new Error().stack});
+    if (value && value.__plugin__) {
+      token.stacks.push({type: 'plugin', stack: value.stack});
+    }
     return this._register(token, value);
   }
   _register<TResolved>(token: Token<TResolved>, value: *) {
@@ -90,6 +94,9 @@ class FusionApp {
       token,
     });
     const alias = (sourceToken: *, destToken: *) => {
+      const stack = new Error().stack;
+      sourceToken.stacks.push({type: 'alias-from', stack});
+      destToken.stacks.push({type: 'alias-to', stack});
       this._dependedOn.add(getTokenRef(destToken));
       if (aliases) {
         aliases.set(getTokenRef(sourceToken), destToken);
@@ -105,6 +112,7 @@ class FusionApp {
     this.register(createPlugin({deps, middleware}));
   }
   enhance<TResolved>(token: Token<TResolved>, enhancer: Function) {
+    token.stacks.push({type: 'enhance', stack: new Error().stack});
     const {value, aliases, enhancers} = this.registered.get(
       getTokenRef(token)
     ) || {
