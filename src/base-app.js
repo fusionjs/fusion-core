@@ -69,7 +69,9 @@ class FusionApp {
       };
     }
     token.stacks.push({type: 'register', stack: new Error().stack});
+    // $FlowFixMe
     if (value && value.__plugin__) {
+      // $FlowFixMe
       token.stacks.push({type: 'plugin', stack: value.stack});
     }
     return this._register(token, value);
@@ -212,14 +214,18 @@ class FusionApp {
           const downstreams =
             'This token is required by plugins registered with tokens: ' +
             dependentTokens.map(token => `"${token}"`).join(', ');
+          const stack = token.stacks.find(t => t.type === 'token');
           const meta = `Required token: ${
             token ? token.name : ''
-          }\n${downstreams}\n${token.stack}`;
+          }\n${downstreams}\n${stack ? stack.stack : ''}`;
           const clue = 'Different tokens with the same name were detected:\n\n';
           const suggestions = token
             ? this.plugins
                 .filter(p => p.name === token.name)
-                .map(c => `${c.name}\n${c.stack}\n\n`)
+                .map(p => {
+                  const stack = p.stacks.find(t => t.type === 'token');
+                  return `${p.name}\n${stack ? stack.stack : ''}\n\n`;
+                })
                 .join('\n\n')
             : '';
           const help =

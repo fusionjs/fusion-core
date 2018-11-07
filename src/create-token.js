@@ -18,7 +18,7 @@ export class TokenImpl<TResolved> {
   ref: mixed;
   type: $Values<typeof TokenType>;
   optional: ?TokenImpl<TResolved>;
-  stacks: Array<string>;
+  stacks: Array<{type: string, stack: string}>;
 
   constructor(name: string, ref: mixed) {
     this.name = name;

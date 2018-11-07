@@ -11,7 +11,7 @@ import type {Context as KoaContext} from 'koa';
 export type Token<T> = {
   (): T,
   optional: () => void | T,
-  stack: string,
+  stacks: Array<{type: string, stack: string}>,
 };
 
 type ExtendedKoaContext = KoaContext & {memoized: Map<Object, mixed>};
@@ -44,6 +44,7 @@ export type ExtractReturnType = <V>(() => V) => V;
 
 export type FusionPlugin<Deps, Service> = {|
   __plugin__: boolean,
+  stack: string,
   deps?: Deps,
   provides?: (Deps: $ObjMap<Deps & {}, ExtractReturnType>) => Service,
   middleware?: (
