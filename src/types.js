@@ -11,7 +11,10 @@ import type {Context as KoaContext} from 'koa';
 export type Token<T> = {
   (): T,
   optional: () => void | T,
-  stacks: Array<{type: string, stack: string}>,
+  stacks: Array<{
+    type: 'token' | 'register' | 'enhance' | 'alias-from' | 'alias-to',
+    stack: string,
+  }>,
 };
 
 type ExtendedKoaContext = KoaContext & {memoized: Map<Object, mixed>};
