@@ -31,7 +31,10 @@ test('unescaping works', async t => {
 });
 test('html sanitization works', async t => {
   const userData = '<malicious data="" />';
-  const value = html`<div>${userData}</div>${null}`;
+  const value = html`
+    <div>${userData}</div>
+    ${null}
+  `;
   t.equals(typeof value, 'object');
   t.equals(
     // $FlowFixMe
@@ -41,8 +44,12 @@ test('html sanitization works', async t => {
   t.end();
 });
 test('nested sanitization works', async t => {
-  const safe = html`hello`;
-  const value = html`<div>${safe}</div>`;
+  const safe = html`
+    hello
+  `;
+  const value = html`
+    <div>${safe}</div>
+  `;
   t.equals(typeof value, 'object');
   // $FlowFixMe
   t.equals(consumeSanitizedHTML(value), `<div>hello</div>`);
