@@ -43,7 +43,7 @@
     "uuid": "^3.3.2"
   },
   "peerDependencies": {
-    "fusion-cli": "^1.9.0"
+    "fusion-cli": "^1.12.1"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.1",
