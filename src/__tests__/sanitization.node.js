@@ -39,7 +39,7 @@ test('html sanitization works', async t => {
   t.equals(
     // $FlowFixMe
     consumeSanitizedHTML(value),
-    `<div>\\u003Cmalicious data=\\u0022\\u0022 \\u002F\\u003E</div>null`
+    `\n    <div>\\u003Cmalicious data=\\u0022\\u0022 \\u002F\\u003E</div>\n    null\n  `
   );
   t.end();
 });
@@ -52,7 +52,7 @@ test('nested sanitization works', async t => {
   `;
   t.equals(typeof value, 'object');
   // $FlowFixMe
-  t.equals(consumeSanitizedHTML(value), `<div>hello</div>`);
+  t.equals(consumeSanitizedHTML(value), `\n    <div>\n    hello\n  </div>\n  `);
   t.end();
 });
 test('dangerouslySetHTML works', async t => {
