@@ -112,8 +112,12 @@ class FusionApp {
   }
   middleware(deps: *, middleware: *) {
     if (middleware === undefined) {
+      if (deps.__plugin__ === true) {
+        throw new Error('Cannot register plugin as a middleware');
+      }
       middleware = () => deps;
     }
+
     this.register(createPlugin({deps, middleware}));
   }
   enhance<TResolved>(token: Token<TResolved>, enhancer: Function) {
