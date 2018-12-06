@@ -617,8 +617,10 @@ test('registering a plugin as a middleware should throw', async t => {
       };
     },
   });
+
   const app = new BaseApp('el', el => el);
   try {
+    // $FlowFixMe
     app.middleware(simplePlugin);
   } catch (e) {
     t.equals(e.message, 'Cannot register plugin as a middleware');
