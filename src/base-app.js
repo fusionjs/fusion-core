@@ -272,7 +272,7 @@ class FusionApp {
           const middlewareFn = plugin.middleware(resolvedDeps, provides);
           const middleware = function(ctx, next) {
             let thisTimer;
-            if (ctx.url && ctx.url.match(/client-main[.]*.js$/)) {
+            if (ctx.url && ctx.url.match(/client-main.*.js$/)) {
               thisTimer = timer.start(
                 `${ctx.url} ${String(plugin.middleware).slice(0, 100)}`
               );
