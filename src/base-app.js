@@ -244,6 +244,20 @@ class FusionApp {
       // Recursive: get the registered type and resolve it
       resolving.add(getTokenRef(token));
 
+      const timer = {
+        start(id = 'unspecified') {
+          return {
+            id,
+            startTime: Date.now(),
+            stop() {
+              /* eslint-disable-next-line */
+              console.log(`${this.id}:
+      ${Date.now() - this.startTime}ms`);
+            },
+          };
+        },
+      };
+
       function resolvePlugin(plugin) {
         const registeredDeps = (plugin && plugin.deps) || {};
         const resolvedDeps = {};
@@ -255,8 +269,21 @@ class FusionApp {
         let provides =
           plugin && plugin.provides ? plugin.provides(resolvedDeps) : undefined;
         if (plugin && plugin.middleware) {
-          resolvedPlugins.push(plugin.middleware(resolvedDeps, provides));
+          const middlewareFn = plugin.middleware(resolvedDeps, provides);
+          const middleware = function(ctx, next) {
+            let thisTimer;
+            if (ctx.url && ctx.url.match(/client-main[.]*.js$/)) {
+              thisTimer = timer.start(
+                `${ctx.url} ${String(plugin.middleware).slice(0, 100)}`
+              );
+            }
+            return middlewareFn(ctx, next).then(
+              () => thisTimer && thisTimer.stop()
+            );
+          };
+          resolvedPlugins.push(middleware);
         }
+
         return provides;
       }
 
