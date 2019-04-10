@@ -217,7 +217,7 @@ class FusionApp {
           const downstreams =
             'This token is required by plugins registered with tokens: ' +
             dependentTokens.map(token => `"${token}"`).join(', ');
-          const stack = token.stacks.find(t => t.type === 'token');
+          const stack = token.stacks && token.stacks.find(t => t.type === 'token');
           const meta = `Required token: ${
             token ? token.name : ''
           }\n${downstreams}\n${stack ? stack.stack : ''}`;
