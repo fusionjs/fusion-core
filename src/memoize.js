@@ -10,16 +10,14 @@ import type {Context} from './types.js';
 
 type MemoizeFn<A> = (ctx: Context) => A;
 
-function Container() {}
-
 export function memoize<A>(fn: MemoizeFn<A>): MemoizeFn<A> {
-  const memoizeKey = __NODE__ ? Symbol('memoize-key') : new Container();
-  return function memoized(ctx: Context) {
-    if (ctx.memoized.has(memoizeKey)) {
-      return ctx.memoized.get(memoizeKey);
+  const wm = new WeakMap();
+  return ctx => {
+    if (wm.has(ctx)) {
+      return ((wm.get(ctx): any): A); // Refinement with `has` doesn't seem to work
     }
     const result = fn(ctx);
-    ctx.memoized.set(memoizeKey, result);
+    wm.set(ctx, result);
     return result;
   };
 }

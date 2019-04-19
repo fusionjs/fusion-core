@@ -43,7 +43,6 @@ const timing: TimingPlugin = {
 export const TimingToken: Token<TimingPlugin> = createToken('TimingToken');
 
 function middleware(ctx, next) {
-  ctx.memoized = new Map();
   const {start, render, end, downstream, upstream} = timing.from(ctx);
   ctx.timing = {
     start,
