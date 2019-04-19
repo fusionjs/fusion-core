@@ -649,3 +649,22 @@ test('enable proxy flag', async t => {
   t.equal(app._app.proxy, true, 'fusion proxy should be true by default');
   t.end();
 });
+
+test('registering a plugin as a middleware should throw', async t => {
+  const simplePlugin = createPlugin({
+    middleware: () => {
+      return (ctx, next) => {
+        return next();
+      };
+    },
+  });
+
+  const app = new BaseApp('el', el => el);
+  try {
+    // $FlowFixMe
+    app.middleware(simplePlugin);
+  } catch (e) {
+    t.equals(e.message, 'Cannot register plugin as a middleware');
+    t.end();
+  }
+});
