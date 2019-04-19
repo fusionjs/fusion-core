@@ -17,15 +17,15 @@ import {
 
 test('escaping works', async t => {
   t.equals(
-    escape('<meta name="" />'),
-    '\\u003Cmeta name=\\u0022\\u0022 /\\u003E'
+    escape('<meta name="" />&'),
+    '\\u003Cmeta name=\\u0022\\u0022 /\\u003E\\u0026'
   );
   t.end();
 });
 test('unescaping works', async t => {
   t.equals(
-    unescape('\\u003Cmeta name=\\u0022\\u0022 /\\u003E'),
-    '<meta name="" />'
+    unescape('\\u003Cmeta name=\\u0022\\u0022 /\\u003E\\u0026'),
+    '<meta name="" />&'
   );
   t.end();
 });
